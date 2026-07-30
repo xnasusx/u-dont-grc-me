@@ -290,6 +290,198 @@ td span {
   padding: 18px;
 }
 
+.module-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.module-hero h2 {
+  font-size: 1.22rem;
+}
+
+.module-source {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-width: 150px;
+  background: #fffafa;
+}
+
+.module-source span,
+.module-source strong {
+  display: block;
+}
+
+.module-source span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.module-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+}
+
+.module-tab {
+  border: 1px solid var(--line);
+  border-bottom-color: transparent;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #fffafa;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.module-tab.active {
+  background: #ffffff;
+  color: var(--ink);
+  border-color: var(--rose);
+}
+
+.governance-tab-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.inventory-toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 220px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.inventory-toolbar label {
+  border: 1px solid var(--line);
+  background: #fffafa;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inventory-toolbar input,
+.inventory-toolbar select {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  min-width: 0;
+}
+
+.selected-table-row {
+  background: #fff4f5;
+}
+
+.text-link {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0;
+  text-align: left;
+}
+
+.text-link span {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.control-record-panel {
+  position: sticky;
+  top: 18px;
+}
+
+.control-record-panel .detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.control-record-panel .detail strong {
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.evidence-health-card {
+  margin-top: 16px;
+  border: 1px solid #78cfc8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f4fbfa;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.evidence-health-card span,
+.evidence-health-card strong {
+  display: block;
+}
+
+.evidence-health-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.evidence-health-card strong {
+  color: var(--green);
+  font-size: 1.4rem;
+  margin-top: 4px;
+}
+
+.framework-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.framework-chip-row span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: #fbfdfc;
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.framework-chip-row strong {
+  color: var(--rose);
+  margin-left: 5px;
+}
+
+.blueprint-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.blueprint-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.blueprint-row span {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+  font-size: 0.82rem;
+}
+
 .dashboard-grid,
 .evidence-grid {
   display: grid;
@@ -579,6 +771,8 @@ td span {
 .pill.healthy,
 .pill.active,
 .pill.current,
+.pill.running,
+.pill.in-scope,
 .pill.complete {
   background: #e7f5eb;
   color: var(--green);
@@ -594,6 +788,7 @@ td span {
 .pill.in-review,
 .pill.recommended,
 .pill.awaiting-approval,
+.pill.needs-review,
 .pill.gap {
   background: #fff3df;
   color: var(--amber);
@@ -1074,6 +1269,8 @@ code {
   .dashboard-grid,
   .graph-shell,
   .evidence-grid,
+  .governance-tab-layout,
+  .inventory-toolbar,
   .knowledge-layout,
   .trust-grid,
   .summary-strip {
@@ -1123,7 +1320,8 @@ code {
   }
 
   .control-list,
-  .approval-inbox {
+  .approval-inbox,
+  .control-record-panel {
     position: static;
   }
 

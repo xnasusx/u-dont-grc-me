@@ -7,7 +7,7 @@
 ## Navigation
 
 - **Command Center**: Use this for program oversight. Review risk metrics, filter the program, save dashboard views, create charts, and run Monte Carlo scenarios.
-- **Governance**: Use this to manage the control library, framework mappings, graph path context, policies, and control-grounded documentation.
+- **Governance**: Use this to manage the control inventory, framework mappings, evidence health, graph path context, policies, assets, and control-grounded documentation.
 - **Compliance**: Use this to prepare audit packages, approve AI-proposed mappings, and validate evidence.
 - **Risk**: Use this to manage risk scenarios and calculate FAIR-style exposure.
 - **Admin**: Use this for integrations, knowledge answers, vendor risk, remediation, RBAC, AI agent boundaries, and mutation audit logs.
@@ -39,8 +39,16 @@
 ### Review Framework Coverage
 
 1. Open **Governance**.
-2. Review the framework mapper table.
-3. Check coverage, mapped controls, approval state, and remaining gaps.
+2. Use the tabs across the top of the module.
+3. Start with **Control Inventory** to choose a control.
+4. Open **Mappings** to check coverage, confidence, approval state, and remaining gaps.
+
+### Review Evidence Health
+
+1. Open **Governance**.
+2. Select a control in **Control Inventory**.
+3. Open **Evidence Health**.
+4. Review evidence blueprints, source systems, schedules, pass rates, and stale checks.
 
 ### Review Vendors and Remediation
 

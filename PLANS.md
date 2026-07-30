@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 01:58 ET
+Last updated: 2026-07-30 02:46 ET
 PMO status: GREEN
-Current phase: 0.3.0 delivered; production backlog pending
+Current phase: 0.4.0 control inventory foundation
 Owner: Codex
 
 ## Objective
@@ -66,12 +66,14 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Build Risk module | DONE | Codex | `src/App.tsx` | Risk register and FAIR calculator |
 | Product UI | Build Admin module | DONE | Codex | `src/App.tsx` | Agents, integrations, audit ledger, settings |
 | Product UI | Reconcile Google Doc implementation plan gaps | DONE | Codex | `src/App.tsx`, `src/data.ts`, `src/types.ts` | Added framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX |
+| Backend | Add local control inventory database | DONE | Codex | `server/schema.sql`, `server/database.js`, `server/api.js` | SQLite-backed Governance API with first-class mappings |
+| Product UI | Rebuild Governance as tabbed module | DONE | Codex | `src/App.tsx`, `src/governanceApi.ts`, `src/styles.css` | Inventory, Mappings, Evidence Health, Policies, Assets, Graph |
 | Documentation | Create GitHub implementation plan source of truth | DONE | Codex | `docs/IMPLEMENTATION_PLAN.md` | Future PMO checks must compare against this file |
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | DONE | Codex | command outputs, review notes | PMO validation gate |
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
 | AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net` | CloudFront + OAC, private S3 origin |
-| Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
+| Closure | Final PMO deliverable check | DONE | Codex | validation history and final status | Compared implementation against ask and source-of-truth plan |
 
 ## Dependencies And Blockers
 
@@ -89,6 +91,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Keep the current CloudFront default domain rather than buying or configuring `udontgrcme.net`.
 - 2026-07-30: Treat `docs/IMPLEMENTATION_PLAN.md` as the GitHub source of truth for future implementation scope.
 - 2026-07-30: Removed mistakenly created `udontgrcme` public S3 website bucket. Canonical hosted URL remains the CloudFront URL.
+- 2026-07-30: Use Node built-in SQLite for the local backend foundation to avoid native package risk; CloudFront remains static fallback until an API is hosted.
 
 ## Validation History
 
@@ -108,6 +111,12 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.3.0 security scan | PASS with notes | No live-format secret findings; documentation-only matches and package dependency names |
 | 2026-07-30 | 0.3.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I2SW86NIG9MQG7IPUO1Q5G1IVD` completed, live HTML serves bundle `index-CuUwbFWI.js` |
 | 2026-07-30 | AWS URL correction | PASS | Mistaken public S3 website bucket `udontgrcme` removed; CloudFront URL remains live |
+| 2026-07-30 | 0.4.0 database tests | PASS | `npm test` checks snapshot, control lookup, create validation, and persisted insert |
+| 2026-07-30 | 0.4.0 TypeScript and production build | PASS | `npm run build` |
+| 2026-07-30 | 0.4.0 Governance API smoke | PASS | `/api/governance` returned 12 controls, 7 frameworks, 16 mappings, 87% avg evidence health |
+| 2026-07-30 | 0.4.0 Governance browser smoke | PASS | Playwright verified SQLite API source and all Governance tabs |
+| 2026-07-30 | 0.4.0 security scan | PASS with notes | No live-format secret findings; docs/demo metric names only, with `data/`, `.env*`, `*.pem`, and `*.key` ignored |
+| 2026-07-30 | 0.4.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I9X15NK625B9Z804RKTNS4S50I` completed, live HTML serves bundle `index-Bs9nnESE.js` |
 
 ## Deliverable Verification
 
@@ -121,10 +130,11 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
 | AWS hosting | CloudFront static website deployed over private S3 origin | `https://d1oxsqx3ua8bb7.cloudfront.net` | PASS |
+| Build proper database for control inventory | Local SQLite schema, API, seed data, tests | `server/schema.sql`, `server/database.js`, `server/api.js`, `server/database.test.js` | PASS |
 | Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
 | Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
 | Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |
 
 ## Next Step
 
-Monitor GitHub Actions and avoid real GRC data until authentication/backend controls exist.
+Host the Governance API behind authenticated cloud infrastructure before storing real GRC data or evidence outside the local prototype.

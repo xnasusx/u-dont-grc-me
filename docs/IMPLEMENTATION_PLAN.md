@@ -24,7 +24,7 @@ Hosted prototype: https://d1oxsqx3ua8bb7.cloudfront.net
 | Phase | Draft-plan goal | Current status | Evidence | Remaining production work |
 | --- | --- | --- | --- | --- |
 | 0. Discovery and Charter | Lock scope, personas, primary framework, architecture posture | Done for prototype | `README.md`, `PLANS.md`, this file | Formal PRD, threat model, ADR set, stakeholder approvals |
-| 1. Control Center Foundation | Graph-backed system of record | Prototype done | `src/App.tsx`, `src/data.ts`, `src/types.ts` | Real graph API, CRUD, tenant filters, persisted control graph |
+| 1. Control Center Foundation | Graph-backed system of record | Local database foundation in progress | `server/schema.sql`, `server/database.js`, `server/api.js`, `src/App.tsx` | Hosted API, authentication, tenant filters, write workflow, production graph database |
 | 2. Evidence and First Integrations | Continuous evidence collection and immutable proof | Prototype surface done | Evidence simulator, integration cards, immutable metadata fields | Signed webhook API, HMAC validation, S3 Object Lock, live AWS/IAM connectors |
 | 3. Framework Mapping and Approvals | Import requirements, propose mappings, human approvals | Prototype done | Framework mapper, approvals queue, coverage matrix | Upload/import pipeline, vector retrieval, mapping evaluation tests |
 | 4. FAIR Risk Engine | Quantitative risk scenarios and Monte Carlo | Prototype done | FAIR register and Monte Carlo lab | Backend simulation service, reproducible assumption storage, appetite governance |
@@ -34,7 +34,7 @@ Hosted prototype: https://d1oxsqx3ua8bb7.cloudfront.net
 ## Implemented Product Capabilities
 
 - Command Center with global filters, metrics, saved views, chart creation, and Monte Carlo simulator.
-- Governance workspace with control library, control detail, graph explorer, framework mapper, policy traceability, and graph data model rules.
+- Governance workspace with SQLite-backed control inventory, top tabs, control detail, graph explorer, framework mapper, policy traceability, evidence health, blueprint library, asset scope, and graph data model rules.
 - Compliance workspace with audit readiness, audit package assembly, AI approval queue, evidence validation simulator, and evidence library.
 - Risk workspace with control-linked risk register and FAIR scenario lab.
 - Admin workspace with integrations, AI knowledge system, third-party risk, remediation playbooks, RBAC matrix, trust UX checks, agent lifecycle metrics, allow-lists, deny-lists, and mutation ledger.
@@ -44,7 +44,7 @@ Hosted prototype: https://d1oxsqx3ua8bb7.cloudfront.net
 ## Not Yet Done
 
 - Production authentication, SSO, tenant isolation, and authorization middleware.
-- Amazon Neptune-backed property graph with Gremlin or openCypher API.
+- Hosted API and Amazon Neptune-backed property graph with Gremlin or openCypher API.
 - S3 Object Lock bucket configured as the real evidence store with legal retention policy.
 - API Gateway or service middleware for schema validation, idempotency, HMAC webhook verification, tenant scoping, and AI action allow-lists.
 - Live integrations for AWS Security Hub, AWS Config, CloudTrail, IAM Access Analyzer, Okta or Entra ID, vulnerability scanners, workflow tools, and vendor portals.

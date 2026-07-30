@@ -6,10 +6,17 @@ A control-centric GRC product prototype. The app treats controls as the primary 
 
 ```powershell
 npm install
-npm run dev -- --port 5173
+npm run dev:full
 ```
 
 Open http://127.0.0.1:5173/.
+
+The full local mode starts:
+
+- React/Vite UI on http://127.0.0.1:5173
+- SQLite-backed API on http://127.0.0.1:8787
+
+For static UI-only work, run `npm run dev -- --port 5173`.
 
 ## Hosted Prototype
 
@@ -30,7 +37,7 @@ npm run build
 ## Current Product Slice
 
 - Command Center: executive metrics, global filters, saved dashboard views, chart creation, and Monte Carlo scenario simulation.
-- Governance: documentation workspace, control library, framework mapper, policy traceability, graph data model rules, owner/status metadata, KPIs/KRIs, requirements, and a control-adjacent graph view.
+- Governance: SQLite-backed control inventory, module tabs, control detail, framework mapping matrix, evidence health, blueprint library, policy traceability, asset scope, graph data model rules, and control-adjacent graph view.
 - Compliance: audit readiness, audit package assembly, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
 - Risk: risk register, control-linked scenarios, FAIR calculator, and percentile exposure outputs.
 - Admin: integrations, knowledge system, third-party risk, remediation playbooks, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
@@ -41,7 +48,10 @@ The GitHub source of truth for the implementation plan is `docs/IMPLEMENTATION_P
 
 ## Local persistence
 
-The app currently uses `localStorage` through `src/store.ts` as an API-shaped state layer. This keeps demo actions persistent across refreshes without committing to a backend too early.
+The app now has two local state paths:
+
+- Governance inventory and mappings can load from the SQLite-backed API in `server/`.
+- Other prototype actions still use `localStorage` through `src/store.ts` as an API-shaped state layer.
 
 Modeled operations:
 
@@ -52,7 +62,13 @@ Modeled operations:
 
 ## Backend handoff target
 
-The next production step is replacing `src/store.ts` with real service calls:
+The local backend uses Node's built-in SQLite driver:
+
+- `server/schema.sql`: relational data model for controls, frameworks, requirements, mappings, assets, policies, evidence blueprints, evidence items, and graph relationships.
+- `server/database.js`: initialization, seed data, parameterized reads/writes.
+- `server/api.js`: local HTTP API with `/api/health`, `/api/governance`, `/api/controls/:id`, and `POST /api/controls`.
+
+The next production step is replacing remaining `src/store.ts` operations with service calls and hosting the API:
 
 - Graph database API for controls, nodes, edges, mappings, and control health.
 - Evidence API with object-locked storage references and version IDs.

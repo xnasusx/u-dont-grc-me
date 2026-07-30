@@ -42,8 +42,9 @@ import {
   Workflow,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { agentWorkflows } from "./data";
+import { buildGovernanceFallback, loadGovernanceSnapshot } from "./governanceApi";
 import { useGrcStore } from "./store";
 import type {
   Approval,
@@ -51,6 +52,8 @@ import type {
   Control,
   EvidenceItem,
   FrameworkRequirement,
+  GovernanceControl,
+  GovernanceSnapshot,
   GraphEdge,
   GraphNode,
   Integration,
@@ -63,6 +66,7 @@ import type {
 import { aggregateAle, formatCurrency, healthScore, seededMonteCarlo, statusClass } from "./utils";
 
 type View = "command" | "governance" | "compliance" | "risk" | "admin";
+type GovernanceTab = "inventory" | "mappings" | "evidence" | "policies" | "assets" | "graph";
 
 const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "command", label: "Command Center", icon: LayoutDashboard },
@@ -79,8 +83,11 @@ function App() {
   const [frameworkFilter, setFrameworkFilter] = useState("All frameworks");
   const [ownerFilter, setOwnerFilter] = useState("All owners");
   const [persona, setPersona] = useState("GRC Analyst");
+  const [governanceSnapshot, setGovernanceSnapshot] = useState<GovernanceSnapshot | null>(null);
+  const [governanceSource, setGovernanceSource] = useState<"SQLite API" | "Seeded fallback">("Seeded fallback");
 
   const selectedControl = state.controls.find((control) => control.id === selectedControlId) ?? state.controls[0];
+  const governanceInventory = governanceSnapshot ?? buildGovernanceFallback(state);
   const filteredControls = state.controls.filter((control) => {
     const frameworkMatches = frameworkFilter === "All frameworks" || control.requirements.some((req) => req.includes(frameworkFilter));
     const ownerMatches = ownerFilter === "All owners" || control.owner === ownerFilter;
@@ -89,6 +96,26 @@ function App() {
 
   const owners = Array.from(new Set(state.controls.map((control) => control.owner)));
   const ale = aggregateAle(filteredControls);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 850);
+    loadGovernanceSnapshot(controller.signal)
+      .then((snapshot) => {
+        if (snapshot) {
+          setGovernanceSnapshot(snapshot);
+          setGovernanceSource("SQLite API");
+        }
+      })
+      .catch(() => {
+        setGovernanceSource("Seeded fallback");
+      })
+      .finally(() => window.clearTimeout(timeout));
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, []);
 
   return (
     <div className="app-shell">
@@ -143,6 +170,9 @@ function App() {
             graphEdges={state.graphEdges}
             frameworkRequirements={state.frameworkRequirements}
             policyArtifacts={state.policyArtifacts}
+            governanceInventory={governanceInventory}
+            governanceSource={governanceSource}
+            selectedControlId={selectedControlId}
             setSelectedControlId={setSelectedControlId}
           />
         )}
@@ -333,13 +363,420 @@ function ChartBuilder({ controls }: { controls: Control[] }) {
   );
 }
 
-function GovernanceSummary({ selectedControl }: { selectedControl: Control }) {
+function GovernanceSummary({
+  selectedControl,
+  inventory,
+  source,
+}: {
+  selectedControl: GovernanceControl;
+  inventory: GovernanceSnapshot;
+  source: "SQLite API" | "Seeded fallback";
+}) {
   return (
     <section className="metric-grid">
-      <Metric label="Control library" value="4 controls" detail="Control-first source of truth with owner and implementation context." icon={ShieldCheck} />
-      <Metric label="Policy drafts" value="1 active" detail={`${selectedControl.name} standard is graph-grounded.`} icon={FileText} />
-      <Metric label="Cross-maps" value={String(selectedControl.requirements.length)} detail="Framework requirements linked to this control." icon={GitBranch} />
-      <Metric label="Owners assigned" value="100%" detail="Every seeded control has an accountable owner." icon={UserCheck} />
+      <Metric label="Control inventory" value={`${inventory.stats.controls} controls`} detail={`${source}; control owners, status, cadence, and health are stored centrally.`} icon={ShieldCheck} />
+      <Metric label="Framework mappings" value={String(inventory.stats.mappings)} detail={`${inventory.stats.activeMappings} active, ${inventory.stats.pendingMappings} pending, ${inventory.stats.gaps} gaps.`} icon={GitBranch} />
+      <Metric label="Evidence health" value={`${inventory.stats.avgEvidenceHealth}%`} detail={`Relevance, freshness, and completeness scored across ${inventory.stats.controls} controls.`} icon={Gauge} />
+      <Metric label="Selected control" value={selectedControl.id} detail={`${selectedControl.name} remains the current working context.`} icon={UserCheck} />
+    </section>
+  );
+}
+
+function GovernanceTabs({ activeTab, setActiveTab }: { activeTab: GovernanceTab; setActiveTab: (tab: GovernanceTab) => void }) {
+  const tabs: { id: GovernanceTab; label: string; icon: typeof Activity }[] = [
+    { id: "inventory", label: "Control Inventory", icon: TableProperties },
+    { id: "mappings", label: "Mappings", icon: GitBranch },
+    { id: "evidence", label: "Evidence Health", icon: Gauge },
+    { id: "policies", label: "Policies", icon: FileText },
+    { id: "assets", label: "Assets", icon: Boxes },
+    { id: "graph", label: "Graph", icon: Network },
+  ];
+
+  return (
+    <div className="module-tabs" role="tablist" aria-label="Governance tabs">
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        return (
+          <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} className={activeTab === tab.id ? "module-tab active" : "module-tab"} onClick={() => setActiveTab(tab.id)}>
+            <Icon size={16} />
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ControlInventoryTab({
+  inventory,
+  selectedControlId,
+  setSelectedControlId,
+}: {
+  inventory: GovernanceSnapshot;
+  selectedControlId: string;
+  setSelectedControlId: (id: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All statuses");
+  const visibleControls = inventory.controls.filter((control) => {
+    const haystack = `${control.id} ${control.name} ${control.family} ${control.owner} ${control.mappedFrameworks.join(" ")}`.toLowerCase();
+    const queryMatches = haystack.includes(query.toLowerCase());
+    const statusMatches = statusFilter === "All statuses" || control.implementation_status === statusFilter;
+    return queryMatches && statusMatches;
+  });
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Control center</p>
+          <h2>Inventory System of Record</h2>
+        </div>
+        <TableProperties size={19} />
+      </div>
+      <div className="inventory-toolbar">
+        <label>
+          <Filter size={15} />
+          <input aria-label="Search controls" placeholder="Search control, owner, family, framework..." value={query} onChange={(event) => setQuery(event.target.value)} />
+        </label>
+        <label>
+          <ShieldAlert size={15} />
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option>All statuses</option>
+            <option>Implemented</option>
+            <option>In Progress</option>
+            <option>Degraded</option>
+            <option>Failed</option>
+          </select>
+        </label>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Control</th>
+              <th>Owner</th>
+              <th>Status</th>
+              <th>Automation</th>
+              <th>Mappings</th>
+              <th>Evidence Health</th>
+              <th>Cadence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleControls.map((control) => {
+              const evidenceHealth = Math.round((control.evidence_freshness + control.evidence_relevance + control.evidence_completeness) / 3);
+              return (
+                <tr key={control.id} className={selectedControlId === control.id ? "selected-table-row" : undefined}>
+                  <td>
+                    <button className="text-link" onClick={() => setSelectedControlId(control.id)}>
+                      <strong>{control.name}</strong>
+                      <span>{control.id} / {control.family}</span>
+                    </button>
+                  </td>
+                  <td>
+                    {control.owner}
+                    <span>{control.team}</span>
+                  </td>
+                  <td><StatusPill status={control.implementation_status} /></td>
+                  <td>{control.automation_level}</td>
+                  <td>
+                    <strong>{control.mappingCount}</strong>
+                    <span>{control.mappedFrameworks.join(", ")}</span>
+                  </td>
+                  <td>
+                    <div className="coverage-cell">
+                      <strong>{evidenceHealth}%</strong>
+                      <div className="bar-track">
+                        <div className={`bar-fill ${evidenceHealth < 80 ? "degraded" : "rose"}`} style={{ width: `${evidenceHealth}%` }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td>{control.testing_cadence}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function ControlRecordPanel({ control }: { control: GovernanceControl }) {
+  const evidenceHealth = Math.round((control.evidence_freshness + control.evidence_relevance + control.evidence_completeness) / 3);
+  return (
+    <section className="panel control-record-panel">
+      <div className="control-title">
+        <div>
+          <p className="eyebrow">{control.id} / {control.family}</p>
+          <h2>{control.name}</h2>
+        </div>
+        <StatusPill status={control.implementation_status} />
+      </div>
+      <p className="description">{control.description}</p>
+      <div className="detail-grid">
+        <Detail label="Owner" value={control.owner} />
+        <Detail label="Criticality" value={control.criticality} />
+        <Detail label="Cadence" value={control.testing_cadence} />
+        <Detail label="Control type" value={control.control_type} />
+        <Detail label="Automation" value={control.automation_level} />
+        <Detail label="Evidence health" value={`${evidenceHealth}%`} />
+      </div>
+      <div className="evidence-health-card">
+        <div>
+          <span>Relevance</span>
+          <strong>{control.evidence_relevance}%</strong>
+        </div>
+        <div>
+          <span>Freshness</span>
+          <strong>{control.evidence_freshness}%</strong>
+        </div>
+        <div>
+          <span>Completeness</span>
+          <strong>{control.evidence_completeness}%</strong>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MappingMatrixTab({ inventory, selectedControlId }: { inventory: GovernanceSnapshot; selectedControlId: string }) {
+  const rows = inventory.mappings.filter((mapping) => mapping.control_id === selectedControlId);
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Map once, prove many</p>
+          <h2>Framework Mapping Matrix</h2>
+        </div>
+        <GitBranch size={19} />
+      </div>
+      <div className="framework-chip-row">
+        {inventory.frameworks.map((framework) => (
+          <span key={framework.id}>{framework.name} <strong>{framework.requirement_count}</strong></span>
+        ))}
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Framework</th>
+              <th>Requirement</th>
+              <th>Coverage</th>
+              <th>Confidence</th>
+              <th>State</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((mapping) => (
+              <tr key={mapping.id}>
+                <td><strong>{mapping.framework_name}</strong></td>
+                <td>
+                  {mapping.citation}
+                  <span>{mapping.requirement_title}</span>
+                </td>
+                <td>{mapping.coverage_percentage}%</td>
+                <td>{mapping.mapping_confidence}%</td>
+                <td><StatusPill status={mapping.state} /></td>
+                <td>{mapping.rationale}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function EvidenceHealthTab({ control }: { control: GovernanceControl }) {
+  return (
+    <section className="evidence-grid">
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Evidence studio</p>
+            <h2>Blueprint Library</h2>
+          </div>
+          <Sparkles size={19} />
+        </div>
+        <div className="pipeline">
+          {control.evidenceBlueprints.map((blueprint) => (
+            <div className="blueprint-row" key={blueprint.id}>
+              <div>
+                <strong>{blueprint.name}</strong>
+                <span>{blueprint.source_system} / {blueprint.schedule} / {blueprint.freshness_days}d old</span>
+              </div>
+              <StatusPill status={blueprint.status} />
+              <code>{blueprint.query_logic}</code>
+              <div className="bar-track">
+                <div className={`bar-fill ${blueprint.pass_rate < 80 ? "degraded" : "rose"}`} style={{ width: `${blueprint.pass_rate}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Live, auditable proof</p>
+            <h2>Evidence Runs</h2>
+          </div>
+          <FileCheck2 size={19} />
+        </div>
+        <div className="pipeline">
+          {control.evidenceItems.map((item) => (
+            <div className="edge-card" key={item.id}>
+              <strong>{item.name}</strong>
+              <span>{item.source_system} / collected {item.collected_at}</span>
+              <StatusPill status={item.verdict} />
+              <code>{item.hash}</code>
+            </div>
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+}
+
+function PoliciesTab({ control }: { control: GovernanceControl }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Policy management</p>
+          <h2>Control-Aligned Documents</h2>
+        </div>
+        <BookOpen size={19} />
+      </div>
+      <div className="artifact-grid">
+        {control.policies.map((policy) => (
+          <div className="artifact-card" key={policy.id}>
+            <div>
+              <strong>{policy.title}</strong>
+              <span>{policy.id} / {policy.document_type}</span>
+            </div>
+            <StatusPill status={policy.status} />
+            <p>{policy.section_reference} / {policy.approved_version} / {policy.owner}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AssetsTab({ control }: { control: GovernanceControl }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Asset scope</p>
+          <h2>Where This Control Operates</h2>
+        </div>
+        <Boxes size={19} />
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Type</th>
+              <th>Environment</th>
+              <th>Data</th>
+              <th>Owner</th>
+              <th>Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            {control.assets.map((asset) => (
+              <tr key={asset.id}>
+                <td><strong>{asset.name}</strong></td>
+                <td>{asset.asset_type}</td>
+                <td>{asset.environment}</td>
+                <td>{asset.data_classification}</td>
+                <td>{asset.owner}</td>
+                <td><StatusPill status={asset.scope_status} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function GovernanceGraphTab({
+  selectedControlId,
+  graphNodes,
+  graphEdges,
+  inventory,
+}: {
+  selectedControlId: string;
+  graphNodes: GraphNode[];
+  graphEdges: GraphEdge[];
+  inventory: GovernanceSnapshot;
+}) {
+  const relationships = inventory.relationships.filter((relationship) => relationship.from_control_id === selectedControlId);
+  const selected = inventory.controls.find((control) => control.id === selectedControlId);
+  const graphHasSelectedControl = graphNodes.some((node) => node.id === selectedControlId);
+  const dbGraphNodes: GraphNode[] = [
+    {
+      id: selectedControlId,
+      kind: "Control",
+      label: selected?.name ?? selectedControlId,
+      subtitle: "Control",
+      status: selected?.implementation_status as GraphNode["status"],
+    },
+    ...relationships.map((relationship) => ({
+      id: relationship.to_entity_id,
+      kind: relationship.to_entity_type as GraphNode["kind"],
+      label: relationship.to_entity_id,
+      subtitle: relationship.to_entity_type,
+      status: relationship.state as GraphNode["status"],
+    })),
+  ];
+  const dbGraphEdges: GraphEdge[] = relationships.map((relationship) => ({
+    id: relationship.id,
+    from: relationship.from_control_id,
+    to: relationship.to_entity_id,
+    label: relationship.relationship_type as GraphEdge["label"],
+    state: relationship.state as GraphEdge["state"],
+    confidence: relationship.confidence ?? undefined,
+    narrative: relationship.narrative,
+  }));
+  const graphNodesForView = graphHasSelectedControl ? graphNodes : dbGraphNodes;
+  const graphEdgesForView = graphHasSelectedControl ? graphEdges : dbGraphEdges;
+
+  return (
+    <section className="view-stack">
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Control graph</p>
+            <h2>Relationship Paths</h2>
+          </div>
+          <Network size={19} />
+        </div>
+        <GraphView selectedControlId={selectedControlId} graphNodes={graphNodesForView} graphEdges={graphEdgesForView} />
+      </section>
+      <section className="panel">
+        <div className="section-heading compact">
+          <div>
+            <p className="eyebrow">Database relationships</p>
+            <h2>Stored Edges</h2>
+          </div>
+        </div>
+        <div className="edge-inspector">
+          {relationships.map((relationship) => (
+            <div className="edge-card" key={relationship.id}>
+              <strong>{relationship.relationship_type} / {relationship.to_entity_type}</strong>
+              <span>{relationship.to_entity_id}</span>
+              <small>{relationship.narrative}</small>
+            </div>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }
@@ -545,6 +982,9 @@ function GovernanceView({
   graphEdges,
   frameworkRequirements,
   policyArtifacts,
+  governanceInventory,
+  governanceSource,
+  selectedControlId,
   setSelectedControlId,
 }: {
   controls: Control[];
@@ -553,16 +993,52 @@ function GovernanceView({
   graphEdges: GraphEdge[];
   frameworkRequirements: FrameworkRequirement[];
   policyArtifacts: PolicyArtifact[];
+  governanceInventory: GovernanceSnapshot;
+  governanceSource: "SQLite API" | "Seeded fallback";
+  selectedControlId: string;
   setSelectedControlId: (id: string) => void;
 }) {
+  const [activeTab, setActiveTab] = useState<GovernanceTab>("inventory");
+  const selectedInventoryControl = governanceInventory.controls.find((control) => control.id === selectedControlId) ?? governanceInventory.controls[0];
+
   return (
     <section className="view-stack">
-      <GovernanceSummary selectedControl={selectedControl} />
-      <ControlsView controls={controls} selectedControl={selectedControl} graphNodes={graphNodes} graphEdges={graphEdges} setSelectedControlId={setSelectedControlId} />
-      <FrameworkMapper requirements={frameworkRequirements} />
-      <DataModelRules />
-      <PolicyLibrary policyArtifacts={policyArtifacts} />
-      <DocsView selectedControl={selectedControl} />
+      <GovernanceSummary selectedControl={selectedInventoryControl} inventory={governanceInventory} source={governanceSource} />
+      <section className="panel module-hero">
+        <div>
+          <p className="eyebrow">Governance module</p>
+          <h2>One Control Library, Every Framework, Live Evidence</h2>
+          <p className="description">
+            Controls are stored once, mapped to every framework they satisfy, linked to policies/assets/evidence, and scored for relevance, freshness, and completeness.
+          </p>
+        </div>
+        <div className="module-source">
+          <span>Data source</span>
+          <strong>{governanceSource}</strong>
+        </div>
+      </section>
+      <GovernanceTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      {activeTab === "inventory" && (
+        <section className="governance-tab-layout">
+          <ControlInventoryTab inventory={governanceInventory} selectedControlId={selectedInventoryControl.id} setSelectedControlId={setSelectedControlId} />
+          <ControlRecordPanel control={selectedInventoryControl} />
+        </section>
+      )}
+      {activeTab === "mappings" && (
+        <section className="governance-tab-layout">
+          <MappingMatrixTab inventory={governanceInventory} selectedControlId={selectedInventoryControl.id} />
+          <DataModelRules />
+        </section>
+      )}
+      {activeTab === "evidence" && <EvidenceHealthTab control={selectedInventoryControl} />}
+      {activeTab === "policies" && (
+        <section className="governance-tab-layout">
+          <PoliciesTab control={selectedInventoryControl} />
+          <DocsView selectedControl={selectedControl} />
+        </section>
+      )}
+      {activeTab === "assets" && <AssetsTab control={selectedInventoryControl} />}
+      {activeTab === "graph" && <GovernanceGraphTab selectedControlId={selectedInventoryControl.id} graphNodes={graphNodes} graphEdges={graphEdges} inventory={governanceInventory} />}
     </section>
   );
 }

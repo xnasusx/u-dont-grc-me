@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 - 2026-07-30
+
+- Added a SQLite-backed local API for Governance control inventory and mappings.
+- Added relational schema for controls, frameworks, requirements, mappings, assets, policies, evidence blueprints, evidence items, and graph relationships.
+- Expanded seeded control inventory to 12 controls, 7 frameworks, and 16 mappings.
+- Rebuilt Governance as a module page with top tabs: Control Inventory, Mappings, Evidence Health, Policies, Assets, and Graph.
+- Added API/database tests and a `dev:full` script to run the API plus Vite UI together.
+- Added static fallback so CloudFront remains usable until an API is hosted.
+
 ## 0.3.0 - 2026-07-30
 
 - Added GitHub-tracked implementation plan source of truth in `docs/IMPLEMENTATION_PLAN.md`.

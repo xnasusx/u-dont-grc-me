@@ -1,5 +1,26 @@
 # Release Notes
 
+## Version 0.4.0
+
+This release starts the real control-inventory foundation.
+
+### Highlights
+
+- Governance now has a top-tab module layout.
+- Control inventory is backed by a local SQLite database and API in development.
+- Controls map to framework requirements through first-class mapping rows instead of only seeded arrays.
+- Evidence health, blueprint automation, policies, assets, and graph relationships now hang off the selected control record.
+
+### Hosted URL
+
+The CloudFront URL remains the active hosted static prototype:
+
+https://d1oxsqx3ua8bb7.cloudfront.net
+
+### Backend Note
+
+The SQLite API is local for now. The CloudFront deployment still uses the seeded fallback until an API is deployed behind AWS.
+
 ## Version 0.3.0
 
 This release reconciles the Google Doc implementation plan with the product prototype and makes the GitHub plan the source of truth.

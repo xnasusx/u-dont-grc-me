@@ -188,6 +188,149 @@ export interface KnowledgeAnswer {
   queryPreview: string;
 }
 
+export interface GovernanceMapping {
+  id: string;
+  control_id: string;
+  requirement_id: string;
+  coverage_percentage: number;
+  mapping_confidence: number;
+  state: "Active" | "Pending Approval" | "Gap" | "Rejected";
+  rationale: string;
+  citation: string;
+  requirement_title: string;
+  framework_id: string;
+  framework_name: string;
+}
+
+export interface GovernanceAsset {
+  control_id: string;
+  id: string;
+  name: string;
+  asset_type: string;
+  environment: string;
+  criticality: string;
+  data_classification: string;
+  owner: string;
+  scope_status: string;
+  testing_cadence: string;
+}
+
+export interface GovernancePolicy {
+  control_id: string;
+  id: string;
+  title: string;
+  document_type: string;
+  owner: string;
+  status: string;
+  approved_version: string;
+  section_reference: string;
+}
+
+export interface EvidenceBlueprint {
+  id: string;
+  control_id: string;
+  name: string;
+  source_system: string;
+  query_logic: string;
+  schedule: string;
+  status: "Running" | "Needs Review" | "Draft" | "Paused";
+  last_run_at: string | null;
+  freshness_days: number;
+  pass_rate: number;
+  owner_approval_state: "Approved" | "Pending" | "Rejected";
+}
+
+export interface GovernanceEvidenceItem {
+  id: string;
+  blueprint_id: string;
+  control_id: string;
+  name: string;
+  source_system: string;
+  verdict: string;
+  collected_at: string;
+  valid_until: string;
+  hash: string;
+  storage_uri: string;
+}
+
+export interface GovernanceControl {
+  id: string;
+  tenant_id: string;
+  name: string;
+  family: string;
+  description: string;
+  owner: string;
+  team: string;
+  control_type: string;
+  automation_level: string;
+  implementation_status: string;
+  criticality: string;
+  testing_cadence: string;
+  evidence_freshness: number;
+  evidence_relevance: number;
+  evidence_completeness: number;
+  mappings: GovernanceMapping[];
+  mappedFrameworks: string[];
+  assets: GovernanceAsset[];
+  policies: GovernancePolicy[];
+  evidenceBlueprints: EvidenceBlueprint[];
+  evidenceItems: GovernanceEvidenceItem[];
+  mappingCount: number;
+  blueprintCount: number;
+}
+
+export interface GovernanceFramework {
+  id: string;
+  name: string;
+  version: string;
+  category: string;
+  requirement_count: number;
+}
+
+export interface GovernanceRequirement {
+  id: string;
+  framework_id: string;
+  citation: string;
+  function_area: string;
+  title: string;
+  requirement_text: string;
+  framework_name: string;
+  framework_version: string;
+}
+
+export interface GovernanceRelationship {
+  id: string;
+  from_control_id: string;
+  to_entity_id: string;
+  to_entity_type: string;
+  relationship_type: string;
+  state: string;
+  confidence: number | null;
+  narrative: string;
+}
+
+export interface GovernanceSnapshot {
+  stats: {
+    controls: number;
+    frameworks: number;
+    requirements: number;
+    mappings: number;
+    activeMappings: number;
+    pendingMappings: number;
+    gaps: number;
+    avgEvidenceHealth: number;
+  };
+  controls: GovernanceControl[];
+  frameworks: GovernanceFramework[];
+  requirements: GovernanceRequirement[];
+  mappings: GovernanceMapping[];
+  assets: GovernanceAsset[];
+  policies: GovernancePolicy[];
+  evidenceBlueprints: EvidenceBlueprint[];
+  evidenceItems: GovernanceEvidenceItem[];
+  relationships: GovernanceRelationship[];
+}
+
 export interface AuditEvent {
   id: string;
   actor: string;
