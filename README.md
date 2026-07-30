@@ -13,15 +13,11 @@ Open http://127.0.0.1:5173/.
 
 ## Hosted Prototype
 
-Shortest no-custom-domain AWS URL:
-
-http://udontgrcme.s3-website-us-east-1.amazonaws.com
-
 AWS CloudFront:
 
 https://d1oxsqx3ua8bb7.cloudfront.net
 
-Secure CloudFront origin bucket is intentionally private/blocked:
+CloudFront origin bucket is intentionally private/blocked:
 
 http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
 

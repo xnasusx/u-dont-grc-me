@@ -1,6 +1,6 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 01:52 ET
+Last updated: 2026-07-30 01:58 ET
 PMO status: GREEN
 Current phase: 0.3.0 delivered; production backlog pending
 Owner: Codex
@@ -70,7 +70,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | DONE | Codex | command outputs, review notes | PMO validation gate |
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
-| AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net`, `http://udontgrcme.s3-website-us-east-1.amazonaws.com` | CloudFront + OAC for HTTPS; short S3 website URL for no-domain shortcut |
+| AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net` | CloudFront + OAC, private S3 origin |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
 
 ## Dependencies And Blockers
@@ -88,7 +88,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Treat AI actions as simulated and human-governed until a backend/orchestrator exists.
 - 2026-07-30: Keep the current CloudFront default domain rather than buying or configuring `udontgrcme.net`.
 - 2026-07-30: Treat `docs/IMPLEMENTATION_PLAN.md` as the GitHub source of truth for future implementation scope.
-- 2026-07-30: Added `udontgrcme` S3 website bucket to provide the shortest no-custom-domain AWS URL. Tradeoff: HTTP/public S3 website endpoint, not HTTPS/private CloudFront.
+- 2026-07-30: Removed mistakenly created `udontgrcme` public S3 website bucket. Canonical hosted URL remains the CloudFront URL.
 
 ## Validation History
 
@@ -107,7 +107,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.3.0 browser smoke | PASS | Playwright checked Command Center, Governance, Compliance, Risk, Admin on desktop/mobile; screenshots in `output/` |
 | 2026-07-30 | 0.3.0 security scan | PASS with notes | No live-format secret findings; documentation-only matches and package dependency names |
 | 2026-07-30 | 0.3.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I2SW86NIG9MQG7IPUO1Q5G1IVD` completed, live HTML serves bundle `index-CuUwbFWI.js` |
-| 2026-07-30 | Short S3 website URL | PASS | `http://udontgrcme.s3-website-us-east-1.amazonaws.com` returns HTTP `200` and serves bundle `index-CuUwbFWI.js` |
+| 2026-07-30 | AWS URL correction | PASS | Mistaken public S3 website bucket `udontgrcme` removed; CloudFront URL remains live |
 
 ## Deliverable Verification
 
@@ -121,7 +121,6 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
 | AWS hosting | CloudFront static website deployed over private S3 origin | `https://d1oxsqx3ua8bb7.cloudfront.net` | PASS |
-| Shortest no-domain URL | Public S3 website bucket named `udontgrcme` | `http://udontgrcme.s3-website-us-east-1.amazonaws.com` | PASS |
 | Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
 | Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
 | Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |
