@@ -18,3 +18,5 @@ vite.config.d.ts
 *.pfx
 aws-credentials*
 credentials.json
+
+dist-portfolio/

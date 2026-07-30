@@ -11,6 +11,8 @@
     "package:lambda": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lambda.ps1",
     "test": "node --test server/*.test.js",
     "build": "tsc -p tsconfig.json && vite build",
+    "build:portfolio": "tsc -p tsconfig.json && vite build --config vite.portfolio.config.ts",
+    "dev:portfolio": "vite --config vite.portfolio.config.ts --host 127.0.0.1",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
