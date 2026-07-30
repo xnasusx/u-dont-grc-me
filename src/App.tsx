@@ -77,7 +77,7 @@ const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "admin", label: "Admin", icon: Settings },
 ];
 
-const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo.png`;
+const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo-transparent.png`;
 
 const fairScenarioRequirements: Record<string, {
   asset: string;
