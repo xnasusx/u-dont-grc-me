@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.playwright-cli/
+output/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+*.crt
+*.pfx
+aws-credentials*
+credentials.json
