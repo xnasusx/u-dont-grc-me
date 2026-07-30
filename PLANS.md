@@ -117,6 +117,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.4.0 Governance browser smoke | PASS | Playwright verified SQLite API source and all Governance tabs |
 | 2026-07-30 | 0.4.0 security scan | PASS with notes | No live-format secret findings; docs/demo metric names only, with `data/`, `.env*`, `*.pem`, and `*.key` ignored |
 | 2026-07-30 | 0.4.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I9X15NK625B9Z804RKTNS4S50I` completed, live HTML serves bundle `index-Bs9nnESE.js` |
+| 2026-07-30 | 0.4.0 GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.4.0` |
 
 ## Deliverable Verification
 
