@@ -25,6 +25,10 @@ CloudFront hosted URL:
 
 - https://d1oxsqx3ua8bb7.cloudfront.net
 
+Shortest no-custom-domain AWS URL:
+
+- http://udontgrcme.s3-website-us-east-1.amazonaws.com
+
 CloudFront distribution:
 
 - `E2HL6YY0F2B5OW`
@@ -41,12 +45,23 @@ S3 bucket:
 
 - `u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1`
 
+Short public website bucket:
+
+- `udontgrcme`
+
 Validation:
 
 - CloudFront deployment uses HTTPS and redirects HTTP to HTTPS.
+- Short S3 website endpoint returns HTTP `200` and serves the current static bundle.
 - S3 direct website endpoint returns HTTP `403` after the bucket was made private.
 - Bucket policy allows `s3:GetObject` only from CloudFront distribution `E2HL6YY0F2B5OW`.
 - S3 public access block is fully enabled.
+
+## URL Tradeoffs
+
+- `http://udontgrcme.s3-website-us-east-1.amazonaws.com` is the shortest AWS-generated URL available without buying a domain. It is HTTP and uses a public S3 website bucket.
+- `https://d1oxsqx3ua8bb7.cloudfront.net` is longer, but it is HTTPS and uses the private S3 origin.
+- A true `udontgrcme.net` or `app.udontgrcme.net` URL requires owning a domain and configuring DNS plus an AWS certificate.
 
 ## Required IAM Permissions For Static CloudFront Hosting
 
