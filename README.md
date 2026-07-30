@@ -26,13 +26,13 @@ npm run package:lambda
 
 ## Hosted Prototype
 
-AWS CloudFront:
-
-https://d1oxsqx3ua8bb7.cloudfront.net
-
-GitHub Pages static mirror:
+Primary frontend on GitHub Pages:
 
 https://xnasusx.github.io/u-dont-grc-me/
+
+AWS CloudFront mirror:
+
+https://d1oxsqx3ua8bb7.cloudfront.net
 
 CloudFront origin bucket is intentionally private/blocked:
 
@@ -50,14 +50,14 @@ The hosted API is backed by DynamoDB for the Governance snapshot and is read-onl
 npm run build
 ```
 
-GitHub Pages builds set `GITHUB_PAGES=true` so Vite emits assets under `/u-dont-grc-me/`. The default build stays rooted at `/` for CloudFront/S3.
+GitHub Pages builds set `GITHUB_PAGES=true` and `VITE_API_BASE_URL` so Vite emits assets under `/u-dont-grc-me/` and loads Governance data from the hosted Lambda/DynamoDB API. The default build stays rooted at `/` for CloudFront/S3.
 
 ## Current Product Slice
 
 - Command Center: executive metrics, global filters, saved dashboard views, chart creation, and Monte Carlo scenario simulation.
 - Governance: API-backed control inventory, module tabs, control detail, framework mapping matrix, evidence health, blueprint library, policy traceability, asset scope, graph data model rules, and control-adjacent graph view.
 - Compliance: audit readiness, audit package assembly, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
-- Risk: risk register, control-linked scenarios, FAIR calculator, Monte Carlo histogram, loss exceedance view, calibration anchors, data-vetting checklist, and percentile exposure outputs.
+- Risk: risk register, control-linked FAIR scenarios, 10,000-trial Monte Carlo calculator, histogram, five-number summary, expected value, loss exceedance view, evidence nutrition labels, calibration anchors, data-vetting checklist, SME elicitation, and human approval controls.
 - Admin: integrations, knowledge system, third-party risk, remediation playbooks, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
 
 ## Implementation Plan

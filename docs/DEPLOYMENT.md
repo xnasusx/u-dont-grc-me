@@ -15,6 +15,16 @@ $env:VITE_API_BASE_URL="https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-e
 npm run build
 ```
 
+For the primary GitHub Pages build, set both the Pages base path and hosted API URL:
+
+```powershell
+$env:GITHUB_PAGES="true"
+$env:VITE_API_BASE_URL="https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws"
+npm run build
+```
+
+The repository workflow `.github/workflows/pages.yml` sets those variables automatically for pushes to `main`.
+
 ## AWS Static Hosting Target
 
 For this prototype release, static hosting is preferred:
@@ -24,13 +34,19 @@ For this prototype release, static hosting is preferred:
 3. Upload `dist/`.
 4. Configure a public-read bucket policy for website assets if acceptable for the account.
 
+## Current Hosted Deployment
+
+Primary GitHub Pages frontend:
+
+- https://xnasusx.github.io/u-dont-grc-me/
+
+AWS CloudFront mirror:
+
+- https://d1oxsqx3ua8bb7.cloudfront.net
+
 ## Current AWS Deployment
 
 Deployment succeeded on 2026-07-30 against AWS account `<AWS_ACCOUNT_ID>` with IAM user `arn:aws:iam::<AWS_ACCOUNT_ID>:user/<deploy-user>`.
-
-CloudFront hosted URL:
-
-- https://d1oxsqx3ua8bb7.cloudfront.net
 
 CloudFront distribution:
 
@@ -63,6 +79,8 @@ Validation:
 - Bucket policy allows `s3:GetObject` only from CloudFront distribution `E2HL6YY0F2B5OW`.
 - S3 public access block is fully enabled.
 - CloudFront build calls the hosted Governance API instead of the seeded browser fallback.
+- GitHub Pages build calls the hosted Governance API instead of the seeded browser fallback.
+- Lambda Function URL CORS allows `https://xnasusx.github.io`, `https://d1oxsqx3ua8bb7.cloudfront.net`, and local development origins.
 - Hosted `/api/governance` returns 12 controls, 7 frameworks, 16 mappings, and 87% average evidence health from DynamoDB.
 
 ## Required IAM Permissions For Static CloudFront Hosting
@@ -94,9 +112,9 @@ The hosted API is intentionally small and low-cost:
 
 The resource policy requires both `lambda:InvokeFunctionUrl` and `lambda:InvokeFunction` for public Function URL access, matching AWS's post-October-2025 Function URL authorization behavior.
 
-## GitHub Pages Static Mirror
+## GitHub Pages Frontend
 
-GitHub Pages is configured as a static demo mirror through `.github/workflows/pages.yml`.
+GitHub Pages is configured as the primary static frontend through `.github/workflows/pages.yml`.
 
 Expected mirror URL:
 
@@ -114,7 +132,7 @@ The workflow requests GitHub Pages enablement through `actions/configure-pages`.
 
 - Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
 
-The Pages mirror is static only. It does not host `server/api.js`, SQLite, background jobs, or production auth. It falls back to seeded browser data unless `VITE_API_BASE_URL` points to a reachable API during the Pages build.
+The Pages frontend is static only. It does not host `server/api.js`, SQLite, background jobs, or production auth. It calls the hosted Lambda/DynamoDB Governance read API because `VITE_API_BASE_URL` is set during the Pages build.
 
 ## Production Upgrade Path
 

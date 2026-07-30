@@ -34,6 +34,7 @@ jobs:
         run: npm run build
         env:
           GITHUB_PAGES: "true"
+          VITE_API_BASE_URL: "https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

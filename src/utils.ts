@@ -34,7 +34,8 @@ export function seededMonteCarlo(base: number, strength: number, volatility: num
     return seed / 233280;
   };
 
-  for (let i = 0; i < 5000; i += 1) {
+  const trialCount = 10000;
+  for (let i = 0; i < trialCount; i += 1) {
     const frequency = 0.45 + random() * volatility;
     const magnitude = base * (0.55 + random() * 1.9);
     const controlEffect = Math.max(0.12, 1 - strength / 120);
@@ -58,11 +59,18 @@ export function seededMonteCarlo(base: number, strength: number, volatility: num
     probability,
     loss: samples[Math.floor(samples.length * (1 - probability))],
   }));
+  const mean = samples.reduce((sum, sample) => sum + sample, 0) / samples.length;
 
   return {
+    trials: trialCount,
+    min: samples[0],
+    q1: samples[Math.floor(samples.length * 0.25)],
     p10: samples[Math.floor(samples.length * 0.1)],
     p50: samples[Math.floor(samples.length * 0.5)],
+    q3: samples[Math.floor(samples.length * 0.75)],
     p90: samples[Math.floor(samples.length * 0.9)],
+    max,
+    mean,
     histogram,
     exceedance,
   };

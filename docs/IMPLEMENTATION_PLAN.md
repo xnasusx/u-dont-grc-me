@@ -1,6 +1,6 @@
 # u dont GRC me Implementation Plan
 
-Last updated: 2026-07-30 03:34 ET
+Last updated: 2026-07-30 02:38 ET
 Plan owner: Codex PMO
 Source of truth: this GitHub-tracked file
 Original draft source: Google Doc `Control-Centric GRC Tool Implementation Plan`
@@ -17,7 +17,8 @@ Future feature work for `u dont GRC me` must update this file in the same pull r
 
 The repository currently contains a React/Vite product prototype with browser-local persistence for simulated workflows and a hosted read-only Governance API backed by DynamoDB. It implements product surfaces and deterministic demo workflows, but it does not yet include production authentication, real tenant isolation, live AWS integrations, live AI orchestration, Amazon Neptune, or S3 Object Lock evidence storage.
 
-Hosted prototype: https://d1oxsqx3ua8bb7.cloudfront.net
+Primary hosted frontend: https://xnasusx.github.io/u-dont-grc-me/
+AWS CloudFront mirror: https://d1oxsqx3ua8bb7.cloudfront.net
 Hosted Governance API: https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws
 
 ## Phase Status
@@ -29,7 +30,7 @@ Hosted Governance API: https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-ea
 | 1A. Open-Source GRC Integration | Bring proven open-source GRC workflows into the control-centric model | Planned and first slice in progress | GitHub issue, `output/design-open-source-grc-integration.md`, `output/plan-open-source-grc-integration.md` | Program workbench, framework import pipeline, assessments, account reviews, vendor questionnaires, hardening guide backlog |
 | 2. Evidence and First Integrations | Continuous evidence collection and immutable proof | Prototype surface done | Evidence simulator, integration cards, immutable metadata fields | Signed webhook API, HMAC validation, S3 Object Lock, live AWS/IAM connectors |
 | 3. Framework Mapping and Approvals | Import requirements, propose mappings, human approvals | Prototype done | Framework mapper, approvals queue, coverage matrix | Upload/import pipeline, vector retrieval, mapping evaluation tests |
-| 4. FAIR Risk Engine | Quantitative risk scenarios and Monte Carlo | Prototype expanded | FAIR register, Monte Carlo lab, histogram, loss exceedance, calibration, data vetting, SME elicitation | Backend simulation service, reproducible assumption storage, appetite governance |
+| 4. FAIR Risk Engine | Quantitative risk scenarios and Monte Carlo | Prototype expanded | FAIR register, 10,000-trial Monte Carlo lab, histogram, five-number summary, expected value, loss exceedance, evidence nutrition labels, calibration, data vetting, SME elicitation, approval gates | Backend simulation service, reproducible assumption storage, appetite governance |
 | 5. TPRM and Policy Workflows | Vendors and documents connected to controls | Prototype done | Vendor risk panel, policy library, document generator | SOC 2 parsing, vendor intake workflow, versioned document approval |
 | 6. Remediation and Scale Hardening | Safe playbooks, HITL execution, rollback evidence | Prototype surface done | Remediation queue, RBAC matrix, agent guardrails | Workflow engine, approvals enforcement, rollback capture, monitoring |
 
@@ -39,15 +40,15 @@ Hosted Governance API: https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-ea
 - Governance workspace with SQLite-backed control inventory, top tabs, control detail, graph explorer, framework mapper, policy traceability, evidence health, blueprint library, asset scope, and graph data model rules.
 - Compliance workspace with audit readiness, audit package assembly, AI approval queue, evidence validation simulator, and evidence library.
 - Risk workspace with control-linked risk register and FAIR scenario lab.
-- CRQ workbench with histogram, loss exceedance, calibration anchors, data-vetting checklist, and SME chip-and-bin elicitation inspired by Heatmaps-to-Histograms resources.
+- CRQ workbench with scoped asset/threat/method/effect fields, FAIR-CAM function labels, 10,000-trial Monte Carlo, histogram, five-number summary, expected value, loss exceedance, evidence nutrition labels, calibration anchors, data-vetting checklist, SME chip-and-bin elicitation, and human approval gates inspired by NotebookLM and Heatmaps-to-Histograms resources.
 - Admin workspace with integrations, AI knowledge system, third-party risk, remediation playbooks, RBAC matrix, trust UX checks, agent lifecycle metrics, allow-lists, deny-lists, and mutation ledger.
 - Documentation set for users, developers, deployment, security, changelog, release notes, and contribution workflow.
-- Private GitHub repository, CloudFront deployment behind a private S3 origin, and hosted Lambda/DynamoDB Governance API.
+- Private GitHub repository, GitHub Pages primary frontend, CloudFront deployment behind a private S3 origin, and hosted Lambda/DynamoDB Governance API.
 
 ## External Source Notes
 
-- Heatmaps-to-Histograms downloads were accessible and informed the CRQ workbench: histogram-based risk communication, loss exceedance, calibration, data vetting, SME elicitation, and FAIR taxonomy concepts.
-- NotebookLM notebook URLs were not readable through public web fetch or the connected Google Drive tool. To incorporate those notebooks directly, export or share the underlying source documents as Google Docs, PDFs, or Drive files.
+- Heatmaps-to-Histograms downloads were accessible and informed the CRQ workbench: heatmap-to-histogram comparison, Monte Carlo simulations, loss exceedance curves, five-number summaries, calibration, data vetting, SME elicitation, scenario coaching, and FAIR taxonomy concepts.
+- NotebookLM notebooks were readable through Susan's signed-in Chrome session on 2026-07-30. The FAIR methodology notebook informed risk scenario schema, control efficacy, FAIR-CAM function labels, variance management, evidence health, and dashboard outputs. The Heatmaps-to-Histograms notebook informed A-T-E scenario fields, six loss forms, evidence nutrition labels, P5/P50/P95 assumptions, 10,000-trial simulations, five-number summaries, loss exceedance statements, data-quality multipliers, and human approval gates.
 
 ## Open-Source GRC Integration Wave
 
@@ -112,7 +113,7 @@ A feature is done only when it:
 
 | Priority | Item | Why |
 | --- | --- | --- |
-| P0 | Build Program Workbench data model and Governance tab | Turns open-source GRC research into a concrete product surface without disrupting control inventory |
+| P0 | Add authenticated hosted write workflows for Governance | Turns the hosted read API into a safe source of truth for real edits |
 | P0 | Add backend contract tests and API schema definitions | Needed before real integrations or authenticated evidence writes |
 | P0 | Design tenant/RBAC middleware and data isolation tests | Prevents unsafe architecture drift |
 | P1 | Add graph schema and migration plan for Neptune | Converts prototype state into the intended system of record |

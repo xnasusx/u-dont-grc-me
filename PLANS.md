@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 03:34 ET
+Last updated: 2026-07-30 02:39 ET
 PMO status: GREEN
-Current phase: 0.6.0 hosted Governance API and CRQ workbench
+Current phase: 0.6.1 GitHub Pages API alignment and CRQ source integration
 Owner: Codex
 
 ## Objective
@@ -18,8 +18,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - Create user/developer docs, changelog, release notes, and deployment notes.
 - Run build, browser/UI validation, React quality review, and AI-assisted security review.
 - Create GitHub repository, commit, and push source if GitHub auth/permissions allow.
-- Deploy to AWS static hosting if AWS credentials/permissions allow.
-- Host the Governance read API so CloudFront does not rely on seeded browser fallback.
+- Deploy to static hosting if credentials and permissions allow.
+- Host the Governance read API so GitHub Pages and CloudFront do not rely on seeded browser fallback.
 
 ## Out Of Scope
 
@@ -41,7 +41,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
   - OpenGRC: frameworks, control implementations, risk management, compliance management, policy traceability.
   - Archer: regulatory intelligence, obligation/control/policy/evidence lineage, scenario analysis, integrated risk management.
   - Heatmaps-to-Histograms: quantitative risk communication, histograms, loss exceedance, calibration, data vetting, SME elicitation, and FAIR taxonomy resources.
-  - NotebookLM URLs provided by Susan: access attempted through web fetch and Google Drive connector; notebook contents were not directly readable.
+  - NotebookLM URLs provided by Susan: accessed through the signed-in Chrome session and used to enrich FAIR and CRQ implementation requirements.
 
 ## Tracking
 
@@ -86,6 +86,9 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Wire CloudFront to hosted API | DONE | Codex | `VITE_API_BASE_URL`, CloudFront deployment | Static fallback no longer used on canonical CloudFront build |
 | Product UI | Add CRQ workbench | DONE | Codex | `src/App.tsx`, `src/utils.ts`, `src/styles.css` | Histogram, loss exceedance, calibration, data vetting, SME elicitation |
 | Brand/IA | Remove black logo background | DONE | Codex | `src/styles.css` | Transparent garden logo rendering |
+| Product UI | Wire GitHub Pages to hosted API | DONE | Codex | `.github/workflows/pages.yml`, Lambda CORS | Pages build uses hosted Governance API |
+| Product UI | Integrate NotebookLM CRQ and FAIR requirements | DONE | Codex | `src/App.tsx`, `src/utils.ts`, `docs/IMPLEMENTATION_PLAN.md` | A-T-E scenario, FAIR-CAM, evidence nutrition label, 10,000 trials, five-number summary, approval gates |
+| Brand/IA | Replace logo with transparent-background PNG | DONE | Codex | `public/u-dont-grc-me-logo.png` | Black image background removed |
 
 ## Dependencies And Blockers
 
@@ -94,7 +97,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Upgraded hosting to CloudFront with Origin Access Control and restored private S3 bucket access.
 - GitHub repo name availability may require a fallback name.
 - Hosted Governance read API exists; authenticated production writes remain blocked.
-- NotebookLM notebook contents are blocked until exported/shared as source files.
+- NotebookLM notebook contents are available through Susan's signed-in Chrome session for this workspace; exported source files are still better for long-term reproducible citation.
 
 ## Decisions And Assumptions
 
@@ -107,7 +110,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Use Node built-in SQLite for the local backend foundation to avoid native package risk; CloudFront remains static fallback until an API is hosted.
 - 2026-07-30: Use Lambda Function URL plus DynamoDB for the hosted Governance read API to keep cost and operational overhead low.
 - 2026-07-30: Keep hosted `POST /api/controls` disabled until authentication, authorization, validation, and audit logging are implemented.
-- 2026-07-30: Treat Heatmaps-to-Histograms as usable CRQ guidance; NotebookLM source incorporation is pending exported/shareable notebook content.
+- 2026-07-30: Treat GitHub Pages as the primary frontend URL and CloudFront as an AWS mirror unless Susan changes hosting direction.
+- 2026-07-30: Use NotebookLM Chrome access for research synthesis, while documenting exact implemented learnings in the GitHub source-of-truth plan.
 
 ## Validation History
 
@@ -145,6 +149,13 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.6.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I28ELX5E0XYX00XYZD94VWNBDH` completed, live HTML serves bundle `index-CIpw5eTm.js` |
 | 2026-07-30 | 0.6.0 security scan | PASS with notes | No live-format secrets; documentation/dependency/demo hardening text only, generated and local package folders ignored |
 | 2026-07-30 | 0.6.0 GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.6.0` |
+| 2026-07-30 | 0.6.1 NotebookLM research check | PASS | Chrome-accessed FAIR and Heatmaps-to-Histograms notebooks; implemented CRQ/Fair requirements in `src/App.tsx` and `src/utils.ts` |
+| 2026-07-30 | 0.6.1 hosted API CORS | PASS | Lambda Function URL returns `Access-Control-Allow-Origin: https://xnasusx.github.io` |
+| 2026-07-30 | 0.6.1 hosted API smoke | PASS | `/api/governance` returned 12 controls, 7 frameworks, 87% average evidence health |
+| 2026-07-30 | 0.6.1 database and Lambda tests | PASS | `npm test` returned 9 passing tests |
+| 2026-07-30 | 0.6.1 GitHub Pages build | PASS | `GITHUB_PAGES=true VITE_API_BASE_URL=... npm run build` produced bundle `index-DVSq6y5o.js` |
+| 2026-07-30 | 0.6.1 browser smoke | PASS | Chrome verified local app, transparent logo asset, Risk CRQ sections, 10,000 trials, five-number summary, evidence nutrition label, and approval controls |
+| 2026-07-30 | 0.6.1 security scan | PASS with notes | No live-format secrets; documentation/dependency/demo matches only |
 
 ## Deliverable Verification
 
@@ -162,7 +173,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Fix CloudFront seeded fallback | Hosted Lambda/DynamoDB Governance API wired into CloudFront build | `server/lambda.js`, `u-dont-grc-me-governance`, `VITE_API_BASE_URL` build | PASS |
 | Transparent garden logo | Removed black CSS background from logo image | `src/styles.css` | PASS |
 | Enhance from CRQ tools | Added Heatmaps-to-Histograms-inspired CRQ workbench | `src/App.tsx`, `src/utils.ts`, `src/styles.css` | PASS |
-| Use NotebookLM notebooks | Access attempted but blocked by NotebookLM/Drive URL format | Source notes in `docs/IMPLEMENTATION_PLAN.md` | BLOCKED |
+| Use NotebookLM notebooks | Chrome-accessible notebook summaries integrated into FAIR/CRQ workbench | `src/App.tsx`, `src/utils.ts`, `docs/IMPLEMENTATION_PLAN.md` | PASS |
+| Make GitHub Pages use hosted backend | Pages workflow builds with hosted API and Lambda CORS allows Pages origin | `.github/workflows/pages.yml`, Lambda Function URL CORS | PASS |
 | Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
 | Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
 | Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |

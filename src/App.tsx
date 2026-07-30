@@ -79,6 +79,48 @@ const views: { id: View; label: string; icon: typeof Activity }[] = [
 
 const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo.png`;
 
+const fairScenarioRequirements: Record<string, {
+  asset: string;
+  threat: string;
+  method: string;
+  effect: string;
+  decision: string;
+  fairCam: string;
+}> = {
+  "CTRL-PAM-001": {
+    asset: "Production administrative access",
+    threat: "External attacker or malicious insider",
+    method: "Compromised privileged identity",
+    effect: "Confidentiality and integrity loss across production systems",
+    decision: "Prioritize privileged access hardening and MFA exception removal",
+    fairCam: "Resistance + Detection + Decision Support",
+  },
+  "CTRL-VULN-004": {
+    asset: "Internet-facing production workload",
+    threat: "Opportunistic exploit actor",
+    method: "Known critical vulnerability exploitation",
+    effect: "Availability interruption and response cost escalation",
+    decision: "Fund automated patch orchestration for public assets",
+    fairCam: "Avoidance + Resistance + Variance Management",
+  },
+  "CTRL-TPRM-002": {
+    asset: "Tier 1 vendor customer-data processing",
+    threat: "Third-party control failure",
+    method: "Vendor breach or unavailable assurance evidence",
+    effect: "Privacy, contractual, and regulatory loss exposure",
+    decision: "Escalate continuous vendor monitoring and bridge-letter automation",
+    fairCam: "Decision Support + Detection + Variance Management",
+  },
+  "CTRL-EVID-007": {
+    asset: "Audit evidence repository",
+    threat: "Evidence tampering or stale attestation",
+    method: "Mutable artifact or broken evidence chain",
+    effect: "Audit failure, remediation cost, and trust loss",
+    decision: "Maintain object-lock retention and evidence hash verification",
+    fairCam: "Resistance + Detection + Decision Support",
+  },
+};
+
 function App() {
   const { state, approveMapping, connectIntegration, ingestEvidence, resetWorkspace } = useGrcStore();
   const [activeView, setActiveView] = useState<View>("command");
@@ -1694,6 +1736,14 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
   const [strength, setStrength] = useState(selectedControl.fair.strength);
   const [volatility, setVolatility] = useState(1.15);
   const simulation = seededMonteCarlo(baseLoss, strength, volatility);
+  const scenario = fairScenarioRequirements[selectedControl.id] ?? {
+    asset: selectedControl.assets[0] ?? "Scoped asset",
+    threat: "Relevant threat agent",
+    method: selectedControl.riskScenarios[0] ?? "Scoped loss event",
+    effect: "Confidentiality, integrity, or availability impact",
+    decision: "Select the control investment this analysis supports",
+    fairCam: "Decision Support",
+  };
 
   return (
     <>
@@ -1706,10 +1756,18 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
             </div>
             <SlidersHorizontal size={19} />
           </div>
-          <p className="description">Tune loss magnitude, control strength, and uncertainty to see how degraded controls change annualized exposure.</p>
+          <p className="description">Tune loss magnitude, control strength, and uncertainty to see how degraded controls change annualized exposure across 10,000 trials.</p>
           <Range label="Probable loss magnitude" min={100000} max={9000000} step={100000} value={baseLoss} display={formatCurrency(baseLoss)} onChange={setBaseLoss} />
           <Range label="Control strength" min={10} max={100} step={1} value={strength} display={`${strength}%`} onChange={setStrength} />
           <Range label="Uncertainty" min={0.25} max={2.5} step={0.05} value={volatility} display={`${volatility.toFixed(2)}x`} onChange={setVolatility} />
+          <div className="scenario-scope">
+            <Detail label="Asset" value={scenario.asset} />
+            <Detail label="Threat" value={scenario.threat} />
+            <Detail label="Method" value={scenario.method} />
+            <Detail label="Effect" value={scenario.effect} />
+            <Detail label="Decision" value={scenario.decision} />
+            <Detail label="FAIR-CAM function" value={scenario.fairCam} />
+          </div>
         </section>
 
         <section className="panel">
@@ -1723,6 +1781,7 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
             <Metric label="P10 low case" value={formatCurrency(simulation.p10)} detail="10% of simulated outcomes fall below this." icon={CircleDollarSign} />
             <Metric label="P50 most likely" value={formatCurrency(simulation.p50)} detail="Median simulated annualized loss." icon={Activity} />
             <Metric label="P90 board case" value={formatCurrency(simulation.p90)} detail="Risk appetite comparison point." icon={AlertTriangle} />
+            <Metric label="Expected value" value={formatCurrency(simulation.mean)} detail="Mean value for ROSI and control investment comparison." icon={BarChart3} />
           </div>
         </section>
       </section>
@@ -1739,10 +1798,40 @@ function CrqDecisionSupport({
   simulation: ReturnType<typeof seededMonteCarlo>;
 }) {
   const topBin = Math.max(...simulation.histogram.map((bin) => bin.count), 1);
+  const fiveNumberSummary = [
+    { label: "Min", value: simulation.min },
+    { label: "Q1", value: simulation.q1 },
+    { label: "Median", value: simulation.p50 },
+    { label: "Q3", value: simulation.q3 },
+    { label: "Max", value: simulation.max },
+  ];
+  const exceedanceStatement = simulation.exceedance[0]
+    ? `There is a ${Math.round(simulation.exceedance[0].probability * 100)}% chance annualized loss exceeds ${formatCurrency(simulation.exceedance[0].loss)}.`
+    : "Run the simulation to generate an exceedance statement.";
+  const lossForms = [
+    "Productivity",
+    "Response",
+    "Replacement",
+    "Fines and judgments",
+    "Reputation",
+    "Competitive advantage",
+  ];
   const calibration = [
     { word: "Possible", range: "10-30%", action: "Use when evidence is thin; widen the range." },
     { word: "Likely", range: "55-75%", action: "Ask which observed base rate supports it." },
     { word: "Almost certain", range: "85-95%", action: "Require internal data or strong external analogs." },
+  ];
+  const evidenceNutrition = [
+    { label: "Unit", value: "USD/year and events/year" },
+    { label: "Citation", value: "Internal telemetry, external analog, or SME estimate" },
+    { label: "Collected", value: "Date-stamped before model approval" },
+    { label: "Quality", value: "Grade with bias and sample-size adjustment" },
+  ];
+  const approvalGates = [
+    "Scope threat, asset, method, and effect before collecting data",
+    "Capture P5 / P50 / P95 range rationale for frequency and magnitude",
+    "Apply range-widening when data is weak, biased, or unverifiable",
+    "Require human approval before AI-assisted assumptions affect reports",
   ];
   const dataChecks = [
     "Internal incidents, tickets, and control failures",
@@ -1763,6 +1852,11 @@ function CrqDecisionSupport({
       <p className="description">
         Convert {selectedControl.name.toLowerCase()} from color-coded risk language into distributions, exceedance statements, and explicit data-quality checks.
       </p>
+      <div className="exceedance-statement">
+        <CircleDollarSign size={19} />
+        <strong>{exceedanceStatement}</strong>
+        <span>{simulation.trials.toLocaleString()} Monte Carlo trials; heatmap language stays secondary to financial distributions.</span>
+      </div>
       <div className="crq-grid">
         <div>
           <h3>Loss histogram</h3>
@@ -1779,6 +1873,17 @@ function CrqDecisionSupport({
           </div>
         </div>
         <div>
+          <h3>Five-number summary</h3>
+          <div className="five-number-grid">
+            {fiveNumberSummary.map((item) => (
+              <div key={item.label}>
+                <span>{item.label}</span>
+                <strong>{formatCurrency(item.value)}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
           <h3>Loss exceedance</h3>
           <div className="exceedance-list">
             {simulation.exceedance.map((point) => (
@@ -1786,6 +1891,22 @@ function CrqDecisionSupport({
                 <span>{Math.round(point.probability * 100)}% chance loss exceeds</span>
                 <strong>{formatCurrency(point.loss)}</strong>
               </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3>Six loss forms</h3>
+          <div className="tag-cloud">
+            {lossForms.map((form) => (
+              <span key={form}>{form}</span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3>Evidence nutrition label</h3>
+          <div className="nutrition-grid">
+            {evidenceNutrition.map((item) => (
+              <Detail key={item.label} label={item.label} value={item.value} />
             ))}
           </div>
         </div>
@@ -1809,6 +1930,17 @@ function CrqDecisionSupport({
                 <span>{item.range}</span>
                 <p>{item.action}</p>
               </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3>Human approval controls</h3>
+          <div className="check-list">
+            {approvalGates.map((item) => (
+              <span key={item}>
+                <Check size={15} />
+                {item}
+              </span>
             ))}
           </div>
         </div>

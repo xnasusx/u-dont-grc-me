@@ -823,6 +823,71 @@ td span {
   gap: 18px;
 }
 
+.scenario-scope,
+.nutrition-grid,
+.five-number-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.scenario-scope {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.nutrition-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.five-number-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.five-number-grid div,
+.exceedance-statement {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfc;
+}
+
+.five-number-grid div {
+  padding: 10px;
+}
+
+.five-number-grid span,
+.five-number-grid strong,
+.exceedance-statement span,
+.exceedance-statement strong {
+  display: block;
+}
+
+.five-number-grid span,
+.exceedance-statement span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.five-number-grid strong {
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.exceedance-statement {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: center;
+  padding: 12px;
+}
+
+.exceedance-statement svg {
+  color: var(--teal);
+}
+
+.exceedance-statement span {
+  grid-column: 2;
+}
+
 .crq-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1449,6 +1514,9 @@ code {
   .metric-grid,
   .percentile-grid,
   .detail-grid,
+  .scenario-scope,
+  .nutrition-grid,
+  .five-number-grid,
   .integration-grid,
   .agent-grid,
   .chip-bins {

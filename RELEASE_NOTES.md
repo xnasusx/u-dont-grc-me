@@ -1,5 +1,22 @@
 # Release Notes
 
+## Version 0.6.1
+
+This release aligns the hosted frontend with Susan's GitHub Pages URL and folds the NotebookLM CRQ/FAIR research into the product.
+
+### Highlights
+
+- GitHub Pages is now documented as the primary frontend: https://xnasusx.github.io/u-dont-grc-me/
+- The Pages workflow builds with the hosted Governance API URL, so it no longer needs seeded Governance fallback.
+- Lambda Function URL CORS now allows the GitHub Pages origin.
+- The garden logo asset now has a transparent background.
+- Risk now includes richer CRQ mechanics: A-T-E scenario scope, FAIR-CAM labels, 10,000-trial simulation, five-number summary, expected value, six loss forms, evidence nutrition labels, and human approval gates.
+
+### Still Pending
+
+- Public hosted writes remain disabled until authentication, tenant isolation, authorization, validation, and mutation audit logging are implemented.
+- The CRQ simulator is still a deterministic prototype, not a production FAIR analysis service.
+
 ## Version 0.6.0
 
 This release removes the CloudFront seeded-data limitation for Governance by adding a hosted AWS API.
@@ -21,7 +38,7 @@ This release removes the CloudFront seeded-data limitation for Governance by add
 ### Still Pending
 
 - Authentication, tenant isolation, write authorization, mutation audit logging, and real evidence storage must be added before real GRC data is stored.
-- NotebookLM notebook URLs were not readable through public web fetch or the connected Google Drive tool; export/share the underlying source docs to incorporate those notes directly.
+- NotebookLM notebook URLs were later checked through Susan's signed-in Chrome session in 0.6.1 and incorporated into the CRQ/Fair workbench.
 
 ## Version 0.4.1
 

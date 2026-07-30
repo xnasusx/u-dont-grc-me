@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 - 2026-07-30
+
+- Made GitHub Pages the primary hosted frontend and configured its build to call the hosted Lambda/DynamoDB Governance API.
+- Updated Lambda Function URL CORS to allow `https://xnasusx.github.io`.
+- Replaced the garden logo asset with a transparent-background PNG.
+- Expanded the CRQ workbench with NotebookLM-informed FAIR scenario fields, FAIR-CAM function labels, 10,000-trial simulation output, five-number summary, expected value, evidence nutrition labels, six loss forms, and human approval gates.
+- Updated the GitHub-tracked implementation plan and PMO tracker so future work uses GitHub Pages and the hosted API as the current deployment baseline.
+
 ## 0.6.0 - 2026-07-30
 
 - Added hosted Governance API on AWS Lambda Function URL backed by DynamoDB.
