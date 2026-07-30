@@ -1,5 +1,24 @@
 # Release Notes
 
+## Version 0.4.1
+
+This release adds a GitHub Pages static mirror while preserving the existing AWS CloudFront deployment.
+
+### Highlights
+
+- Added a GitHub Actions workflow that builds and deploys `dist/` to GitHub Pages.
+- Made the Vite base path conditional so Pages uses `/u-dont-grc-me/` and AWS keeps `/`.
+- Updated public asset paths so the favicon and logo load correctly from both hosts.
+
+### Hosted URLs
+
+- AWS CloudFront: https://d1oxsqx3ua8bb7.cloudfront.net
+- GitHub Pages mirror: https://xnasusx.github.io/u-dont-grc-me/
+
+### Deployment Note
+
+After the workflow is pushed, GitHub Pages must be set to `Source: GitHub Actions` in the repository settings.
+
 ## Version 0.4.0
 
 This release starts the real control-inventory foundation.

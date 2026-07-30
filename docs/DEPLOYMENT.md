@@ -66,6 +66,28 @@ Minimum permissions for the current deployment approach:
 
 The S3 bucket should remain private. Public access should go through CloudFront.
 
+## GitHub Pages Static Mirror
+
+GitHub Pages is configured as a static demo mirror through `.github/workflows/pages.yml`.
+
+Expected mirror URL:
+
+- https://xnasusx.github.io/u-dont-grc-me/
+
+The workflow:
+
+1. Runs on pushes to `main` and manual dispatches.
+2. Installs dependencies with `npm ci`.
+3. Builds with `GITHUB_PAGES=true npm run build`.
+4. Uploads `dist/` with `actions/upload-pages-artifact`.
+5. Deploys through `actions/deploy-pages`.
+
+Repository setting required after pushing the workflow:
+
+- Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
+
+The Pages mirror is static only. It does not host `server/api.js`, SQLite, background jobs, or production auth. The app falls back to seeded browser data unless `VITE_API_BASE_URL` points to a reachable API.
+
 ## Production Upgrade Path
 
 Before handling real GRC data, move to:

@@ -24,6 +24,10 @@ AWS CloudFront:
 
 https://d1oxsqx3ua8bb7.cloudfront.net
 
+GitHub Pages static mirror:
+
+https://xnasusx.github.io/u-dont-grc-me/
+
 CloudFront origin bucket is intentionally private/blocked:
 
 http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
@@ -33,6 +37,8 @@ http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.c
 ```powershell
 npm run build
 ```
+
+GitHub Pages builds set `GITHUB_PAGES=true` so Vite emits assets under `/u-dont-grc-me/`. The default build stays rooted at `/` for CloudFront/S3.
 
 ## Current Product Slice
 

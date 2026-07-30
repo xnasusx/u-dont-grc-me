@@ -76,6 +76,8 @@ const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "admin", label: "Admin", icon: Settings },
 ];
 
+const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo.png`;
+
 function App() {
   const { state, approveMapping, connectIntegration, ingestEvidence, resetWorkspace } = useGrcStore();
   const [activeView, setActiveView] = useState<View>("command");
@@ -121,7 +123,7 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <img className="brand-logo" src="/u-dont-grc-me-logo.png" alt="u dont GRC me logo" width="54" height="54" />
+          <img className="brand-logo" src={brandLogoUrl} alt="u dont GRC me logo" width="54" height="54" />
           <div>
             <strong>u dont GRC me</strong>
             <span>Control-first risk garden</span>
