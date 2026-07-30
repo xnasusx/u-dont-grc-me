@@ -21,7 +21,19 @@ For this prototype release, static hosting is preferred:
 
 Deployment succeeded on 2026-07-30 against AWS account `<AWS_ACCOUNT_ID>` with IAM user `arn:aws:iam::<AWS_ACCOUNT_ID>:user/<deploy-user>`.
 
-Hosted URL:
+CloudFront hosted URL:
+
+- https://d1oxsqx3ua8bb7.cloudfront.net
+
+CloudFront distribution:
+
+- `E2HL6YY0F2B5OW`
+
+Origin Access Control:
+
+- `E20XLJHCKV4NR`
+
+Legacy S3 website endpoint:
 
 - http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
 
@@ -31,11 +43,12 @@ S3 bucket:
 
 Validation:
 
-- Website endpoint returned HTTP `200`.
-- Deployed HTML contains `u dont GRC me`.
-- S3 website configuration uses `index.html` for index and error routing.
+- CloudFront deployment uses HTTPS and redirects HTTP to HTTPS.
+- S3 direct website endpoint returns HTTP `403` after the bucket was made private.
+- Bucket policy allows `s3:GetObject` only from CloudFront distribution `E2HL6YY0F2B5OW`.
+- S3 public access block is fully enabled.
 
-## Required IAM Permissions For Static S3 Hosting
+## Required IAM Permissions For Static CloudFront Hosting
 
 Minimum permissions for the current deployment approach:
 
@@ -47,8 +60,11 @@ Minimum permissions for the current deployment approach:
 - `s3:PutObject`
 - `s3:DeleteObject`
 - `s3:GetObject`
+- `cloudfront:CreateDistribution`
+- `cloudfront:GetDistribution`
+- `cloudfront:CreateOriginAccessControl`
 
-If public S3 website hosting is not acceptable, use CloudFront with Origin Access Control and keep the bucket private.
+The S3 bucket should remain private. Public access should go through CloudFront.
 
 ## Production Upgrade Path
 

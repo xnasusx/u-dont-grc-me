@@ -1,6 +1,6 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 00:51 ET
+Last updated: 2026-07-30 01:00 ET
 PMO status: GREEN
 Current phase: Delivered
 Owner: Codex
@@ -67,13 +67,14 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | TODO | Codex | command outputs, review notes | PMO validation gate |
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
-| AWS | Deploy static site | DONE | Codex | `http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com` | S3 static website |
+| AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net` | CloudFront + OAC, private S3 origin |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
 
 ## Dependencies And Blockers
 
 - AWS permissions may block creating S3 buckets, bucket policies, or public website access.
 - 2026-07-30: AWS permissions were updated and S3 static hosting succeeded.
+- 2026-07-30: Upgraded hosting to CloudFront with Origin Access Control and restored private S3 bucket access.
 - GitHub repo name availability may require a fallback name.
 - No production backend exists yet; local persistence remains a prototype boundary.
 
@@ -94,7 +95,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | Security scan | PASS with notes | No credential findings; `.gitignore` hardened for env/key files |
 | 2026-07-30 | GitHub publish | PASS | Created and pushed `https://github.com/xnasusx/u-dont-grc-me` |
 | 2026-07-30 | GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` |
-| 2026-07-30 | AWS hosting | PASS | S3 website endpoint returned HTTP `200` |
+| 2026-07-30 | AWS hosting | PASS | CloudFront distribution `E2HL6YY0F2B5OW`; direct S3 endpoint returns `403` |
 
 ## Deliverable Verification
 
@@ -107,8 +108,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Use PMO skill | `PLANS.md` and plan tracking | This file | PASS |
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
-| AWS hosting | S3 static website deployed | `http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com` | PASS |
+| AWS hosting | CloudFront static website deployed over private S3 origin | `https://d1oxsqx3ua8bb7.cloudfront.net` | PASS |
 
 ## Next Step
 
-Monitor GitHub Actions and move to CloudFront/OAC before using the prototype with real GRC data.
+Monitor GitHub Actions and avoid real GRC data until authentication/backend controls exist.

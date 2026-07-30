@@ -12,11 +12,11 @@
 - Compliance now emphasizes audit readiness, evidence review, and human approval of AI-proposed changes.
 - Risk now includes a register plus FAIR-style calculator.
 - Admin now rolls up integrations, agent governance, and operational audit logs.
-- Static AWS S3 website hosting is live for the prototype.
+- Static AWS hosting is live behind CloudFront with Origin Access Control.
 
 ### Hosted URL
 
-http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
+https://d1oxsqx3ua8bb7.cloudfront.net
 
 ### Known Limitations
 
