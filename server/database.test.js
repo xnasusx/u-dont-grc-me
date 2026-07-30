@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createControl, createDatabase, getControl, getGovernanceSnapshot, initializeDatabase, seedDatabase } from "./database.js";
+import { createControl, createDatabase, getControl, getGovernanceSnapshot, getProgramWorkbench, initializeDatabase, seedDatabase } from "./database.js";
 
 function seededMemoryDb() {
   const db = createDatabase(":memory:");
@@ -60,4 +60,34 @@ test("new controls are validated and persisted", () => {
 test("new controls reject missing required fields", () => {
   const db = seededMemoryDb();
   assert.throws(() => createControl(db, { id: "CTRL-BAD-001" }), /Missing required fields/);
+});
+
+test("program workbench returns open-source GRC integration queues", () => {
+  const db = seededMemoryDb();
+  const workbench = getProgramWorkbench(db);
+
+  assert.equal(workbench.projects.length, 3);
+  assert.equal(workbench.frameworkImports.length, 5);
+  assert.equal(workbench.assessmentRuns.length, 3);
+  assert.equal(workbench.accountReviews.length, 3);
+  assert.equal(workbench.vendorQuestionnaires.length, 3);
+  assert.equal(workbench.hardeningGuides.length, 4);
+
+  const cisoImport = workbench.frameworkImports.find((item) => item.source_tool === "CISO Assistant");
+  assert.ok(cisoImport);
+  assert.equal(cisoImport.validation_state, "Ready");
+  assert.ok(cisoImport.candidate_controls >= 20);
+
+  const oktaReview = workbench.accountReviews.find((item) => item.source_system === "Okta Workforce");
+  assert.ok(oktaReview);
+  assert.equal(oktaReview.control_id, "CTRL-IAM-002");
+});
+
+test("governance snapshot includes program workbench data", () => {
+  const db = seededMemoryDb();
+  const snapshot = getGovernanceSnapshot(db);
+
+  assert.ok(snapshot.programWorkbench);
+  assert.equal(snapshot.programWorkbench.projects[0].tenant_id, "tenant-acme-us");
+  assert.equal(snapshot.programWorkbench.hardeningGuides[0].control_id.startsWith("CTRL-"), true);
 });

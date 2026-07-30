@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 - 2026-07-30
+
+- Added hosted Governance API on AWS Lambda Function URL backed by DynamoDB.
+- Added Lambda packaging, seed snapshot export, scoped IAM policy files, and hosted API tests.
+- Built the CloudFront frontend with `VITE_API_BASE_URL` so Governance loads from the hosted API instead of seeded browser fallback.
+- Kept hosted mutations disabled until authentication and audit-safe write workflows are added.
+- Removed the black CSS background behind the garden logo so the transparent PNG renders correctly.
+- Expanded Risk with a CRQ workbench inspired by Heatmaps-to-Histograms: Monte Carlo histogram, loss exceedance view, data vetting, calibration anchors, and SME chip-and-bin elicitation.
+
 ## 0.4.0 - 2026-07-30
 
 - Added a SQLite-backed local API for Governance control inventory and mappings.

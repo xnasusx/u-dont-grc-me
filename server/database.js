@@ -128,6 +128,45 @@ const relationships = [
   ["REL-006", "CTRL-CHANGE-009", "POL-CHANGE", "Policy", "GOVERNS", "Active", 90, "Production Change Policy defines approval and exception handling."],
 ];
 
+const programProjects = [
+  ["PRG-SOC2-2026", "tenant-acme-us", "SOC 2 Type II 2026", "grc-platform@company.com", "SOC 2, ISO 27001", 42, 83, "Auditor workspace ready for read-only package review", "In Progress"],
+  ["PRG-TPRM-REFRESH", "tenant-acme-us", "Tier 1 Vendor Refresh", "vendor-risk@company.com", "NIST CSF, GDPR", 18, 61, "Questionnaires staged; two vendors blocked", "Blocked"],
+  ["PRG-AI-GOV", "tenant-acme-us", "AI Governance Pilot", "privacy-risk@company.com", "ISO 42001, NIST AI RMF", 12, 48, "Internal readiness review before external audit", "Planning"],
+];
+
+const frameworkImports = [
+  ["IMP-CISO-ISO42001", "CISO Assistant", "ISO 42001", "2023", "ISO42001", 90, 24, "Ready", "Preview mapping candidates and route low-confidence edges to approval."],
+  ["IMP-OPENGRC-NISTCSF", "OpenGRC", "NIST CSF", "2.0", "NISTCSF", 220, 36, "Imported", "Compare imported requirements against active control mappings."],
+  ["IMP-GAPPS-CMMC", "Gapps", "CMMC", "2.0", null, 320, 18, "Needs Review", "Create framework shell, normalize domains, and dedupe common controls."],
+  ["IMP-ERAMBA-GDPR", "Eramba", "GDPR privacy controls", "EU", "GDPR", 120, 14, "Ready", "Map data privacy obligations to policies, vendors, and assets."],
+  ["IMP-GRCENG-HARDENING", "GRC Engineering", "Integration hardening guides", "2026", null, 116, 21, "Needs Review", "Convert guide steps into first-party SaaS control implementation tasks."],
+];
+
+const assessmentRuns = [
+  ["ASM-SOC2-EVIDENCE", "PRG-SOC2-2026", "SOC 2 evidence freeze", "External audit", "SOC2", 42, 6, "Evidence Collection", "audit-readiness@company.com"],
+  ["ASM-VENDOR-Q3", "PRG-TPRM-REFRESH", "Quarterly Tier 1 reassessment", "Vendor assessment", "NISTCSF", 18, 4, "Review", "vendor-risk@company.com"],
+  ["ASM-AI-GOV-GAP", "PRG-AI-GOV", "AI governance gap assessment", "Internal assessment", "ISO42001", 12, 9, "Planning", "privacy-risk@company.com"],
+];
+
+const accountReviews = [
+  ["AR-OKTA-Q3", "Okta Workforce", "CTRL-IAM-002", "it-ops@company.com", 412, 7, "Quarterly", "Needs Review"],
+  ["AR-AWS-ADMINS", "AWS IAM", "CTRL-PAM-001", "sec-ops@company.com", 28, 0, "Monthly", "Running"],
+  ["AR-GITHUB-MAINTAINERS", "GitHub", "CTRL-BRANCH-012", "appsec@company.com", 63, 3, "Monthly", "Needs Review"],
+];
+
+const vendorQuestionnaires = [
+  ["VQ-ACME-PAY", "Acme Payments", "CTRL-TPRM-002", "SOC 2 bridge letter and SIG-lite", "2026-08-20", "In Review", "CTRL-TPRM-002, CTRL-EVID-007", "Bridge letter expires in 21 days."],
+  ["VQ-CLOUD-ID", "Cloud Identity Labs", "CTRL-PAM-001", "Identity provider annual review", "2026-09-03", "Complete", "CTRL-PAM-001, CTRL-IAM-002", "No material exceptions in latest assessment."],
+  ["VQ-SCAN-CO", "ScanCo VM", "CTRL-VULN-004", "Vulnerability data processing review", "2026-08-11", "Blocked", "CTRL-VULN-004", "API scope missing container registry findings."],
+];
+
+const hardeningGuides = [
+  ["HG-SALESFORCE-OAUTH", "Salesforce", "CTRL-TPRM-002", "GRC Engineering how-to-harden", "Restrict OAuth token abuse through IP allow-listing and app scope review.", "P0", "Backlog", "First-party SaaS integration restrictions"],
+  ["HG-GITHUB-APP", "GitHub", "CTRL-BRANCH-012", "GRC Engineering hardening backlog", "Review GitHub App permissions, branch protection, and admin bypass controls.", "P0", "In Progress", "Repository protection and app governance"],
+  ["HG-OKTA-ADMIN", "Okta", "CTRL-PAM-001", "GRC Engineering hardening backlog", "Reduce privileged identity blast radius through admin role hygiene.", "P1", "Ready", "Privileged identity hardening"],
+  ["HG-NTH-PARTY", "Vendor Trust Portal", "CTRL-TPRM-002", "GRC Engineering nth-party discovery", "Track subprocessor and fourth-party signals against Tier 1 vendor records.", "P1", "Backlog", "Nth-party dependency visibility"],
+];
+
 export function createDatabase(dbPath = join(__dirname, "..", "data", "grc.db")) {
   return new DatabaseSync(dbPath);
 }
@@ -141,9 +180,24 @@ function insertMany(db, sql, rows) {
   for (const row of rows) statement.run(...row);
 }
 
+function seedProgramWorkbench(db) {
+  const count = db.prepare("SELECT COUNT(*) AS count FROM program_projects").get().count;
+  if (count > 0) return;
+
+  insertMany(db, "INSERT INTO program_projects VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", programProjects);
+  insertMany(db, "INSERT INTO framework_imports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", frameworkImports);
+  insertMany(db, "INSERT INTO assessment_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", assessmentRuns);
+  insertMany(db, "INSERT INTO account_reviews VALUES (?, ?, ?, ?, ?, ?, ?, ?)", accountReviews);
+  insertMany(db, "INSERT INTO vendor_questionnaires VALUES (?, ?, ?, ?, ?, ?, ?, ?)", vendorQuestionnaires);
+  insertMany(db, "INSERT INTO hardening_guides VALUES (?, ?, ?, ?, ?, ?, ?, ?)", hardeningGuides);
+}
+
 export function seedDatabase(db) {
   const count = db.prepare("SELECT COUNT(*) AS count FROM controls").get().count;
-  if (count > 0) return;
+  if (count > 0) {
+    seedProgramWorkbench(db);
+    return;
+  }
 
   insertMany(db, "INSERT INTO controls VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", controls);
   insertMany(db, "INSERT INTO frameworks VALUES (?, ?, ?, ?, ?)", frameworks);
@@ -156,6 +210,7 @@ export function seedDatabase(db) {
   insertMany(db, "INSERT INTO evidence_blueprints VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", blueprints);
   insertMany(db, "INSERT INTO evidence_items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", evidenceItems);
   insertMany(db, "INSERT INTO control_relationships VALUES (?, ?, ?, ?, ?, ?, ?, ?)", relationships);
+  seedProgramWorkbench(db);
 }
 
 function all(db, sql, params = []) {
@@ -233,6 +288,18 @@ export function getGovernanceSnapshot(db) {
     evidenceBlueprints: blueprintRows,
     evidenceItems: evidenceRows,
     relationships: all(db, "SELECT * FROM control_relationships ORDER BY relationship_type, from_control_id"),
+    programWorkbench: getProgramWorkbench(db),
+  };
+}
+
+export function getProgramWorkbench(db) {
+  return {
+    projects: all(db, "SELECT * FROM program_projects ORDER BY status, name"),
+    frameworkImports: all(db, "SELECT * FROM framework_imports ORDER BY validation_state, framework_name"),
+    assessmentRuns: all(db, "SELECT * FROM assessment_runs ORDER BY report_state, name"),
+    accountReviews: all(db, "SELECT * FROM account_reviews ORDER BY overdue_count DESC, source_system"),
+    vendorQuestionnaires: all(db, "SELECT * FROM vendor_questionnaires ORDER BY due_date, vendor_name"),
+    hardeningGuides: all(db, "SELECT * FROM hardening_guides ORDER BY priority, platform"),
   };
 }
 

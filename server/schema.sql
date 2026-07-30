@@ -119,3 +119,72 @@ CREATE TABLE IF NOT EXISTS control_relationships (
   confidence INTEGER,
   narrative TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS program_projects (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  owner TEXT NOT NULL,
+  frameworks TEXT NOT NULL,
+  scoped_controls INTEGER NOT NULL CHECK (scoped_controls >= 0),
+  evidence_ready_percentage INTEGER NOT NULL CHECK (evidence_ready_percentage BETWEEN 0 AND 100),
+  auditor_collaboration TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('Planning', 'In Progress', 'Ready', 'Blocked'))
+);
+
+CREATE TABLE IF NOT EXISTS framework_imports (
+  id TEXT PRIMARY KEY,
+  source_tool TEXT NOT NULL,
+  framework_name TEXT NOT NULL,
+  framework_version TEXT NOT NULL,
+  mapped_framework_id TEXT REFERENCES frameworks(id) ON DELETE SET NULL,
+  requirement_total INTEGER NOT NULL CHECK (requirement_total >= 0),
+  candidate_controls INTEGER NOT NULL CHECK (candidate_controls >= 0),
+  validation_state TEXT NOT NULL CHECK (validation_state IN ('Ready', 'Needs Review', 'Blocked', 'Imported')),
+  next_step TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS assessment_runs (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES program_projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  assessment_type TEXT NOT NULL,
+  framework_id TEXT REFERENCES frameworks(id) ON DELETE SET NULL,
+  scoped_controls INTEGER NOT NULL CHECK (scoped_controls >= 0),
+  findings_open INTEGER NOT NULL CHECK (findings_open >= 0),
+  report_state TEXT NOT NULL CHECK (report_state IN ('Planning', 'Evidence Collection', 'Review', 'Ready')),
+  owner TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS account_reviews (
+  id TEXT PRIMARY KEY,
+  source_system TEXT NOT NULL,
+  control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+  reviewer TEXT NOT NULL,
+  accounts_in_scope INTEGER NOT NULL CHECK (accounts_in_scope >= 0),
+  overdue_count INTEGER NOT NULL CHECK (overdue_count >= 0),
+  review_cadence TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('Running', 'Needs Review', 'Ready', 'Blocked'))
+);
+
+CREATE TABLE IF NOT EXISTS vendor_questionnaires (
+  id TEXT PRIMARY KEY,
+  vendor_name TEXT NOT NULL,
+  control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+  questionnaire_type TEXT NOT NULL,
+  due_date TEXT NOT NULL,
+  response_state TEXT NOT NULL CHECK (response_state IN ('Draft', 'Sent', 'In Review', 'Blocked', 'Complete')),
+  relied_upon_controls TEXT NOT NULL,
+  risk_signal TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS hardening_guides (
+  id TEXT PRIMARY KEY,
+  platform TEXT NOT NULL,
+  control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+  guide_source TEXT NOT NULL,
+  hardening_focus TEXT NOT NULL,
+  priority TEXT NOT NULL CHECK (priority IN ('P0', 'P1', 'P2')),
+  implementation_state TEXT NOT NULL CHECK (implementation_state IN ('Backlog', 'In Progress', 'Ready', 'Blocked')),
+  first_party_control TEXT NOT NULL
+);

@@ -1,0 +1,1861 @@
+{
+  "stats": {
+    "controls": 12,
+    "frameworks": 7,
+    "requirements": 12,
+    "mappings": 16,
+    "activeMappings": 11,
+    "pendingMappings": 3,
+    "gaps": 2,
+    "avgEvidenceHealth": 87
+  },
+  "controls": [
+    {
+      "id": "CTRL-EVID-007",
+      "tenant_id": "tenant-acme-us",
+      "name": "Immutable Evidence Retention",
+      "family": "Audit Evidence",
+      "description": "Control evidence is written to object-locked storage with version identifiers, hash validation, retention policy, and graph edge traceability.",
+      "owner": "grc-platform@company.com",
+      "team": "GRC Platform",
+      "control_type": "Preventive",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "High",
+      "testing_cadence": "Continuous",
+      "evidence_freshness": 94,
+      "evidence_relevance": 98,
+      "evidence_completeness": 95,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-008",
+          "control_id": "CTRL-EVID-007",
+          "requirement_id": "REQ-SOC2-CC7.2",
+          "coverage_percentage": 88,
+          "mapping_confidence": 90,
+          "state": "Active",
+          "rationale": "Immutable evidence proves monitoring outcomes and decision traceability.",
+          "citation": "CC7.2",
+          "requirement_title": "Security monitoring",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-EVID-007",
+          "id": "AST-S3-EVIDENCE",
+          "name": "S3 Evidence Vault",
+          "asset_type": "Evidence Store",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Restricted",
+          "owner": "grc-platform@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Continuous"
+        }
+      ],
+      "policies": [
+        {
+          "control_id": "CTRL-EVID-007",
+          "id": "POL-EVID-SOP",
+          "title": "Immutable Evidence Handling SOP",
+          "document_type": "SOP",
+          "owner": "grc-platform@company.com",
+          "status": "Approved",
+          "approved_version": "v1.0",
+          "section_reference": "Evidence retention rules"
+        }
+      ],
+      "evidenceBlueprints": [
+        {
+          "id": "BP-EVID-WORM",
+          "control_id": "CTRL-EVID-007",
+          "name": "Object lock version proof",
+          "source_system": "AWS S3",
+          "query_logic": "s3.objects.where(object_lock = 'COMPLIANCE' and version_id exists)",
+          "schedule": "Daily",
+          "status": "Running",
+          "last_run_at": "2026-07-30T04:50:00Z",
+          "freshness_days": 0,
+          "pass_rate": 100,
+          "owner_approval_state": "Approved"
+        }
+      ],
+      "evidenceItems": [
+        {
+          "id": "EV-S3-WORM-812",
+          "blueprint_id": "BP-EVID-WORM",
+          "control_id": "CTRL-EVID-007",
+          "name": "Object locked evidence sample",
+          "source_system": "AWS S3",
+          "verdict": "Implemented",
+          "collected_at": "2026-07-30T04:50:00Z",
+          "valid_until": "2027-07-30",
+          "hash": "sha256:5537e77fb201eb1d",
+          "storage_uri": "s3://evidence/prod/worm/sample-812.json?versionId=1ac7"
+        }
+      ],
+      "mappingCount": 1,
+      "blueprintCount": 1
+    },
+    {
+      "id": "CTRL-CHANGE-009",
+      "tenant_id": "tenant-acme-us",
+      "name": "Production Change Management",
+      "family": "Change Management",
+      "description": "Production changes require approval, linked tickets, testing evidence, and emergency change review.",
+      "owner": "platform-ops@company.com",
+      "team": "Platform Operations",
+      "control_type": "Directive",
+      "automation_level": "Partially Automated",
+      "implementation_status": "Implemented",
+      "criticality": "Medium",
+      "testing_cadence": "Weekly",
+      "evidence_freshness": 88,
+      "evidence_relevance": 91,
+      "evidence_completeness": 87,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-013",
+          "control_id": "CTRL-CHANGE-009",
+          "requirement_id": "REQ-SOC2-CC8.1",
+          "coverage_percentage": 89,
+          "mapping_confidence": 92,
+          "state": "Active",
+          "rationale": "Change approvals and linked tickets satisfy change management.",
+          "citation": "CC8.1",
+          "requirement_title": "Changes are authorized",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-CHANGE-009",
+          "id": "AST-JIRA",
+          "name": "Jira",
+          "asset_type": "Workflow",
+          "environment": "Production",
+          "criticality": "Medium",
+          "data_classification": "Internal",
+          "owner": "platform-ops@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Weekly"
+        }
+      ],
+      "policies": [
+        {
+          "control_id": "CTRL-CHANGE-009",
+          "id": "POL-CHANGE",
+          "title": "Production Change Policy",
+          "document_type": "Policy",
+          "owner": "platform-ops@company.com",
+          "status": "Approved",
+          "approved_version": "v3.2",
+          "section_reference": "Emergency change exception"
+        }
+      ],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 1,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-ENC-008",
+      "tenant_id": "tenant-acme-us",
+      "name": "Encryption at Rest",
+      "family": "Data Protection",
+      "description": "Sensitive data stores use approved encryption at rest with managed keys and monitored configuration drift.",
+      "owner": "cloud-sec@company.com",
+      "team": "Cloud Security",
+      "control_type": "Preventive",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "High",
+      "testing_cadence": "Continuous",
+      "evidence_freshness": 97,
+      "evidence_relevance": 95,
+      "evidence_completeness": 94,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-011",
+          "control_id": "CTRL-ENC-008",
+          "requirement_id": "REQ-ISO-A.8.24",
+          "coverage_percentage": 94,
+          "mapping_confidence": 95,
+          "state": "Active",
+          "rationale": "Encryption and key controls are continuously checked.",
+          "citation": "A.8.24",
+          "requirement_title": "Use of cryptography",
+          "framework_id": "ISO27001",
+          "framework_name": "ISO 27001"
+        },
+        {
+          "id": "MAP-012",
+          "control_id": "CTRL-ENC-008",
+          "requirement_id": "REQ-PCI-3.5.1",
+          "coverage_percentage": 88,
+          "mapping_confidence": 86,
+          "state": "Active",
+          "rationale": "Key management coverage is strong but needs PCI-specific custodian evidence.",
+          "citation": "3.5.1",
+          "requirement_title": "Encryption key management",
+          "framework_id": "PCIDSS",
+          "framework_name": "PCI DSS"
+        }
+      ],
+      "mappedFrameworks": [
+        "ISO 27001",
+        "PCI DSS"
+      ],
+      "assets": [],
+      "policies": [],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 2,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-LOG-003",
+      "tenant_id": "tenant-acme-us",
+      "name": "Centralized Security Logging",
+      "family": "Detection and Response",
+      "description": "Security-relevant system, identity, and cloud logs are centralized, retained, monitored, and available for investigation.",
+      "owner": "detection@company.com",
+      "team": "Detection Engineering",
+      "control_type": "Detective",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "High",
+      "testing_cadence": "Continuous",
+      "evidence_freshness": 90,
+      "evidence_relevance": 95,
+      "evidence_completeness": 92,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-010",
+          "control_id": "CTRL-LOG-003",
+          "requirement_id": "REQ-NIST-DE.CM-03",
+          "coverage_percentage": 90,
+          "mapping_confidence": 91,
+          "state": "Active",
+          "rationale": "Central logs support monitoring of user and system activity.",
+          "citation": "DE.CM-03",
+          "requirement_title": "Personnel activity monitoring",
+          "framework_id": "NISTCSF",
+          "framework_name": "NIST CSF"
+        }
+      ],
+      "mappedFrameworks": [
+        "NIST CSF"
+      ],
+      "assets": [],
+      "policies": [],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 1,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-ENDPOINT-010",
+      "tenant_id": "tenant-acme-us",
+      "name": "Endpoint Protection Coverage",
+      "family": "Endpoint Security",
+      "description": "Managed endpoints run approved protection, report health, and automatically create remediation tasks for stale agents.",
+      "owner": "endpoint@company.com",
+      "team": "Security Operations",
+      "control_type": "Detective",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Degraded",
+      "criticality": "High",
+      "testing_cadence": "Daily",
+      "evidence_freshness": 74,
+      "evidence_relevance": 92,
+      "evidence_completeness": 81,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-014",
+          "control_id": "CTRL-ENDPOINT-010",
+          "requirement_id": "REQ-SOC2-CC7.2",
+          "coverage_percentage": 74,
+          "mapping_confidence": 81,
+          "state": "Gap",
+          "rationale": "Endpoint posture is stale on a subset of devices.",
+          "citation": "CC7.2",
+          "requirement_title": "Security monitoring",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-ENDPOINT-010",
+          "id": "AST-CROWDSTRIKE",
+          "name": "CrowdStrike",
+          "asset_type": "Endpoint Security",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Internal",
+          "owner": "endpoint@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Daily"
+        }
+      ],
+      "policies": [],
+      "evidenceBlueprints": [
+        {
+          "id": "BP-ENDPOINT",
+          "control_id": "CTRL-ENDPOINT-010",
+          "name": "Endpoint posture coverage",
+          "source_system": "CrowdStrike",
+          "query_logic": "crowdstrike.devices.where(agent_health = 'healthy')",
+          "schedule": "Daily",
+          "status": "Needs Review",
+          "last_run_at": "2026-06-19T18:00:00Z",
+          "freshness_days": 41,
+          "pass_rate": 74,
+          "owner_approval_state": "Pending"
+        }
+      ],
+      "evidenceItems": [
+        {
+          "id": "EV-CS-POSTURE-331",
+          "blueprint_id": "BP-ENDPOINT",
+          "control_id": "CTRL-ENDPOINT-010",
+          "name": "Endpoint posture export",
+          "source_system": "CrowdStrike",
+          "verdict": "Degraded",
+          "collected_at": "2026-06-19T18:00:00Z",
+          "valid_until": "2026-07-20",
+          "hash": "sha256:f1f7b7e2c9a1dd31",
+          "storage_uri": "s3://evidence/prod/endpoint/posture-331.json?versionId=6ca1"
+        }
+      ],
+      "mappingCount": 1,
+      "blueprintCount": 1
+    },
+    {
+      "id": "CTRL-IAM-002",
+      "tenant_id": "tenant-acme-us",
+      "name": "Identity Lifecycle Review",
+      "family": "Identity and Access",
+      "description": "Joiner, mover, and leaver access is reviewed against HR source-of-truth and deprovisioning evidence.",
+      "owner": "it-ops@company.com",
+      "team": "IT Operations",
+      "control_type": "Detective",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "High",
+      "testing_cadence": "Daily",
+      "evidence_freshness": 91,
+      "evidence_relevance": 94,
+      "evidence_completeness": 89,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-005",
+          "control_id": "CTRL-IAM-002",
+          "requirement_id": "REQ-HIPAA-164.312A",
+          "coverage_percentage": 83,
+          "mapping_confidence": 84,
+          "state": "Active",
+          "rationale": "Unique workforce identities are linked to access review evidence.",
+          "citation": "164.312(a)",
+          "requirement_title": "Unique user identification",
+          "framework_id": "HIPAA",
+          "framework_name": "HIPAA"
+        },
+        {
+          "id": "MAP-004",
+          "control_id": "CTRL-IAM-002",
+          "requirement_id": "REQ-SOC2-CC6.2",
+          "coverage_percentage": 91,
+          "mapping_confidence": 93,
+          "state": "Active",
+          "rationale": "Lifecycle reviews remove access when business need ends.",
+          "citation": "CC6.2",
+          "requirement_title": "Prior access is removed",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "HIPAA",
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-IAM-002",
+          "id": "AST-OKTA",
+          "name": "Okta Workforce",
+          "asset_type": "Identity",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Restricted",
+          "owner": "it-ops@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Daily"
+        }
+      ],
+      "policies": [
+        {
+          "control_id": "CTRL-IAM-002",
+          "id": "POL-IAM-SOP",
+          "title": "Access Review SOP",
+          "document_type": "SOP",
+          "owner": "it-ops@company.com",
+          "status": "Approved",
+          "approved_version": "v1.1",
+          "section_reference": "Quarterly review workflow"
+        }
+      ],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 2,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-PAM-001",
+      "tenant_id": "tenant-acme-us",
+      "name": "Privileged Access Management",
+      "family": "Identity and Access",
+      "description": "Administrative access to production systems is brokered through a managed vault, requires MFA, and records every privileged session.",
+      "owner": "sec-ops@company.com",
+      "team": "Security Operations",
+      "control_type": "Preventive",
+      "automation_level": "Agentic",
+      "implementation_status": "Implemented",
+      "criticality": "Mission Critical",
+      "testing_cadence": "Continuous",
+      "evidence_freshness": 96,
+      "evidence_relevance": 96,
+      "evidence_completeness": 93,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-002",
+          "control_id": "CTRL-PAM-001",
+          "requirement_id": "REQ-ISO-A.5.16",
+          "coverage_percentage": 86,
+          "mapping_confidence": 88,
+          "state": "Pending Approval",
+          "rationale": "Human privileged access is covered; service identities need an explicit subcontrol.",
+          "citation": "A.5.16",
+          "requirement_title": "Identity management",
+          "framework_id": "ISO27001",
+          "framework_name": "ISO 27001"
+        },
+        {
+          "id": "MAP-003",
+          "control_id": "CTRL-PAM-001",
+          "requirement_id": "REQ-NIST-PR.AA-01",
+          "coverage_percentage": 92,
+          "mapping_confidence": 94,
+          "state": "Active",
+          "rationale": "Identity and credentials are governed through vaulting and MFA.",
+          "citation": "PR.AA-01",
+          "requirement_title": "Identities are managed",
+          "framework_id": "NISTCSF",
+          "framework_name": "NIST CSF"
+        },
+        {
+          "id": "MAP-001",
+          "control_id": "CTRL-PAM-001",
+          "requirement_id": "REQ-SOC2-CC6.1",
+          "coverage_percentage": 94,
+          "mapping_confidence": 96,
+          "state": "Active",
+          "rationale": "PAM, MFA, and session recording strongly satisfy logical access requirements.",
+          "citation": "CC6.1",
+          "requirement_title": "Logical access security",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "ISO 27001",
+        "NIST CSF",
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-PAM-001",
+          "id": "AST-AWS-IAM",
+          "name": "AWS IAM",
+          "asset_type": "Cloud IAM",
+          "environment": "Production",
+          "criticality": "Mission Critical",
+          "data_classification": "Confidential",
+          "owner": "cloud-sec@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Continuous"
+        },
+        {
+          "control_id": "CTRL-PAM-001",
+          "id": "AST-OKTA",
+          "name": "Okta Workforce",
+          "asset_type": "Identity",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Restricted",
+          "owner": "it-ops@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Continuous"
+        }
+      ],
+      "policies": [
+        {
+          "control_id": "CTRL-PAM-001",
+          "id": "POL-PAM-STD",
+          "title": "Privileged Access Management Standard",
+          "document_type": "Standard",
+          "owner": "sec-ops@company.com",
+          "status": "In Review",
+          "approved_version": "v0.3 draft",
+          "section_reference": "Sections 2.1-2.5"
+        }
+      ],
+      "evidenceBlueprints": [
+        {
+          "id": "BP-PAM-AWS",
+          "control_id": "CTRL-PAM-001",
+          "name": "Privileged AWS console session review",
+          "source_system": "AWS CloudTrail",
+          "query_logic": "cloudtrail.events.where(role = 'admin' and mfa = true)",
+          "schedule": "Hourly",
+          "status": "Running",
+          "last_run_at": "2026-07-30T04:44:00Z",
+          "freshness_days": 0,
+          "pass_rate": 97,
+          "owner_approval_state": "Approved"
+        },
+        {
+          "id": "BP-PAM-MFA",
+          "control_id": "CTRL-PAM-001",
+          "name": "Admin MFA enforcement",
+          "source_system": "Okta",
+          "query_logic": "okta.admins.where(mfa_enrolled = true)",
+          "schedule": "Hourly",
+          "status": "Running",
+          "last_run_at": "2026-07-30T04:58:00Z",
+          "freshness_days": 0,
+          "pass_rate": 99,
+          "owner_approval_state": "Approved"
+        }
+      ],
+      "evidenceItems": [
+        {
+          "id": "EV-OKTA-MFA-112",
+          "blueprint_id": "BP-PAM-MFA",
+          "control_id": "CTRL-PAM-001",
+          "name": "Okta admin MFA coverage",
+          "source_system": "Okta",
+          "verdict": "Implemented",
+          "collected_at": "2026-07-30T04:58:00Z",
+          "valid_until": "2026-10-28",
+          "hash": "sha256:b9a4a145a811f0d0",
+          "storage_uri": "s3://evidence/prod/okta/mfa-112.json?versionId=8d2c"
+        },
+        {
+          "id": "EV-PAM-LOGIN-774",
+          "blueprint_id": "BP-PAM-AWS",
+          "control_id": "CTRL-PAM-001",
+          "name": "Privileged console login with MFA",
+          "source_system": "AWS CloudTrail",
+          "verdict": "Implemented",
+          "collected_at": "2026-07-29T21:44:00Z",
+          "valid_until": "2026-10-27",
+          "hash": "sha256:8fd9d1b1c0a49e27",
+          "storage_uri": "s3://evidence/prod/pam/cloudtrail-774.json?versionId=4f9a"
+        }
+      ],
+      "mappingCount": 3,
+      "blueprintCount": 2
+    },
+    {
+      "id": "CTRL-TRAIN-011",
+      "tenant_id": "tenant-acme-us",
+      "name": "Security Awareness Training",
+      "family": "People Controls",
+      "description": "Employees and privileged users complete security awareness training within policy-defined windows.",
+      "owner": "people-sec@company.com",
+      "team": "People Security",
+      "control_type": "Directive",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "Medium",
+      "testing_cadence": "Monthly",
+      "evidence_freshness": 89,
+      "evidence_relevance": 87,
+      "evidence_completeness": 90,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-015",
+          "control_id": "CTRL-TRAIN-011",
+          "requirement_id": "REQ-SOC2-CC6.1",
+          "coverage_percentage": 76,
+          "mapping_confidence": 78,
+          "state": "Active",
+          "rationale": "Training supports access responsibilities for privileged users.",
+          "citation": "CC6.1",
+          "requirement_title": "Logical access security",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "SOC 2"
+      ],
+      "assets": [],
+      "policies": [],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 1,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-BCP-006",
+      "tenant_id": "tenant-acme-us",
+      "name": "Business Continuity Exercise",
+      "family": "Resilience",
+      "description": "Critical services have documented recovery procedures and tested continuity exercises with tracked remediation.",
+      "owner": "resilience@company.com",
+      "team": "Business Resilience",
+      "control_type": "Corrective",
+      "automation_level": "Manual",
+      "implementation_status": "In Progress",
+      "criticality": "Medium",
+      "testing_cadence": "Annual",
+      "evidence_freshness": 63,
+      "evidence_relevance": 78,
+      "evidence_completeness": 66,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [],
+      "mappedFrameworks": [],
+      "assets": [],
+      "policies": [],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 0,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-BRANCH-012",
+      "tenant_id": "tenant-acme-us",
+      "name": "Protected Production Branches",
+      "family": "Secure SDLC",
+      "description": "Production repositories enforce branch protection, required reviews, and restricted admin bypass.",
+      "owner": "appsec@company.com",
+      "team": "Application Security",
+      "control_type": "Preventive",
+      "automation_level": "Fully Automated",
+      "implementation_status": "Implemented",
+      "criticality": "High",
+      "testing_cadence": "Daily",
+      "evidence_freshness": 93,
+      "evidence_relevance": 95,
+      "evidence_completeness": 92,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-016",
+          "control_id": "CTRL-BRANCH-012",
+          "requirement_id": "REQ-SOC2-CC8.1",
+          "coverage_percentage": 93,
+          "mapping_confidence": 94,
+          "state": "Active",
+          "rationale": "Branch protections enforce review before production change.",
+          "citation": "CC8.1",
+          "requirement_title": "Changes are authorized",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-BRANCH-012",
+          "id": "AST-GITHUB",
+          "name": "GitHub",
+          "asset_type": "Source Control",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Confidential",
+          "owner": "appsec@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Daily"
+        }
+      ],
+      "policies": [],
+      "evidenceBlueprints": [
+        {
+          "id": "BP-GITHUB-BRANCH",
+          "control_id": "CTRL-BRANCH-012",
+          "name": "Production branch protection",
+          "source_system": "GitHub",
+          "query_logic": "github.repos.where(branch = 'main' and protection.required_reviews >= 1)",
+          "schedule": "Daily",
+          "status": "Running",
+          "last_run_at": "2026-07-30T04:11:00Z",
+          "freshness_days": 0,
+          "pass_rate": 98,
+          "owner_approval_state": "Approved"
+        }
+      ],
+      "evidenceItems": [],
+      "mappingCount": 1,
+      "blueprintCount": 1
+    },
+    {
+      "id": "CTRL-TPRM-002",
+      "tenant_id": "tenant-acme-us",
+      "name": "Tier 1 Vendor Security Review",
+      "family": "Third-Party Risk",
+      "description": "Tier 1 vendors are assessed before onboarding and annually thereafter using SOC 2, security questionnaire, breach history, and data processing scope.",
+      "owner": "vendor-risk@company.com",
+      "team": "Third-Party Risk",
+      "control_type": "Detective",
+      "automation_level": "Partially Automated",
+      "implementation_status": "In Progress",
+      "criticality": "High",
+      "testing_cadence": "Quarterly",
+      "evidence_freshness": 58,
+      "evidence_relevance": 83,
+      "evidence_completeness": 69,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-009",
+          "control_id": "CTRL-TPRM-002",
+          "requirement_id": "REQ-NIST-GV.SC-06",
+          "coverage_percentage": 66,
+          "mapping_confidence": 79,
+          "state": "Pending Approval",
+          "rationale": "Vendor assessment exists; continuous monitoring is not complete.",
+          "citation": "GV.SC-06",
+          "requirement_title": "Supplier risk response",
+          "framework_id": "NISTCSF",
+          "framework_name": "NIST CSF"
+        }
+      ],
+      "mappedFrameworks": [
+        "NIST CSF"
+      ],
+      "assets": [],
+      "policies": [],
+      "evidenceBlueprints": [],
+      "evidenceItems": [],
+      "mappingCount": 1,
+      "blueprintCount": 0
+    },
+    {
+      "id": "CTRL-VULN-004",
+      "tenant_id": "tenant-acme-us",
+      "name": "Critical Vulnerability Remediation",
+      "family": "Vulnerability Management",
+      "description": "Critical vulnerabilities on internet-facing production assets are remediated or formally risk accepted within SLA.",
+      "owner": "platform-risk@company.com",
+      "team": "Platform Engineering",
+      "control_type": "Corrective",
+      "automation_level": "Partially Automated",
+      "implementation_status": "Degraded",
+      "criticality": "High",
+      "testing_cadence": "Daily",
+      "evidence_freshness": 71,
+      "evidence_relevance": 86,
+      "evidence_completeness": 74,
+      "created_at": "2026-07-30 06:22:41",
+      "updated_at": "2026-07-30 06:22:41",
+      "mappings": [
+        {
+          "id": "MAP-006",
+          "control_id": "CTRL-VULN-004",
+          "requirement_id": "REQ-ISO-A.8.8",
+          "coverage_percentage": 78,
+          "mapping_confidence": 82,
+          "state": "Pending Approval",
+          "rationale": "Remediation workflow covers vulnerabilities but needs EOL replacement criteria.",
+          "citation": "A.8.8",
+          "requirement_title": "Management of technical vulnerabilities",
+          "framework_id": "ISO27001",
+          "framework_name": "ISO 27001"
+        },
+        {
+          "id": "MAP-007",
+          "control_id": "CTRL-VULN-004",
+          "requirement_id": "REQ-SOC2-CC7.2",
+          "coverage_percentage": 70,
+          "mapping_confidence": 76,
+          "state": "Gap",
+          "rationale": "Security findings are monitored, but SLA misses are currently degraded.",
+          "citation": "CC7.2",
+          "requirement_title": "Security monitoring",
+          "framework_id": "SOC2",
+          "framework_name": "SOC 2"
+        }
+      ],
+      "mappedFrameworks": [
+        "ISO 27001",
+        "SOC 2"
+      ],
+      "assets": [
+        {
+          "control_id": "CTRL-VULN-004",
+          "id": "AST-SECURITY-HUB",
+          "name": "AWS Security Hub",
+          "asset_type": "Cloud Security",
+          "environment": "Production",
+          "criticality": "High",
+          "data_classification": "Internal",
+          "owner": "platform-risk@company.com",
+          "scope_status": "In Scope",
+          "testing_cadence": "Daily"
+        }
+      ],
+      "policies": [
+        {
+          "control_id": "CTRL-VULN-004",
+          "id": "POL-VULN-STD",
+          "title": "Vulnerability Management Standard",
+          "document_type": "Standard",
+          "owner": "platform-risk@company.com",
+          "status": "Approved",
+          "approved_version": "v2.0",
+          "section_reference": "Critical SLA table"
+        }
+      ],
+      "evidenceBlueprints": [
+        {
+          "id": "BP-VULN-SLA",
+          "control_id": "CTRL-VULN-004",
+          "name": "Critical finding SLA monitor",
+          "source_system": "AWS Security Hub",
+          "query_logic": "securityhub.findings.where(severity = 'CRITICAL' and status != 'RESOLVED')",
+          "schedule": "Daily",
+          "status": "Needs Review",
+          "last_run_at": "2026-07-29T22:09:00Z",
+          "freshness_days": 1,
+          "pass_rate": 68,
+          "owner_approval_state": "Approved"
+        }
+      ],
+      "evidenceItems": [
+        {
+          "id": "EV-SHUB-FINDING-991",
+          "blueprint_id": "BP-VULN-SLA",
+          "control_id": "CTRL-VULN-004",
+          "name": "Critical public workload finding",
+          "source_system": "AWS Security Hub",
+          "verdict": "Degraded",
+          "collected_at": "2026-07-29T22:09:00Z",
+          "valid_until": "2026-08-05",
+          "hash": "sha256:a044c9258bbf120e",
+          "storage_uri": "s3://evidence/prod/vuln/securityhub-991.json?versionId=9ac2"
+        }
+      ],
+      "mappingCount": 2,
+      "blueprintCount": 1
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "GDPR",
+      "name": "GDPR",
+      "version": "EU",
+      "category": "Privacy",
+      "requirement_count": 120
+    },
+    {
+      "id": "HIPAA",
+      "name": "HIPAA",
+      "version": "Security Rule",
+      "category": "Healthcare",
+      "requirement_count": 160
+    },
+    {
+      "id": "ISO27001",
+      "name": "ISO 27001",
+      "version": "2022",
+      "category": "Security Management",
+      "requirement_count": 260
+    },
+    {
+      "id": "ISO42001",
+      "name": "ISO 42001",
+      "version": "2023",
+      "category": "AI Governance",
+      "requirement_count": 90
+    },
+    {
+      "id": "NISTCSF",
+      "name": "NIST CSF",
+      "version": "2.0",
+      "category": "Cybersecurity",
+      "requirement_count": 220
+    },
+    {
+      "id": "PCIDSS",
+      "name": "PCI DSS",
+      "version": "4.0",
+      "category": "Payments",
+      "requirement_count": 180
+    },
+    {
+      "id": "SOC2",
+      "name": "SOC 2",
+      "version": "Type II 2026",
+      "category": "Assurance",
+      "requirement_count": 300
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-HIPAA-164.312A",
+      "framework_id": "HIPAA",
+      "citation": "164.312(a)",
+      "function_area": "Access Control",
+      "title": "Unique user identification",
+      "requirement_text": "Access controls uniquely identify and track user activity.",
+      "framework_name": "HIPAA",
+      "framework_version": "Security Rule"
+    },
+    {
+      "id": "REQ-ISO-A.5.16",
+      "framework_id": "ISO27001",
+      "citation": "A.5.16",
+      "function_area": "Identity Management",
+      "title": "Identity management",
+      "requirement_text": "The full lifecycle of identities is managed.",
+      "framework_name": "ISO 27001",
+      "framework_version": "2022"
+    },
+    {
+      "id": "REQ-ISO-A.8.24",
+      "framework_id": "ISO27001",
+      "citation": "A.8.24",
+      "function_area": "Cryptography",
+      "title": "Use of cryptography",
+      "requirement_text": "Rules for effective use of cryptography, including key management, are defined and implemented.",
+      "framework_name": "ISO 27001",
+      "framework_version": "2022"
+    },
+    {
+      "id": "REQ-ISO-A.8.8",
+      "framework_id": "ISO27001",
+      "citation": "A.8.8",
+      "function_area": "Technical Vulnerabilities",
+      "title": "Management of technical vulnerabilities",
+      "requirement_text": "Information about technical vulnerabilities is obtained, evaluated, and addressed.",
+      "framework_name": "ISO 27001",
+      "framework_version": "2022"
+    },
+    {
+      "id": "REQ-NIST-DE.CM-03",
+      "framework_id": "NISTCSF",
+      "citation": "DE.CM-03",
+      "function_area": "Continuous Monitoring",
+      "title": "Personnel activity monitoring",
+      "requirement_text": "Personnel activity and technology usage are monitored to find potentially adverse events.",
+      "framework_name": "NIST CSF",
+      "framework_version": "2.0"
+    },
+    {
+      "id": "REQ-NIST-GV.SC-06",
+      "framework_id": "NISTCSF",
+      "citation": "GV.SC-06",
+      "function_area": "Supply Chain",
+      "title": "Supplier risk response",
+      "requirement_text": "Suppliers and third-party partners are known, prioritized, and managed based on cyber risk.",
+      "framework_name": "NIST CSF",
+      "framework_version": "2.0"
+    },
+    {
+      "id": "REQ-NIST-PR.AA-01",
+      "framework_id": "NISTCSF",
+      "citation": "PR.AA-01",
+      "function_area": "Identity Management",
+      "title": "Identities are managed",
+      "requirement_text": "Identities and credentials for authorized users, services, and hardware are managed.",
+      "framework_name": "NIST CSF",
+      "framework_version": "2.0"
+    },
+    {
+      "id": "REQ-PCI-3.5.1",
+      "framework_id": "PCIDSS",
+      "citation": "3.5.1",
+      "function_area": "Cryptography",
+      "title": "Encryption key management",
+      "requirement_text": "Cryptographic keys used to protect stored account data are secured.",
+      "framework_name": "PCI DSS",
+      "framework_version": "4.0"
+    },
+    {
+      "id": "REQ-SOC2-CC6.1",
+      "framework_id": "SOC2",
+      "citation": "CC6.1",
+      "function_area": "Logical Access",
+      "title": "Logical access security",
+      "requirement_text": "The entity implements logical access security software, infrastructure, and architectures over protected information assets.",
+      "framework_name": "SOC 2",
+      "framework_version": "Type II 2026"
+    },
+    {
+      "id": "REQ-SOC2-CC6.2",
+      "framework_id": "SOC2",
+      "citation": "CC6.2",
+      "function_area": "Access Removal",
+      "title": "Prior access is removed",
+      "requirement_text": "Prior access is removed when employees or contractors no longer require access.",
+      "framework_name": "SOC 2",
+      "framework_version": "Type II 2026"
+    },
+    {
+      "id": "REQ-SOC2-CC7.2",
+      "framework_id": "SOC2",
+      "citation": "CC7.2",
+      "function_area": "Monitoring",
+      "title": "Security monitoring",
+      "requirement_text": "The entity monitors system components and detects anomalies that could indicate malicious acts.",
+      "framework_name": "SOC 2",
+      "framework_version": "Type II 2026"
+    },
+    {
+      "id": "REQ-SOC2-CC8.1",
+      "framework_id": "SOC2",
+      "citation": "CC8.1",
+      "function_area": "Change Management",
+      "title": "Changes are authorized",
+      "requirement_text": "Changes to infrastructure, data, software, and procedures are authorized, tested, approved, and documented.",
+      "framework_name": "SOC 2",
+      "framework_version": "Type II 2026"
+    }
+  ],
+  "mappings": [
+    {
+      "id": "MAP-005",
+      "control_id": "CTRL-IAM-002",
+      "requirement_id": "REQ-HIPAA-164.312A",
+      "coverage_percentage": 83,
+      "mapping_confidence": 84,
+      "state": "Active",
+      "rationale": "Unique workforce identities are linked to access review evidence.",
+      "citation": "164.312(a)",
+      "requirement_title": "Unique user identification",
+      "framework_id": "HIPAA",
+      "framework_name": "HIPAA"
+    },
+    {
+      "id": "MAP-002",
+      "control_id": "CTRL-PAM-001",
+      "requirement_id": "REQ-ISO-A.5.16",
+      "coverage_percentage": 86,
+      "mapping_confidence": 88,
+      "state": "Pending Approval",
+      "rationale": "Human privileged access is covered; service identities need an explicit subcontrol.",
+      "citation": "A.5.16",
+      "requirement_title": "Identity management",
+      "framework_id": "ISO27001",
+      "framework_name": "ISO 27001"
+    },
+    {
+      "id": "MAP-011",
+      "control_id": "CTRL-ENC-008",
+      "requirement_id": "REQ-ISO-A.8.24",
+      "coverage_percentage": 94,
+      "mapping_confidence": 95,
+      "state": "Active",
+      "rationale": "Encryption and key controls are continuously checked.",
+      "citation": "A.8.24",
+      "requirement_title": "Use of cryptography",
+      "framework_id": "ISO27001",
+      "framework_name": "ISO 27001"
+    },
+    {
+      "id": "MAP-006",
+      "control_id": "CTRL-VULN-004",
+      "requirement_id": "REQ-ISO-A.8.8",
+      "coverage_percentage": 78,
+      "mapping_confidence": 82,
+      "state": "Pending Approval",
+      "rationale": "Remediation workflow covers vulnerabilities but needs EOL replacement criteria.",
+      "citation": "A.8.8",
+      "requirement_title": "Management of technical vulnerabilities",
+      "framework_id": "ISO27001",
+      "framework_name": "ISO 27001"
+    },
+    {
+      "id": "MAP-010",
+      "control_id": "CTRL-LOG-003",
+      "requirement_id": "REQ-NIST-DE.CM-03",
+      "coverage_percentage": 90,
+      "mapping_confidence": 91,
+      "state": "Active",
+      "rationale": "Central logs support monitoring of user and system activity.",
+      "citation": "DE.CM-03",
+      "requirement_title": "Personnel activity monitoring",
+      "framework_id": "NISTCSF",
+      "framework_name": "NIST CSF"
+    },
+    {
+      "id": "MAP-009",
+      "control_id": "CTRL-TPRM-002",
+      "requirement_id": "REQ-NIST-GV.SC-06",
+      "coverage_percentage": 66,
+      "mapping_confidence": 79,
+      "state": "Pending Approval",
+      "rationale": "Vendor assessment exists; continuous monitoring is not complete.",
+      "citation": "GV.SC-06",
+      "requirement_title": "Supplier risk response",
+      "framework_id": "NISTCSF",
+      "framework_name": "NIST CSF"
+    },
+    {
+      "id": "MAP-003",
+      "control_id": "CTRL-PAM-001",
+      "requirement_id": "REQ-NIST-PR.AA-01",
+      "coverage_percentage": 92,
+      "mapping_confidence": 94,
+      "state": "Active",
+      "rationale": "Identity and credentials are governed through vaulting and MFA.",
+      "citation": "PR.AA-01",
+      "requirement_title": "Identities are managed",
+      "framework_id": "NISTCSF",
+      "framework_name": "NIST CSF"
+    },
+    {
+      "id": "MAP-012",
+      "control_id": "CTRL-ENC-008",
+      "requirement_id": "REQ-PCI-3.5.1",
+      "coverage_percentage": 88,
+      "mapping_confidence": 86,
+      "state": "Active",
+      "rationale": "Key management coverage is strong but needs PCI-specific custodian evidence.",
+      "citation": "3.5.1",
+      "requirement_title": "Encryption key management",
+      "framework_id": "PCIDSS",
+      "framework_name": "PCI DSS"
+    },
+    {
+      "id": "MAP-001",
+      "control_id": "CTRL-PAM-001",
+      "requirement_id": "REQ-SOC2-CC6.1",
+      "coverage_percentage": 94,
+      "mapping_confidence": 96,
+      "state": "Active",
+      "rationale": "PAM, MFA, and session recording strongly satisfy logical access requirements.",
+      "citation": "CC6.1",
+      "requirement_title": "Logical access security",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-015",
+      "control_id": "CTRL-TRAIN-011",
+      "requirement_id": "REQ-SOC2-CC6.1",
+      "coverage_percentage": 76,
+      "mapping_confidence": 78,
+      "state": "Active",
+      "rationale": "Training supports access responsibilities for privileged users.",
+      "citation": "CC6.1",
+      "requirement_title": "Logical access security",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-004",
+      "control_id": "CTRL-IAM-002",
+      "requirement_id": "REQ-SOC2-CC6.2",
+      "coverage_percentage": 91,
+      "mapping_confidence": 93,
+      "state": "Active",
+      "rationale": "Lifecycle reviews remove access when business need ends.",
+      "citation": "CC6.2",
+      "requirement_title": "Prior access is removed",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-014",
+      "control_id": "CTRL-ENDPOINT-010",
+      "requirement_id": "REQ-SOC2-CC7.2",
+      "coverage_percentage": 74,
+      "mapping_confidence": 81,
+      "state": "Gap",
+      "rationale": "Endpoint posture is stale on a subset of devices.",
+      "citation": "CC7.2",
+      "requirement_title": "Security monitoring",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-008",
+      "control_id": "CTRL-EVID-007",
+      "requirement_id": "REQ-SOC2-CC7.2",
+      "coverage_percentage": 88,
+      "mapping_confidence": 90,
+      "state": "Active",
+      "rationale": "Immutable evidence proves monitoring outcomes and decision traceability.",
+      "citation": "CC7.2",
+      "requirement_title": "Security monitoring",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-007",
+      "control_id": "CTRL-VULN-004",
+      "requirement_id": "REQ-SOC2-CC7.2",
+      "coverage_percentage": 70,
+      "mapping_confidence": 76,
+      "state": "Gap",
+      "rationale": "Security findings are monitored, but SLA misses are currently degraded.",
+      "citation": "CC7.2",
+      "requirement_title": "Security monitoring",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-016",
+      "control_id": "CTRL-BRANCH-012",
+      "requirement_id": "REQ-SOC2-CC8.1",
+      "coverage_percentage": 93,
+      "mapping_confidence": 94,
+      "state": "Active",
+      "rationale": "Branch protections enforce review before production change.",
+      "citation": "CC8.1",
+      "requirement_title": "Changes are authorized",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    },
+    {
+      "id": "MAP-013",
+      "control_id": "CTRL-CHANGE-009",
+      "requirement_id": "REQ-SOC2-CC8.1",
+      "coverage_percentage": 89,
+      "mapping_confidence": 92,
+      "state": "Active",
+      "rationale": "Change approvals and linked tickets satisfy change management.",
+      "citation": "CC8.1",
+      "requirement_title": "Changes are authorized",
+      "framework_id": "SOC2",
+      "framework_name": "SOC 2"
+    }
+  ],
+  "assets": [
+    {
+      "control_id": "CTRL-PAM-001",
+      "id": "AST-AWS-IAM",
+      "name": "AWS IAM",
+      "asset_type": "Cloud IAM",
+      "environment": "Production",
+      "criticality": "Mission Critical",
+      "data_classification": "Confidential",
+      "owner": "cloud-sec@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Continuous"
+    },
+    {
+      "control_id": "CTRL-VULN-004",
+      "id": "AST-SECURITY-HUB",
+      "name": "AWS Security Hub",
+      "asset_type": "Cloud Security",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Internal",
+      "owner": "platform-risk@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Daily"
+    },
+    {
+      "control_id": "CTRL-ENDPOINT-010",
+      "id": "AST-CROWDSTRIKE",
+      "name": "CrowdStrike",
+      "asset_type": "Endpoint Security",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Internal",
+      "owner": "endpoint@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Daily"
+    },
+    {
+      "control_id": "CTRL-BRANCH-012",
+      "id": "AST-GITHUB",
+      "name": "GitHub",
+      "asset_type": "Source Control",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Confidential",
+      "owner": "appsec@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Daily"
+    },
+    {
+      "control_id": "CTRL-CHANGE-009",
+      "id": "AST-JIRA",
+      "name": "Jira",
+      "asset_type": "Workflow",
+      "environment": "Production",
+      "criticality": "Medium",
+      "data_classification": "Internal",
+      "owner": "platform-ops@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Weekly"
+    },
+    {
+      "control_id": "CTRL-PAM-001",
+      "id": "AST-OKTA",
+      "name": "Okta Workforce",
+      "asset_type": "Identity",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Restricted",
+      "owner": "it-ops@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Continuous"
+    },
+    {
+      "control_id": "CTRL-IAM-002",
+      "id": "AST-OKTA",
+      "name": "Okta Workforce",
+      "asset_type": "Identity",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Restricted",
+      "owner": "it-ops@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Daily"
+    },
+    {
+      "control_id": "CTRL-EVID-007",
+      "id": "AST-S3-EVIDENCE",
+      "name": "S3 Evidence Vault",
+      "asset_type": "Evidence Store",
+      "environment": "Production",
+      "criticality": "High",
+      "data_classification": "Restricted",
+      "owner": "grc-platform@company.com",
+      "scope_status": "In Scope",
+      "testing_cadence": "Continuous"
+    }
+  ],
+  "policies": [
+    {
+      "control_id": "CTRL-IAM-002",
+      "id": "POL-IAM-SOP",
+      "title": "Access Review SOP",
+      "document_type": "SOP",
+      "owner": "it-ops@company.com",
+      "status": "Approved",
+      "approved_version": "v1.1",
+      "section_reference": "Quarterly review workflow"
+    },
+    {
+      "control_id": "CTRL-EVID-007",
+      "id": "POL-EVID-SOP",
+      "title": "Immutable Evidence Handling SOP",
+      "document_type": "SOP",
+      "owner": "grc-platform@company.com",
+      "status": "Approved",
+      "approved_version": "v1.0",
+      "section_reference": "Evidence retention rules"
+    },
+    {
+      "control_id": "CTRL-PAM-001",
+      "id": "POL-PAM-STD",
+      "title": "Privileged Access Management Standard",
+      "document_type": "Standard",
+      "owner": "sec-ops@company.com",
+      "status": "In Review",
+      "approved_version": "v0.3 draft",
+      "section_reference": "Sections 2.1-2.5"
+    },
+    {
+      "control_id": "CTRL-CHANGE-009",
+      "id": "POL-CHANGE",
+      "title": "Production Change Policy",
+      "document_type": "Policy",
+      "owner": "platform-ops@company.com",
+      "status": "Approved",
+      "approved_version": "v3.2",
+      "section_reference": "Emergency change exception"
+    },
+    {
+      "control_id": "CTRL-VULN-004",
+      "id": "POL-VULN-STD",
+      "title": "Vulnerability Management Standard",
+      "document_type": "Standard",
+      "owner": "platform-risk@company.com",
+      "status": "Approved",
+      "approved_version": "v2.0",
+      "section_reference": "Critical SLA table"
+    }
+  ],
+  "evidenceBlueprints": [
+    {
+      "id": "BP-PAM-AWS",
+      "control_id": "CTRL-PAM-001",
+      "name": "Privileged AWS console session review",
+      "source_system": "AWS CloudTrail",
+      "query_logic": "cloudtrail.events.where(role = 'admin' and mfa = true)",
+      "schedule": "Hourly",
+      "status": "Running",
+      "last_run_at": "2026-07-30T04:44:00Z",
+      "freshness_days": 0,
+      "pass_rate": 97,
+      "owner_approval_state": "Approved"
+    },
+    {
+      "id": "BP-EVID-WORM",
+      "control_id": "CTRL-EVID-007",
+      "name": "Object lock version proof",
+      "source_system": "AWS S3",
+      "query_logic": "s3.objects.where(object_lock = 'COMPLIANCE' and version_id exists)",
+      "schedule": "Daily",
+      "status": "Running",
+      "last_run_at": "2026-07-30T04:50:00Z",
+      "freshness_days": 0,
+      "pass_rate": 100,
+      "owner_approval_state": "Approved"
+    },
+    {
+      "id": "BP-VULN-SLA",
+      "control_id": "CTRL-VULN-004",
+      "name": "Critical finding SLA monitor",
+      "source_system": "AWS Security Hub",
+      "query_logic": "securityhub.findings.where(severity = 'CRITICAL' and status != 'RESOLVED')",
+      "schedule": "Daily",
+      "status": "Needs Review",
+      "last_run_at": "2026-07-29T22:09:00Z",
+      "freshness_days": 1,
+      "pass_rate": 68,
+      "owner_approval_state": "Approved"
+    },
+    {
+      "id": "BP-ENDPOINT",
+      "control_id": "CTRL-ENDPOINT-010",
+      "name": "Endpoint posture coverage",
+      "source_system": "CrowdStrike",
+      "query_logic": "crowdstrike.devices.where(agent_health = 'healthy')",
+      "schedule": "Daily",
+      "status": "Needs Review",
+      "last_run_at": "2026-06-19T18:00:00Z",
+      "freshness_days": 41,
+      "pass_rate": 74,
+      "owner_approval_state": "Pending"
+    },
+    {
+      "id": "BP-GITHUB-BRANCH",
+      "control_id": "CTRL-BRANCH-012",
+      "name": "Production branch protection",
+      "source_system": "GitHub",
+      "query_logic": "github.repos.where(branch = 'main' and protection.required_reviews >= 1)",
+      "schedule": "Daily",
+      "status": "Running",
+      "last_run_at": "2026-07-30T04:11:00Z",
+      "freshness_days": 0,
+      "pass_rate": 98,
+      "owner_approval_state": "Approved"
+    },
+    {
+      "id": "BP-PAM-MFA",
+      "control_id": "CTRL-PAM-001",
+      "name": "Admin MFA enforcement",
+      "source_system": "Okta",
+      "query_logic": "okta.admins.where(mfa_enrolled = true)",
+      "schedule": "Hourly",
+      "status": "Running",
+      "last_run_at": "2026-07-30T04:58:00Z",
+      "freshness_days": 0,
+      "pass_rate": 99,
+      "owner_approval_state": "Approved"
+    }
+  ],
+  "evidenceItems": [
+    {
+      "id": "EV-OKTA-MFA-112",
+      "blueprint_id": "BP-PAM-MFA",
+      "control_id": "CTRL-PAM-001",
+      "name": "Okta admin MFA coverage",
+      "source_system": "Okta",
+      "verdict": "Implemented",
+      "collected_at": "2026-07-30T04:58:00Z",
+      "valid_until": "2026-10-28",
+      "hash": "sha256:b9a4a145a811f0d0",
+      "storage_uri": "s3://evidence/prod/okta/mfa-112.json?versionId=8d2c"
+    },
+    {
+      "id": "EV-S3-WORM-812",
+      "blueprint_id": "BP-EVID-WORM",
+      "control_id": "CTRL-EVID-007",
+      "name": "Object locked evidence sample",
+      "source_system": "AWS S3",
+      "verdict": "Implemented",
+      "collected_at": "2026-07-30T04:50:00Z",
+      "valid_until": "2027-07-30",
+      "hash": "sha256:5537e77fb201eb1d",
+      "storage_uri": "s3://evidence/prod/worm/sample-812.json?versionId=1ac7"
+    },
+    {
+      "id": "EV-SHUB-FINDING-991",
+      "blueprint_id": "BP-VULN-SLA",
+      "control_id": "CTRL-VULN-004",
+      "name": "Critical public workload finding",
+      "source_system": "AWS Security Hub",
+      "verdict": "Degraded",
+      "collected_at": "2026-07-29T22:09:00Z",
+      "valid_until": "2026-08-05",
+      "hash": "sha256:a044c9258bbf120e",
+      "storage_uri": "s3://evidence/prod/vuln/securityhub-991.json?versionId=9ac2"
+    },
+    {
+      "id": "EV-PAM-LOGIN-774",
+      "blueprint_id": "BP-PAM-AWS",
+      "control_id": "CTRL-PAM-001",
+      "name": "Privileged console login with MFA",
+      "source_system": "AWS CloudTrail",
+      "verdict": "Implemented",
+      "collected_at": "2026-07-29T21:44:00Z",
+      "valid_until": "2026-10-27",
+      "hash": "sha256:8fd9d1b1c0a49e27",
+      "storage_uri": "s3://evidence/prod/pam/cloudtrail-774.json?versionId=4f9a"
+    },
+    {
+      "id": "EV-CS-POSTURE-331",
+      "blueprint_id": "BP-ENDPOINT",
+      "control_id": "CTRL-ENDPOINT-010",
+      "name": "Endpoint posture export",
+      "source_system": "CrowdStrike",
+      "verdict": "Degraded",
+      "collected_at": "2026-06-19T18:00:00Z",
+      "valid_until": "2026-07-20",
+      "hash": "sha256:f1f7b7e2c9a1dd31",
+      "storage_uri": "s3://evidence/prod/endpoint/posture-331.json?versionId=6ca1"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "REL-006",
+      "from_control_id": "CTRL-CHANGE-009",
+      "to_entity_id": "POL-CHANGE",
+      "to_entity_type": "Policy",
+      "relationship_type": "GOVERNS",
+      "state": "Active",
+      "confidence": 90,
+      "narrative": "Production Change Policy defines approval and exception handling."
+    },
+    {
+      "id": "REL-001",
+      "from_control_id": "CTRL-PAM-001",
+      "to_entity_id": "AST-AWS-IAM",
+      "to_entity_type": "Asset",
+      "relationship_type": "IMPLEMENTED_ON",
+      "state": "Active",
+      "confidence": 99,
+      "narrative": "AWS IAM roles require MFA and session recording for privileged access."
+    },
+    {
+      "id": "REL-005",
+      "from_control_id": "CTRL-ENDPOINT-010",
+      "to_entity_id": "EV-CS-POSTURE-331",
+      "to_entity_type": "Evidence",
+      "relationship_type": "PROVED_BY",
+      "state": "Active",
+      "confidence": 74,
+      "narrative": "CrowdStrike evidence is stale and requires refresh."
+    },
+    {
+      "id": "REL-003",
+      "from_control_id": "CTRL-PAM-001",
+      "to_entity_id": "EV-PAM-LOGIN-774",
+      "to_entity_type": "Evidence",
+      "relationship_type": "PROVED_BY",
+      "state": "Active",
+      "confidence": 96,
+      "narrative": "CloudTrail event shows successful MFA for privileged console session."
+    },
+    {
+      "id": "REL-002",
+      "from_control_id": "CTRL-PAM-001",
+      "to_entity_id": "REQ-NIST-PR.AA-01",
+      "to_entity_type": "Requirement",
+      "relationship_type": "SATISFIES",
+      "state": "Active",
+      "confidence": 94,
+      "narrative": "PAM and SSO controls satisfy identity and credential management."
+    },
+    {
+      "id": "REL-004",
+      "from_control_id": "CTRL-VULN-004",
+      "to_entity_id": "REQ-ISO-A.8.8",
+      "to_entity_type": "Requirement",
+      "relationship_type": "SATISFIES",
+      "state": "Pending Approval",
+      "confidence": 82,
+      "narrative": "Vulnerability remediation covers most technical vulnerability obligations."
+    }
+  ],
+  "programWorkbench": {
+    "projects": [
+      {
+        "id": "PRG-TPRM-REFRESH",
+        "tenant_id": "tenant-acme-us",
+        "name": "Tier 1 Vendor Refresh",
+        "owner": "vendor-risk@company.com",
+        "frameworks": "NIST CSF, GDPR",
+        "scoped_controls": 18,
+        "evidence_ready_percentage": 61,
+        "auditor_collaboration": "Questionnaires staged; two vendors blocked",
+        "status": "Blocked"
+      },
+      {
+        "id": "PRG-SOC2-2026",
+        "tenant_id": "tenant-acme-us",
+        "name": "SOC 2 Type II 2026",
+        "owner": "grc-platform@company.com",
+        "frameworks": "SOC 2, ISO 27001",
+        "scoped_controls": 42,
+        "evidence_ready_percentage": 83,
+        "auditor_collaboration": "Auditor workspace ready for read-only package review",
+        "status": "In Progress"
+      },
+      {
+        "id": "PRG-AI-GOV",
+        "tenant_id": "tenant-acme-us",
+        "name": "AI Governance Pilot",
+        "owner": "privacy-risk@company.com",
+        "frameworks": "ISO 42001, NIST AI RMF",
+        "scoped_controls": 12,
+        "evidence_ready_percentage": 48,
+        "auditor_collaboration": "Internal readiness review before external audit",
+        "status": "Planning"
+      }
+    ],
+    "frameworkImports": [
+      {
+        "id": "IMP-OPENGRC-NISTCSF",
+        "source_tool": "OpenGRC",
+        "framework_name": "NIST CSF",
+        "framework_version": "2.0",
+        "mapped_framework_id": "NISTCSF",
+        "requirement_total": 220,
+        "candidate_controls": 36,
+        "validation_state": "Imported",
+        "next_step": "Compare imported requirements against active control mappings."
+      },
+      {
+        "id": "IMP-GAPPS-CMMC",
+        "source_tool": "Gapps",
+        "framework_name": "CMMC",
+        "framework_version": "2.0",
+        "mapped_framework_id": null,
+        "requirement_total": 320,
+        "candidate_controls": 18,
+        "validation_state": "Needs Review",
+        "next_step": "Create framework shell, normalize domains, and dedupe common controls."
+      },
+      {
+        "id": "IMP-GRCENG-HARDENING",
+        "source_tool": "GRC Engineering",
+        "framework_name": "Integration hardening guides",
+        "framework_version": "2026",
+        "mapped_framework_id": null,
+        "requirement_total": 116,
+        "candidate_controls": 21,
+        "validation_state": "Needs Review",
+        "next_step": "Convert guide steps into first-party SaaS control implementation tasks."
+      },
+      {
+        "id": "IMP-ERAMBA-GDPR",
+        "source_tool": "Eramba",
+        "framework_name": "GDPR privacy controls",
+        "framework_version": "EU",
+        "mapped_framework_id": "GDPR",
+        "requirement_total": 120,
+        "candidate_controls": 14,
+        "validation_state": "Ready",
+        "next_step": "Map data privacy obligations to policies, vendors, and assets."
+      },
+      {
+        "id": "IMP-CISO-ISO42001",
+        "source_tool": "CISO Assistant",
+        "framework_name": "ISO 42001",
+        "framework_version": "2023",
+        "mapped_framework_id": "ISO42001",
+        "requirement_total": 90,
+        "candidate_controls": 24,
+        "validation_state": "Ready",
+        "next_step": "Preview mapping candidates and route low-confidence edges to approval."
+      }
+    ],
+    "assessmentRuns": [
+      {
+        "id": "ASM-SOC2-EVIDENCE",
+        "project_id": "PRG-SOC2-2026",
+        "name": "SOC 2 evidence freeze",
+        "assessment_type": "External audit",
+        "framework_id": "SOC2",
+        "scoped_controls": 42,
+        "findings_open": 6,
+        "report_state": "Evidence Collection",
+        "owner": "audit-readiness@company.com"
+      },
+      {
+        "id": "ASM-AI-GOV-GAP",
+        "project_id": "PRG-AI-GOV",
+        "name": "AI governance gap assessment",
+        "assessment_type": "Internal assessment",
+        "framework_id": "ISO42001",
+        "scoped_controls": 12,
+        "findings_open": 9,
+        "report_state": "Planning",
+        "owner": "privacy-risk@company.com"
+      },
+      {
+        "id": "ASM-VENDOR-Q3",
+        "project_id": "PRG-TPRM-REFRESH",
+        "name": "Quarterly Tier 1 reassessment",
+        "assessment_type": "Vendor assessment",
+        "framework_id": "NISTCSF",
+        "scoped_controls": 18,
+        "findings_open": 4,
+        "report_state": "Review",
+        "owner": "vendor-risk@company.com"
+      }
+    ],
+    "accountReviews": [
+      {
+        "id": "AR-OKTA-Q3",
+        "source_system": "Okta Workforce",
+        "control_id": "CTRL-IAM-002",
+        "reviewer": "it-ops@company.com",
+        "accounts_in_scope": 412,
+        "overdue_count": 7,
+        "review_cadence": "Quarterly",
+        "status": "Needs Review"
+      },
+      {
+        "id": "AR-GITHUB-MAINTAINERS",
+        "source_system": "GitHub",
+        "control_id": "CTRL-BRANCH-012",
+        "reviewer": "appsec@company.com",
+        "accounts_in_scope": 63,
+        "overdue_count": 3,
+        "review_cadence": "Monthly",
+        "status": "Needs Review"
+      },
+      {
+        "id": "AR-AWS-ADMINS",
+        "source_system": "AWS IAM",
+        "control_id": "CTRL-PAM-001",
+        "reviewer": "sec-ops@company.com",
+        "accounts_in_scope": 28,
+        "overdue_count": 0,
+        "review_cadence": "Monthly",
+        "status": "Running"
+      }
+    ],
+    "vendorQuestionnaires": [
+      {
+        "id": "VQ-SCAN-CO",
+        "vendor_name": "ScanCo VM",
+        "control_id": "CTRL-VULN-004",
+        "questionnaire_type": "Vulnerability data processing review",
+        "due_date": "2026-08-11",
+        "response_state": "Blocked",
+        "relied_upon_controls": "CTRL-VULN-004",
+        "risk_signal": "API scope missing container registry findings."
+      },
+      {
+        "id": "VQ-ACME-PAY",
+        "vendor_name": "Acme Payments",
+        "control_id": "CTRL-TPRM-002",
+        "questionnaire_type": "SOC 2 bridge letter and SIG-lite",
+        "due_date": "2026-08-20",
+        "response_state": "In Review",
+        "relied_upon_controls": "CTRL-TPRM-002, CTRL-EVID-007",
+        "risk_signal": "Bridge letter expires in 21 days."
+      },
+      {
+        "id": "VQ-CLOUD-ID",
+        "vendor_name": "Cloud Identity Labs",
+        "control_id": "CTRL-PAM-001",
+        "questionnaire_type": "Identity provider annual review",
+        "due_date": "2026-09-03",
+        "response_state": "Complete",
+        "relied_upon_controls": "CTRL-PAM-001, CTRL-IAM-002",
+        "risk_signal": "No material exceptions in latest assessment."
+      }
+    ],
+    "hardeningGuides": [
+      {
+        "id": "HG-GITHUB-APP",
+        "platform": "GitHub",
+        "control_id": "CTRL-BRANCH-012",
+        "guide_source": "GRC Engineering hardening backlog",
+        "hardening_focus": "Review GitHub App permissions, branch protection, and admin bypass controls.",
+        "priority": "P0",
+        "implementation_state": "In Progress",
+        "first_party_control": "Repository protection and app governance"
+      },
+      {
+        "id": "HG-SALESFORCE-OAUTH",
+        "platform": "Salesforce",
+        "control_id": "CTRL-TPRM-002",
+        "guide_source": "GRC Engineering how-to-harden",
+        "hardening_focus": "Restrict OAuth token abuse through IP allow-listing and app scope review.",
+        "priority": "P0",
+        "implementation_state": "Backlog",
+        "first_party_control": "First-party SaaS integration restrictions"
+      },
+      {
+        "id": "HG-OKTA-ADMIN",
+        "platform": "Okta",
+        "control_id": "CTRL-PAM-001",
+        "guide_source": "GRC Engineering hardening backlog",
+        "hardening_focus": "Reduce privileged identity blast radius through admin role hygiene.",
+        "priority": "P1",
+        "implementation_state": "Ready",
+        "first_party_control": "Privileged identity hardening"
+      },
+      {
+        "id": "HG-NTH-PARTY",
+        "platform": "Vendor Trust Portal",
+        "control_id": "CTRL-TPRM-002",
+        "guide_source": "GRC Engineering nth-party discovery",
+        "hardening_focus": "Track subprocessor and fourth-party signals against Tier 1 vendor records.",
+        "priority": "P1",
+        "implementation_state": "Backlog",
+        "first_party_control": "Nth-party dependency visibility"
+      }
+    ]
+  }
+}

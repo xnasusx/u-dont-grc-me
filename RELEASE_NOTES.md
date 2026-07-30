@@ -1,5 +1,28 @@
 # Release Notes
 
+## Version 0.6.0
+
+This release removes the CloudFront seeded-data limitation for Governance by adding a hosted AWS API.
+
+### Highlights
+
+- CloudFront now calls a hosted Lambda Function URL for Governance data.
+- DynamoDB stores the Governance snapshot used by the hosted API.
+- Public hosted writes are disabled until authenticated mutation workflows are implemented.
+- The garden logo no longer renders with a black CSS background.
+- Risk now includes a CRQ workbench with histogram, loss exceedance, calibration, data-vetting, and SME elicitation views inspired by Heatmaps-to-Histograms materials.
+
+### Hosted API
+
+- Function URL: https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws
+- DynamoDB table: `u-dont-grc-me-governance`
+- Lambda function: `u-dont-grc-me-governance-api`
+
+### Still Pending
+
+- Authentication, tenant isolation, write authorization, mutation audit logging, and real evidence storage must be added before real GRC data is stored.
+- NotebookLM notebook URLs were not readable through public web fetch or the connected Google Drive tool; export/share the underlying source docs to incorporate those notes directly.
+
 ## Version 0.4.1
 
 This release adds a GitHub Pages static mirror while preserving the existing AWS CloudFront deployment.

@@ -309,6 +309,84 @@ export interface GovernanceRelationship {
   narrative: string;
 }
 
+export interface ProgramProject {
+  id: string;
+  tenant_id: string;
+  name: string;
+  owner: string;
+  frameworks: string;
+  scoped_controls: number;
+  evidence_ready_percentage: number;
+  auditor_collaboration: string;
+  status: "Planning" | "In Progress" | "Ready" | "Blocked";
+}
+
+export interface FrameworkImport {
+  id: string;
+  source_tool: string;
+  framework_name: string;
+  framework_version: string;
+  mapped_framework_id: string | null;
+  requirement_total: number;
+  candidate_controls: number;
+  validation_state: "Ready" | "Needs Review" | "Blocked" | "Imported";
+  next_step: string;
+}
+
+export interface AssessmentRun {
+  id: string;
+  project_id: string;
+  name: string;
+  assessment_type: string;
+  framework_id: string | null;
+  scoped_controls: number;
+  findings_open: number;
+  report_state: "Planning" | "Evidence Collection" | "Review" | "Ready";
+  owner: string;
+}
+
+export interface AccountReview {
+  id: string;
+  source_system: string;
+  control_id: string;
+  reviewer: string;
+  accounts_in_scope: number;
+  overdue_count: number;
+  review_cadence: string;
+  status: "Running" | "Needs Review" | "Ready" | "Blocked";
+}
+
+export interface VendorQuestionnaire {
+  id: string;
+  vendor_name: string;
+  control_id: string;
+  questionnaire_type: string;
+  due_date: string;
+  response_state: "Draft" | "Sent" | "In Review" | "Blocked" | "Complete";
+  relied_upon_controls: string;
+  risk_signal: string;
+}
+
+export interface HardeningGuide {
+  id: string;
+  platform: string;
+  control_id: string;
+  guide_source: string;
+  hardening_focus: string;
+  priority: "P0" | "P1" | "P2";
+  implementation_state: "Backlog" | "In Progress" | "Ready" | "Blocked";
+  first_party_control: string;
+}
+
+export interface ProgramWorkbench {
+  projects: ProgramProject[];
+  frameworkImports: FrameworkImport[];
+  assessmentRuns: AssessmentRun[];
+  accountReviews: AccountReview[];
+  vendorQuestionnaires: VendorQuestionnaire[];
+  hardeningGuides: HardeningGuide[];
+}
+
 export interface GovernanceSnapshot {
   stats: {
     controls: number;
@@ -329,6 +407,7 @@ export interface GovernanceSnapshot {
   evidenceBlueprints: EvidenceBlueprint[];
   evidenceItems: GovernanceEvidenceItem[];
   relationships: GovernanceRelationship[];
+  programWorkbench: ProgramWorkbench;
 }
 
 export interface AuditEvent {

@@ -9,7 +9,7 @@
 - **Command Center**: Use this for program oversight. Review risk metrics, filter the program, save dashboard views, create charts, and run Monte Carlo scenarios.
 - **Governance**: Use this to manage the control inventory, framework mappings, evidence health, graph path context, policies, assets, and control-grounded documentation.
 - **Compliance**: Use this to prepare audit packages, approve AI-proposed mappings, and validate evidence.
-- **Risk**: Use this to manage risk scenarios and calculate FAIR-style exposure.
+- **Risk**: Use this to manage risk scenarios and calculate FAIR-style exposure with percentile, histogram, exceedance, calibration, and data-quality views.
 - **Admin**: Use this for integrations, knowledge answers, vendor risk, remediation, RBAC, AI agent boundaries, and mutation audit logs.
 
 ## Common Workflows
@@ -62,7 +62,8 @@
 2. Select a risk scenario from the register.
 3. Adjust loss magnitude, control strength, and uncertainty in the FAIR lab.
 4. Review the P10, P50, and P90 exposure outputs.
+5. Use the CRQ workbench to review the loss histogram, loss exceedance thresholds, data-vetting checklist, calibration anchors, and SME chip-and-bin elicitation.
 
 ## Prototype Boundary
 
-This version uses browser-local persistence. It is suitable for product validation, not production GRC operations.
+This version uses hosted read-only Governance data plus browser-local persistence for simulated workflow actions. It is suitable for product validation, not production GRC operations.

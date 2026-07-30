@@ -18,6 +18,12 @@ The full local mode starts:
 
 For static UI-only work, run `npm run dev -- --port 5173`.
 
+To package the hosted API Lambda:
+
+```powershell
+npm run package:lambda
+```
+
 ## Hosted Prototype
 
 AWS CloudFront:
@@ -32,6 +38,12 @@ CloudFront origin bucket is intentionally private/blocked:
 
 http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
 
+Hosted Governance API:
+
+https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws
+
+The hosted API is backed by DynamoDB for the Governance snapshot and is read-only from the public app until authenticated mutation workflows are added.
+
 ## Build
 
 ```powershell
@@ -43,9 +55,9 @@ GitHub Pages builds set `GITHUB_PAGES=true` so Vite emits assets under `/u-dont-
 ## Current Product Slice
 
 - Command Center: executive metrics, global filters, saved dashboard views, chart creation, and Monte Carlo scenario simulation.
-- Governance: SQLite-backed control inventory, module tabs, control detail, framework mapping matrix, evidence health, blueprint library, policy traceability, asset scope, graph data model rules, and control-adjacent graph view.
+- Governance: API-backed control inventory, module tabs, control detail, framework mapping matrix, evidence health, blueprint library, policy traceability, asset scope, graph data model rules, and control-adjacent graph view.
 - Compliance: audit readiness, audit package assembly, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
-- Risk: risk register, control-linked scenarios, FAIR calculator, and percentile exposure outputs.
+- Risk: risk register, control-linked scenarios, FAIR calculator, Monte Carlo histogram, loss exceedance view, calibration anchors, data-vetting checklist, and percentile exposure outputs.
 - Admin: integrations, knowledge system, third-party risk, remediation playbooks, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
 
 ## Implementation Plan
@@ -54,9 +66,9 @@ The GitHub source of truth for the implementation plan is `docs/IMPLEMENTATION_P
 
 ## Local persistence
 
-The app now has two local state paths:
+The app now has local and hosted state paths:
 
-- Governance inventory and mappings can load from the SQLite-backed API in `server/`.
+- Governance inventory and mappings load from the hosted Lambda/DynamoDB API on CloudFront and from the SQLite-backed API in local `dev:full` mode.
 - Other prototype actions still use `localStorage` through `src/store.ts` as an API-shaped state layer.
 
 Modeled operations:
@@ -73,8 +85,11 @@ The local backend uses Node's built-in SQLite driver:
 - `server/schema.sql`: relational data model for controls, frameworks, requirements, mappings, assets, policies, evidence blueprints, evidence items, and graph relationships.
 - `server/database.js`: initialization, seed data, parameterized reads/writes.
 - `server/api.js`: local HTTP API with `/api/health`, `/api/governance`, `/api/controls/:id`, and `POST /api/controls`.
+- `server/lambda.js`: hosted read-only Lambda API for `/api/health` and `/api/governance`.
+- `server/governance-seed-snapshot.json`: generated seed snapshot stored in DynamoDB on first hosted read.
+- `scripts/package-lambda.ps1`: reproducible Lambda package build.
 
-The next production step is replacing remaining `src/store.ts` operations with service calls and hosting the API:
+The next production step is replacing remaining `src/store.ts` operations with authenticated service calls:
 
 - Graph database API for controls, nodes, edges, mappings, and control health.
 - Evidence API with object-locked storage references and version IDs.

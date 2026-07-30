@@ -59,6 +59,7 @@ import type {
   Integration,
   KnowledgeAnswer,
   PolicyArtifact,
+  ProgramWorkbench,
   RbacGrant,
   RemediationItem,
   Vendor,
@@ -66,7 +67,7 @@ import type {
 import { aggregateAle, formatCurrency, healthScore, seededMonteCarlo, statusClass } from "./utils";
 
 type View = "command" | "governance" | "compliance" | "risk" | "admin";
-type GovernanceTab = "inventory" | "mappings" | "evidence" | "policies" | "assets" | "graph";
+type GovernanceTab = "inventory" | "program" | "mappings" | "evidence" | "policies" | "assets" | "graph";
 
 const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "command", label: "Command Center", icon: LayoutDashboard },
@@ -86,7 +87,7 @@ function App() {
   const [ownerFilter, setOwnerFilter] = useState("All owners");
   const [persona, setPersona] = useState("GRC Analyst");
   const [governanceSnapshot, setGovernanceSnapshot] = useState<GovernanceSnapshot | null>(null);
-  const [governanceSource, setGovernanceSource] = useState<"SQLite API" | "Seeded fallback">("Seeded fallback");
+  const [governanceSource, setGovernanceSource] = useState<"Governance API" | "Seeded fallback">("Seeded fallback");
 
   const selectedControl = state.controls.find((control) => control.id === selectedControlId) ?? state.controls[0];
   const governanceInventory = governanceSnapshot ?? buildGovernanceFallback(state);
@@ -106,7 +107,7 @@ function App() {
       .then((snapshot) => {
         if (snapshot) {
           setGovernanceSnapshot(snapshot);
-          setGovernanceSource("SQLite API");
+          setGovernanceSource("Governance API");
         }
       })
       .catch(() => {
@@ -372,7 +373,7 @@ function GovernanceSummary({
 }: {
   selectedControl: GovernanceControl;
   inventory: GovernanceSnapshot;
-  source: "SQLite API" | "Seeded fallback";
+  source: "Governance API" | "Seeded fallback";
 }) {
   return (
     <section className="metric-grid">
@@ -387,6 +388,7 @@ function GovernanceSummary({
 function GovernanceTabs({ activeTab, setActiveTab }: { activeTab: GovernanceTab; setActiveTab: (tab: GovernanceTab) => void }) {
   const tabs: { id: GovernanceTab; label: string; icon: typeof Activity }[] = [
     { id: "inventory", label: "Control Inventory", icon: TableProperties },
+    { id: "program", label: "Program Workbench", icon: ClipboardCheck },
     { id: "mappings", label: "Mappings", icon: GitBranch },
     { id: "evidence", label: "Evidence Health", icon: Gauge },
     { id: "policies", label: "Policies", icon: FileText },
@@ -708,6 +710,186 @@ function AssetsTab({ control }: { control: GovernanceControl }) {
   );
 }
 
+function ProgramWorkbenchTab({ workbench }: { workbench: ProgramWorkbench }) {
+  const totalEvidenceReady = Math.round(
+    workbench.projects.reduce((sum, project) => sum + project.evidence_ready_percentage, 0) / Math.max(1, workbench.projects.length),
+  );
+  const readyImports = workbench.frameworkImports.filter((item) => item.validation_state === "Ready" || item.validation_state === "Imported").length;
+  const overdueReviews = workbench.accountReviews.reduce((sum, review) => sum + review.overdue_count, 0);
+  const p0Hardening = workbench.hardeningGuides.filter((guide) => guide.priority === "P0").length;
+
+  return (
+    <section className="view-stack">
+      <section className="metric-grid">
+        <Metric label="Program projects" value={String(workbench.projects.length)} detail={`${totalEvidenceReady}% average evidence readiness across active scopes.`} icon={ClipboardCheck} />
+        <Metric label="Framework intake" value={`${readyImports}/${workbench.frameworkImports.length}`} detail="Imports ready for mapping review or already loaded." icon={FileSearch} />
+        <Metric label="Account reviews" value={String(overdueReviews)} detail="Overdue access review items across source systems." icon={UserCheck} />
+        <Metric label="Hardening backlog" value={`${p0Hardening} P0`} detail="First-party integration controls from GRC Engineering patterns." icon={ShieldCheck} />
+      </section>
+
+      <section className="program-grid">
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Gapps pattern</p>
+              <h2>Program Projects</h2>
+            </div>
+            <ClipboardCheck size={19} />
+          </div>
+          <div className="artifact-grid">
+            {workbench.projects.map((project) => (
+              <div className="artifact-card" key={project.id}>
+                <div>
+                  <strong>{project.name}</strong>
+                  <span>{project.frameworks} / {project.scoped_controls} controls</span>
+                </div>
+                <StatusPill status={project.status} />
+                <p>{project.evidence_ready_percentage}% evidence ready. {project.auditor_collaboration}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">CISO Assistant and OpenGRC pattern</p>
+              <h2>Framework Import Queue</h2>
+            </div>
+            <FileSearch size={19} />
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Framework</th>
+                  <th>Requirements</th>
+                  <th>Candidates</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workbench.frameworkImports.map((item) => (
+                  <tr key={item.id}>
+                    <td><strong>{item.source_tool}</strong></td>
+                    <td>
+                      {item.framework_name}
+                      <span>{item.framework_version}</span>
+                    </td>
+                    <td>{item.requirement_total}</td>
+                    <td>{item.candidate_controls}</td>
+                    <td>
+                      <StatusPill status={item.validation_state} />
+                      <span>{item.next_step}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section className="program-grid">
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Eramba and OpenGRC pattern</p>
+              <h2>Assessments and Account Reviews</h2>
+            </div>
+            <UserCheck size={19} />
+          </div>
+          <div className="split-table-grid">
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Assessment</th>
+                    <th>Scope</th>
+                    <th>Findings</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workbench.assessmentRuns.map((run) => (
+                    <tr key={run.id}>
+                      <td>
+                        <strong>{run.name}</strong>
+                        <span>{run.assessment_type} / {run.owner}</span>
+                      </td>
+                      <td>{run.scoped_controls} controls</td>
+                      <td>{run.findings_open}</td>
+                      <td><StatusPill status={run.report_state} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Source System</th>
+                    <th>Control</th>
+                    <th>Accounts</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workbench.accountReviews.map((review) => (
+                    <tr key={review.id}>
+                      <td>
+                        <strong>{review.source_system}</strong>
+                        <span>{review.review_cadence} / {review.reviewer}</span>
+                      </td>
+                      <td>{review.control_id}</td>
+                      <td>{review.accounts_in_scope} / {review.overdue_count} overdue</td>
+                      <td><StatusPill status={review.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">TPRM and hardening pattern</p>
+              <h2>Questionnaires and Integration Guides</h2>
+            </div>
+            <Boxes size={19} />
+          </div>
+          <div className="artifact-grid">
+            {workbench.vendorQuestionnaires.map((questionnaire) => (
+              <div className="artifact-card" key={questionnaire.id}>
+                <div>
+                  <strong>{questionnaire.vendor_name}</strong>
+                  <span>{questionnaire.questionnaire_type} / due {questionnaire.due_date}</span>
+                </div>
+                <StatusPill status={questionnaire.response_state} />
+                <p>{questionnaire.risk_signal} Relied-upon controls: {questionnaire.relied_upon_controls}.</p>
+              </div>
+            ))}
+            {workbench.hardeningGuides.map((guide) => (
+              <div className="artifact-card" key={guide.id}>
+                <div>
+                  <strong>{guide.platform}</strong>
+                  <span>{guide.priority} / {guide.control_id}</span>
+                </div>
+                <StatusPill status={guide.implementation_state} />
+                <p>{guide.hardening_focus} Control: {guide.first_party_control}.</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    </section>
+  );
+}
+
 function GovernanceGraphTab({
   selectedControlId,
   graphNodes,
@@ -996,7 +1178,7 @@ function GovernanceView({
   frameworkRequirements: FrameworkRequirement[];
   policyArtifacts: PolicyArtifact[];
   governanceInventory: GovernanceSnapshot;
-  governanceSource: "SQLite API" | "Seeded fallback";
+  governanceSource: "Governance API" | "Seeded fallback";
   selectedControlId: string;
   setSelectedControlId: (id: string) => void;
 }) {
@@ -1026,6 +1208,7 @@ function GovernanceView({
           <ControlRecordPanel control={selectedInventoryControl} />
         </section>
       )}
+      {activeTab === "program" && <ProgramWorkbenchTab workbench={governanceInventory.programWorkbench} />}
       {activeTab === "mappings" && (
         <section className="governance-tab-layout">
           <MappingMatrixTab inventory={governanceInventory} selectedControlId={selectedInventoryControl.id} />
@@ -1513,34 +1696,134 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
   const simulation = seededMonteCarlo(baseLoss, strength, volatility);
 
   return (
-    <section className="risk-layout">
-      <section className="panel">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">FAIR integration</p>
-            <h2>Monte Carlo scenario lab</h2>
+    <>
+      <section className="risk-layout">
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">FAIR integration</p>
+              <h2>Monte Carlo scenario lab</h2>
+            </div>
+            <SlidersHorizontal size={19} />
           </div>
-          <SlidersHorizontal size={19} />
-        </div>
-        <p className="description">Tune loss magnitude, control strength, and uncertainty to see how degraded controls change annualized exposure.</p>
-        <Range label="Probable loss magnitude" min={100000} max={9000000} step={100000} value={baseLoss} display={formatCurrency(baseLoss)} onChange={setBaseLoss} />
-        <Range label="Control strength" min={10} max={100} step={1} value={strength} display={`${strength}%`} onChange={setStrength} />
-        <Range label="Uncertainty" min={0.25} max={2.5} step={0.05} value={volatility} display={`${volatility.toFixed(2)}x`} onChange={setVolatility} />
-      </section>
+          <p className="description">Tune loss magnitude, control strength, and uncertainty to see how degraded controls change annualized exposure.</p>
+          <Range label="Probable loss magnitude" min={100000} max={9000000} step={100000} value={baseLoss} display={formatCurrency(baseLoss)} onChange={setBaseLoss} />
+          <Range label="Control strength" min={10} max={100} step={1} value={strength} display={`${strength}%`} onChange={setStrength} />
+          <Range label="Uncertainty" min={0.25} max={2.5} step={0.05} value={volatility} display={`${volatility.toFixed(2)}x`} onChange={setVolatility} />
+        </section>
 
-      <section className="panel">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Annualized loss exposure</p>
-            <h2>{selectedControl.name}</h2>
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Annualized loss exposure</p>
+              <h2>{selectedControl.name}</h2>
+            </div>
+          </div>
+          <div className="percentile-grid">
+            <Metric label="P10 low case" value={formatCurrency(simulation.p10)} detail="10% of simulated outcomes fall below this." icon={CircleDollarSign} />
+            <Metric label="P50 most likely" value={formatCurrency(simulation.p50)} detail="Median simulated annualized loss." icon={Activity} />
+            <Metric label="P90 board case" value={formatCurrency(simulation.p90)} detail="Risk appetite comparison point." icon={AlertTriangle} />
+          </div>
+        </section>
+      </section>
+      <CrqDecisionSupport selectedControl={selectedControl} simulation={simulation} />
+    </>
+  );
+}
+
+function CrqDecisionSupport({
+  selectedControl,
+  simulation,
+}: {
+  selectedControl: Control;
+  simulation: ReturnType<typeof seededMonteCarlo>;
+}) {
+  const topBin = Math.max(...simulation.histogram.map((bin) => bin.count), 1);
+  const calibration = [
+    { word: "Possible", range: "10-30%", action: "Use when evidence is thin; widen the range." },
+    { word: "Likely", range: "55-75%", action: "Ask which observed base rate supports it." },
+    { word: "Almost certain", range: "85-95%", action: "Require internal data or strong external analogs." },
+  ];
+  const dataChecks = [
+    "Internal incidents, tickets, and control failures",
+    "External loss and threat frequency analogs",
+    "SME range with low / most likely / high estimates",
+    "Documented confidence and bias adjustment",
+  ];
+
+  return (
+    <section className="panel crq-panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">CRQ workbench</p>
+          <h2>From Heatmaps to Histograms</h2>
+        </div>
+        <BarChart3 size={19} />
+      </div>
+      <p className="description">
+        Convert {selectedControl.name.toLowerCase()} from color-coded risk language into distributions, exceedance statements, and explicit data-quality checks.
+      </p>
+      <div className="crq-grid">
+        <div>
+          <h3>Loss histogram</h3>
+          <div className="histogram" aria-label="Monte Carlo loss histogram">
+            {simulation.histogram.map((bin) => (
+              <div className="histogram-bin" key={`${bin.lower}-${bin.upper}`}>
+                <div style={{ height: `${Math.max(8, (bin.count / topBin) * 100)}%` }} title={`${bin.percentage}% between ${formatCurrency(bin.lower)} and ${formatCurrency(bin.upper)}`} />
+              </div>
+            ))}
+          </div>
+          <div className="chart-caption">
+            <span>{formatCurrency(0)}</span>
+            <span>{formatCurrency(simulation.histogram.at(-1)?.upper ?? 0)}</span>
           </div>
         </div>
-        <div className="percentile-grid">
-          <Metric label="P10 low case" value={formatCurrency(simulation.p10)} detail="10% of simulated outcomes fall below this." icon={CircleDollarSign} />
-          <Metric label="P50 most likely" value={formatCurrency(simulation.p50)} detail="Median simulated annualized loss." icon={Activity} />
-          <Metric label="P90 board case" value={formatCurrency(simulation.p90)} detail="Risk appetite comparison point." icon={AlertTriangle} />
+        <div>
+          <h3>Loss exceedance</h3>
+          <div className="exceedance-list">
+            {simulation.exceedance.map((point) => (
+              <div className="signal" key={point.probability}>
+                <span>{Math.round(point.probability * 100)}% chance loss exceeds</span>
+                <strong>{formatCurrency(point.loss)}</strong>
+              </div>
+            ))}
+          </div>
         </div>
-      </section>
+        <div>
+          <h3>Data vetting</h3>
+          <div className="check-list">
+            {dataChecks.map((item) => (
+              <span key={item}>
+                <Check size={15} />
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3>Calibration anchors</h3>
+          <div className="calibration-list">
+            {calibration.map((item) => (
+              <div key={item.word}>
+                <strong>{item.word}</strong>
+                <span>{item.range}</span>
+                <p>{item.action}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="wide-crq">
+          <h3>SME chip-and-bin elicitation</h3>
+          <div className="chip-bins">
+            {["0-1 events", "2-4 events", "5-8 events", "9+ events"].map((label, index) => (
+              <div className="chip-bin" key={label}>
+                <span>{label}</span>
+                <strong>{[18, 42, 28, 12][index]} chips</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

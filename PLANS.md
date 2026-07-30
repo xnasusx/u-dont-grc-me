@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 02:46 ET
+Last updated: 2026-07-30 03:34 ET
 PMO status: GREEN
-Current phase: 0.4.0 control inventory foundation
+Current phase: 0.6.0 hosted Governance API and CRQ workbench
 Owner: Codex
 
 ## Objective
@@ -19,11 +19,12 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - Run build, browser/UI validation, React quality review, and AI-assisted security review.
 - Create GitHub repository, commit, and push source if GitHub auth/permissions allow.
 - Deploy to AWS static hosting if AWS credentials/permissions allow.
+- Host the Governance read API so CloudFront does not rely on seeded browser fallback.
 
 ## Out Of Scope
 
 - Production-grade multi-tenant backend, live Neptune graph, real S3 Object Lock evidence pipeline, real FAIR actuarial engine, live integrations, and real AI agent execution.
-- Paid AWS architecture such as full CloudFront/WAF/Amplify unless explicitly approved later.
+- Larger paid AWS architecture such as WAF, Neptune, Amplify, managed auth, or production evidence pipelines unless explicitly approved later.
 - Handling live regulated/customer data.
 
 ## Sources
@@ -39,6 +40,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
   - Compyl: centralized compliance platform, workflow automation, one control library, real-time dashboards, automated evidence.
   - OpenGRC: frameworks, control implementations, risk management, compliance management, policy traceability.
   - Archer: regulatory intelligence, obligation/control/policy/evidence lineage, scenario analysis, integrated risk management.
+  - Heatmaps-to-Histograms: quantitative risk communication, histograms, loss exceedance, calibration, data vetting, SME elicitation, and FAIR taxonomy resources.
+  - NotebookLM URLs provided by Susan: access attempted through web fetch and Google Drive connector; notebook contents were not directly readable.
 
 ## Tracking
 
@@ -74,6 +77,15 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
 | AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net` | CloudFront + OAC, private S3 origin |
 | Closure | Final PMO deliverable check | DONE | Codex | validation history and final status | Compared implementation against ask and source-of-truth plan |
+| Research | Review open-source GRC references | DONE | Codex | `docs/IMPLEMENTATION_PLAN.md`, web research | Reviewed GRC Engineering, Eramba, OpenGRC, CISO Assistant, and Gapps |
+| Planning | Add open-source GRC integration roadmap | DONE | Codex | `docs/IMPLEMENTATION_PLAN.md`, GitHub issue #1 | First build slice is Program Workbench |
+| Backend | Add Program Workbench API data | DONE | Codex | `server/schema.sql`, `server/database.js`, tests | Projects, imports, assessments, account reviews, questionnaires, hardening guides |
+| Product UI | Add Governance Program Workbench tab | DONE | Codex | `src/App.tsx`, `src/types.ts`, fallback data | Dense operational view, no fake live integrations |
+| Quality | Run build/tests/review | DONE | Codex | `npm run build`, `npm test`, browser smoke | Spartan order applied manually |
+| Backend | Host Governance read API | DONE | Codex | `server/lambda.js`, DynamoDB `u-dont-grc-me-governance`, Lambda Function URL | CloudFront can load Governance data from hosted API |
+| Product UI | Wire CloudFront to hosted API | DONE | Codex | `VITE_API_BASE_URL`, CloudFront deployment | Static fallback no longer used on canonical CloudFront build |
+| Product UI | Add CRQ workbench | DONE | Codex | `src/App.tsx`, `src/utils.ts`, `src/styles.css` | Histogram, loss exceedance, calibration, data vetting, SME elicitation |
+| Brand/IA | Remove black logo background | DONE | Codex | `src/styles.css` | Transparent garden logo rendering |
 
 ## Dependencies And Blockers
 
@@ -81,7 +93,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: AWS permissions were updated and S3 static hosting succeeded.
 - 2026-07-30: Upgraded hosting to CloudFront with Origin Access Control and restored private S3 bucket access.
 - GitHub repo name availability may require a fallback name.
-- No production backend exists yet; local persistence remains a prototype boundary.
+- Hosted Governance read API exists; authenticated production writes remain blocked.
+- NotebookLM notebook contents are blocked until exported/shared as source files.
 
 ## Decisions And Assumptions
 
@@ -92,6 +105,9 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Treat `docs/IMPLEMENTATION_PLAN.md` as the GitHub source of truth for future implementation scope.
 - 2026-07-30: Removed mistakenly created `udontgrcme` public S3 website bucket. Canonical hosted URL remains the CloudFront URL.
 - 2026-07-30: Use Node built-in SQLite for the local backend foundation to avoid native package risk; CloudFront remains static fallback until an API is hosted.
+- 2026-07-30: Use Lambda Function URL plus DynamoDB for the hosted Governance read API to keep cost and operational overhead low.
+- 2026-07-30: Keep hosted `POST /api/controls` disabled until authentication, authorization, validation, and audit logging are implemented.
+- 2026-07-30: Treat Heatmaps-to-Histograms as usable CRQ guidance; NotebookLM source incorporation is pending exported/shareable notebook content.
 
 ## Validation History
 
@@ -118,6 +134,16 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.4.0 security scan | PASS with notes | No live-format secret findings; docs/demo metric names only, with `data/`, `.env*`, `*.pem`, and `*.key` ignored |
 | 2026-07-30 | 0.4.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I9X15NK625B9Z804RKTNS4S50I` completed, live HTML serves bundle `index-Bs9nnESE.js` |
 | 2026-07-30 | 0.4.0 GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.4.0` |
+| 2026-07-30 | 0.5.0 Program Workbench tests | PASS | `npm test` returned 9 passing tests, including program workbench API coverage |
+| 2026-07-30 | 0.5.0 TypeScript and production build | PASS | `npm run build` passed after renaming stale generated `dist/lambda` artifact |
+| 2026-07-30 | 0.5.0 Program Workbench browser smoke | PASS | Playwright verified Governance > Program Workbench with API data and saved `output/program-workbench-smoke.png` |
+| 2026-07-30 | 0.6.0 hosted API tests | PASS | `npm test` returned 9 passing tests, including Lambda route coverage |
+| 2026-07-30 | 0.6.0 hosted API smoke | PASS | Lambda Function URL `/api/health` returned `runtime=lambda`, `/api/governance` returned 12 controls, 7 frameworks, 16 mappings |
+| 2026-07-30 | 0.6.0 hosted API CORS | PASS | Function URL returns a single `Access-Control-Allow-Origin` scoped to `https://d1oxsqx3ua8bb7.cloudfront.net` |
+| 2026-07-30 | 0.6.0 DynamoDB persistence | PASS | Table `u-dont-grc-me-governance` contains `TENANT#tenant-acme-us` / `SNAPSHOT#governance` |
+| 2026-07-30 | 0.6.0 TypeScript and production build | PASS | `VITE_API_BASE_URL=... npm run build` produced bundle `index-CIpw5eTm.js` |
+| 2026-07-30 | 0.6.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I28ELX5E0XYX00XYZD94VWNBDH` completed, live HTML serves bundle `index-CIpw5eTm.js` |
+| 2026-07-30 | 0.6.0 security scan | PASS with notes | No live-format secrets; documentation/dependency/demo hardening text only, generated and local package folders ignored |
 
 ## Deliverable Verification
 
@@ -132,10 +158,14 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
 | AWS hosting | CloudFront static website deployed over private S3 origin | `https://d1oxsqx3ua8bb7.cloudfront.net` | PASS |
 | Build proper database for control inventory | Local SQLite schema, API, seed data, tests | `server/schema.sql`, `server/database.js`, `server/api.js`, `server/database.test.js` | PASS |
+| Fix CloudFront seeded fallback | Hosted Lambda/DynamoDB Governance API wired into CloudFront build | `server/lambda.js`, `u-dont-grc-me-governance`, `VITE_API_BASE_URL` build | PASS |
+| Transparent garden logo | Removed black CSS background from logo image | `src/styles.css` | PASS |
+| Enhance from CRQ tools | Added Heatmaps-to-Histograms-inspired CRQ workbench | `src/App.tsx`, `src/utils.ts`, `src/styles.css` | PASS |
+| Use NotebookLM notebooks | Access attempted but blocked by NotebookLM/Drive URL format | Source notes in `docs/IMPLEMENTATION_PLAN.md` | BLOCKED |
 | Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
 | Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
 | Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |
 
 ## Next Step
 
-Host the Governance API behind authenticated cloud infrastructure before storing real GRC data or evidence outside the local prototype.
+Add authenticated hosted write workflows, tenant isolation, and audit logging before storing real GRC data or evidence outside the prototype.

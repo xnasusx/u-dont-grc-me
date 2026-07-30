@@ -42,9 +42,28 @@ export function seededMonteCarlo(base: number, strength: number, volatility: num
   }
 
   samples.sort((a, b) => a - b);
+  const max = samples.at(-1) ?? 1;
+  const binCount = 12;
+  const binCounts = Array.from({ length: binCount }, () => 0);
+  for (const sample of samples) {
+    const binIndex = Math.min(binCount - 1, Math.floor((sample / max) * binCount));
+    binCounts[binIndex] += 1;
+  }
+  const histogram = binCounts.map((count, index) => {
+    const lower = (max / binCount) * index;
+    const upper = (max / binCount) * (index + 1);
+    return { lower, upper, count, percentage: Math.round((count / samples.length) * 100) };
+  });
+  const exceedance = [0.1, 0.25, 0.5, 0.75, 0.9].map((probability) => ({
+    probability,
+    loss: samples[Math.floor(samples.length * (1 - probability))],
+  }));
+
   return {
     p10: samples[Math.floor(samples.length * 0.1)],
     p50: samples[Math.floor(samples.length * 0.5)],
     p90: samples[Math.floor(samples.length * 0.9)],
+    histogram,
+    exceedance,
   };
 }

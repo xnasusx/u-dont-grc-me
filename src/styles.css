@@ -77,10 +77,10 @@ textarea:focus-visible {
 .brand-logo {
   width: 54px;
   height: 54px;
-  object-fit: cover;
-  object-position: 36% 42%;
+  object-fit: contain;
+  object-position: center;
   border-radius: 8px;
-  background: #000000;
+  background: transparent;
   border: 1px solid rgba(240, 222, 224, 0.28);
 }
 
@@ -773,7 +773,9 @@ td span {
 .pill.current,
 .pill.running,
 .pill.in-scope,
-.pill.complete {
+.pill.complete,
+.pill.ready,
+.pill.imported {
   background: #e7f5eb;
   color: var(--green);
 }
@@ -789,7 +791,11 @@ td span {
 .pill.recommended,
 .pill.awaiting-approval,
 .pill.needs-review,
-.pill.gap {
+.pill.gap,
+.pill.planning,
+.pill.evidence-collection,
+.pill.sent,
+.pill.backlog {
   background: #fff3df;
   color: var(--amber);
 }
@@ -812,12 +818,132 @@ td span {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.crq-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.crq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.crq-grid h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.histogram {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 5px;
+  height: 148px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+}
+
+.histogram-bin {
+  display: flex;
+  align-items: end;
+  min-width: 0;
+  height: 100%;
+}
+
+.histogram-bin div {
+  width: 100%;
+  min-height: 8px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--teal) 0%, #71d7c6 100%);
+}
+
+.chart-caption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.exceedance-list,
+.calibration-list,
+.check-list {
+  display: grid;
+  gap: 8px;
+}
+
+.check-list span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: var(--muted);
+}
+
+.check-list svg {
+  color: var(--green);
+  flex: 0 0 auto;
+}
+
+.calibration-list div,
+.chip-bin {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 10px;
+  background: #fbfdfc;
+}
+
+.calibration-list div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 0.55fr) minmax(0, 1.75fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.calibration-list p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.wide-crq {
+  grid-column: 1 / -1;
+}
+
+.chip-bins {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.chip-bin {
+  display: grid;
+  gap: 6px;
+}
+
+.chip-bin strong {
+  color: var(--teal);
+}
+
 .split-panels,
 .risk-layout,
 .agent-grid,
-.integration-grid {
+.integration-grid,
+.program-grid,
+.split-table-grid {
   display: grid;
   gap: 18px;
+}
+
+.program-grid,
+.split-table-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .tag-cloud {
@@ -1271,10 +1397,17 @@ code {
   .evidence-grid,
   .governance-tab-layout,
   .inventory-toolbar,
+  .crq-grid,
   .knowledge-layout,
   .trust-grid,
-  .summary-strip {
+  .summary-strip,
+  .program-grid,
+  .split-table-grid {
     grid-template-columns: 1fr;
+  }
+
+  .wide-crq {
+    grid-column: auto;
   }
 }
 
@@ -1297,6 +1430,8 @@ code {
   .approvals-layout,
   .split-panels,
   .risk-layout,
+  .program-grid,
+  .split-table-grid,
   .diff-viewer {
     grid-template-columns: 1fr;
     display: grid;
@@ -1315,7 +1450,12 @@ code {
   .percentile-grid,
   .detail-grid,
   .integration-grid,
-  .agent-grid {
+  .agent-grid,
+  .chip-bins {
+    grid-template-columns: 1fr;
+  }
+
+  .calibration-list div {
     grid-template-columns: 1fr;
   }
 

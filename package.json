@@ -1,17 +1,21 @@
 {
   "name": "control-centric-grc",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "api": "node server/api.js",
     "dev:full": "node scripts/dev-full.js",
+    "export:snapshot": "node scripts/export-governance-snapshot.js",
+    "package:lambda": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lambda.ps1",
     "test": "node --test server/*.test.js",
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1098.0",
+    "@aws-sdk/lib-dynamodb": "^3.1098.0",
     "@vitejs/plugin-react": "^5.0.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
