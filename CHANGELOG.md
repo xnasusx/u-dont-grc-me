@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 - 2026-07-30
+
+- Added GitHub-tracked implementation plan source of truth in `docs/IMPLEMENTATION_PLAN.md`.
+- Added Governance framework mapper, coverage matrix, policy traceability, and control graph data model rules.
+- Added Compliance audit package assembly workflow.
+- Added Admin knowledge system, third-party risk, remediation playbooks, RBAC matrix, and trust UX checks.
+- Expanded seeded data model for requirements, vendors, policies, remediation, RBAC, and graph-grounded knowledge answers.
+- Updated README and guides to align with the Google Doc implementation plan.
+
 ## 0.2.0 - 2026-07-30
 
 - Renamed the product to `u dont GRC me`.

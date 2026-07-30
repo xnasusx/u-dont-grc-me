@@ -1,8 +1,18 @@
 export type ControlStatus = "Implemented" | "Degraded" | "Failed" | "In Progress";
 export type ControlType = "Preventative" | "Detective" | "Corrective";
 export type AutomationLevel = "Manual" | "Partially Automated" | "Fully Automated" | "Agentic";
-export type NodeKind = "Control" | "Asset" | "Requirement" | "Evidence" | "Risk" | "Vendor" | "Agent";
-export type EdgeLabel = "SATISFIES" | "IMPLEMENTED_ON" | "PROVED_BY" | "MITIGATES" | "OWNED_BY" | "RELATED_TO" | "EVALUATED_BY";
+export type NodeKind = "Control" | "Asset" | "Requirement" | "Evidence" | "Risk" | "Vendor" | "Policy" | "Agent";
+export type EdgeLabel =
+  | "SATISFIES"
+  | "IMPLEMENTED_ON"
+  | "PROVED_BY"
+  | "MITIGATES"
+  | "OWNED_BY"
+  | "RELATED_TO"
+  | "GOVERNS"
+  | "RELIED_UPON_FOR"
+  | "PROCESSES_DATA_FOR"
+  | "EVALUATED_BY";
 
 export interface FairMetrics {
   strength: number;
@@ -106,6 +116,17 @@ export interface EvidenceItem {
   reasoning: string;
 }
 
+export interface FrameworkRequirement {
+  id: string;
+  framework: "NIST CSF 2.0" | "ISO 27001" | "SOC 2";
+  functionArea: string;
+  text: string;
+  mappedControls: string[];
+  coverage: number;
+  gap: string;
+  approvalState: "Active" | "Pending" | "Gap";
+}
+
 export interface Integration {
   id: string;
   name: string;
@@ -113,6 +134,58 @@ export interface Integration {
   status: "Connected" | "Available" | "Needs Attention";
   mappedControls: number;
   quickWin: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  tier: "Tier 1" | "Tier 2" | "Tier 3";
+  dataAccess: string;
+  businessOwner: string;
+  assessmentStatus: "Current" | "Due Soon" | "Blocked";
+  externalRating: string;
+  reliedUponControls: string[];
+  riskSignal: string;
+}
+
+export interface PolicyArtifact {
+  id: string;
+  title: string;
+  type: "Policy" | "Standard" | "SOP" | "Audit Narrative";
+  owner: string;
+  status: "Draft" | "In Review" | "Approved";
+  approvedVersion: string;
+  mappedControls: string[];
+  lastUpdated: string;
+}
+
+export interface RemediationItem {
+  id: string;
+  playbook: string;
+  trigger: string;
+  controlId: string;
+  asset: string;
+  riskTier: "Low" | "Medium" | "High" | "Mission Critical";
+  approvalGate: string;
+  status: "Recommended" | "Awaiting Approval" | "Running" | "Complete";
+}
+
+export interface RbacGrant {
+  role: "Admin" | "Analyst" | "Owner" | "TPRM" | "Executive" | "Auditor";
+  globalFair: string;
+  graphAccess: string;
+  evidence: string;
+  approvals: string;
+  guardrails: string;
+}
+
+export interface KnowledgeAnswer {
+  id: string;
+  question: string;
+  answer: string;
+  confidence: number;
+  graphPath: string[];
+  queryPreview: string;
 }
 
 export interface AuditEvent {
@@ -132,5 +205,11 @@ export interface GrcState {
   approvals: Approval[];
   evidenceItems: EvidenceItem[];
   integrations: Integration[];
+  frameworkRequirements: FrameworkRequirement[];
+  vendors: Vendor[];
+  policyArtifacts: PolicyArtifact[];
+  remediations: RemediationItem[];
+  rbacGrants: RbacGrant[];
+  knowledgeAnswers: KnowledgeAnswer[];
   auditEvents: AuditEvent[];
 }

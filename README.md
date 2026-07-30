@@ -30,10 +30,14 @@ npm run build
 ## Current Product Slice
 
 - Command Center: executive metrics, global filters, saved dashboard views, chart creation, and Monte Carlo scenario simulation.
-- Governance: documentation workspace, control library, owner/status metadata, KPIs/KRIs, requirements, and a control-adjacent graph view.
-- Compliance: audit readiness, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
+- Governance: documentation workspace, control library, framework mapper, policy traceability, graph data model rules, owner/status metadata, KPIs/KRIs, requirements, and a control-adjacent graph view.
+- Compliance: audit readiness, audit package assembly, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
 - Risk: risk register, control-linked scenarios, FAIR calculator, and percentile exposure outputs.
-- Admin: integrations, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
+- Admin: integrations, knowledge system, third-party risk, remediation playbooks, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
+
+## Implementation Plan
+
+The GitHub source of truth for the implementation plan is `docs/IMPLEMENTATION_PLAN.md`. Future feature work should update that file and pass a PMO check against it before release.
 
 ## Local persistence
 

@@ -1,4 +1,18 @@
-import type { AgentWorkflow, Approval, Control, EvidenceItem, GraphEdge, GraphNode, Integration } from "./types";
+import type {
+  AgentWorkflow,
+  Approval,
+  Control,
+  EvidenceItem,
+  FrameworkRequirement,
+  GraphEdge,
+  GraphNode,
+  Integration,
+  KnowledgeAnswer,
+  PolicyArtifact,
+  RbacGrant,
+  RemediationItem,
+  Vendor,
+} from "./types";
 
 export const controls: Control[] = [
   {
@@ -110,6 +124,8 @@ export const graphNodes: GraphNode[] = [
   { id: "EV-PAM-LOGIN-774", kind: "Evidence", label: "CloudTrail MFA Log", subtitle: "Evidence", status: "Active" },
   { id: "Unauthorized admin access to production", kind: "Risk", label: "Unauthorized Admin Access", subtitle: "Risk scenario", status: "Active" },
   { id: "Evidence Agent", kind: "Agent", label: "Evidence Agent", subtitle: "AI agent", status: "Active" },
+  { id: "Acme Payments", kind: "Vendor", label: "Acme Payments", subtitle: "Tier 1 vendor", status: "Active" },
+  { id: "POL-PAM-STD", kind: "Policy", label: "PAM Standard", subtitle: "Policy", status: "Pending" },
 ];
 
 export const graphEdges: GraphEdge[] = [
@@ -120,6 +136,8 @@ export const graphEdges: GraphEdge[] = [
   { id: "edge-5", from: "CTRL-PAM-001", to: "EV-PAM-LOGIN-774", label: "PROVED_BY", state: "Active", narrative: "CloudTrail event shows successful MFA for privileged console session." },
   { id: "edge-6", from: "CTRL-PAM-001", to: "Unauthorized admin access to production", label: "MITIGATES", state: "Active", narrative: "Reduces loss event frequency by limiting unauthorized privileged sessions." },
   { id: "edge-7", from: "CTRL-PAM-001", to: "Evidence Agent", label: "EVALUATED_BY", state: "Active", narrative: "Evidence Agent reviewed telemetry using schema-validated prompt context." },
+  { id: "edge-8", from: "Acme Payments", to: "CTRL-TPRM-002", label: "RELIED_UPON_FOR", state: "Active", confidence: 88, narrative: "The payment processor's SOC 2 controls are relied on for Tier 1 vendor security review evidence." },
+  { id: "edge-9", from: "POL-PAM-STD", to: "CTRL-PAM-001", label: "GOVERNS", state: "Pending Approval", confidence: 91, narrative: "Draft PAM standard maps operating requirements and review cadence to the control." },
 ];
 
 export const approvals: Approval[] = [
@@ -226,4 +244,167 @@ export const integrations: Integration[] = [
   { id: "int-jira", name: "Jira", category: "Workflow", status: "Available", mappedControls: 6, quickWin: "Cut remediation tickets from failed controls." },
   { id: "int-qualys", name: "Qualys VMDR", category: "Vulnerability", status: "Needs Attention", mappedControls: 9, quickWin: "Replace manual vulnerability evidence pulls." },
   { id: "int-vendor", name: "Vendor Trust Portal", category: "Vendor", status: "Available", mappedControls: 5, quickWin: "Parse SOC 2 reports into control mappings." },
+];
+
+export const frameworkRequirements: FrameworkRequirement[] = [
+  {
+    id: "NIST CSF GV.SC-06",
+    framework: "NIST CSF 2.0",
+    functionArea: "Govern",
+    text: "Suppliers and third-party partners are known, prioritized, and managed based on cyber risk.",
+    mappedControls: ["CTRL-TPRM-002"],
+    coverage: 66,
+    gap: "Annual reassessment cadence is present; continuous vendor monitoring is pending.",
+    approvalState: "Pending",
+  },
+  {
+    id: "NIST CSF PR.AA-01",
+    framework: "NIST CSF 2.0",
+    functionArea: "Protect",
+    text: "Identities and credentials for authorized users, services, and hardware are managed.",
+    mappedControls: ["CTRL-PAM-001"],
+    coverage: 92,
+    gap: "Service account lifecycle evidence should be split into its own implementation edge.",
+    approvalState: "Active",
+  },
+  {
+    id: "SOC 2 CC7.2",
+    framework: "SOC 2",
+    functionArea: "System Operations",
+    text: "The entity monitors system components and detects anomalies that could indicate malicious acts.",
+    mappedControls: ["CTRL-EVID-007", "CTRL-VULN-004"],
+    coverage: 84,
+    gap: "Connector outage handling needs test evidence before audit freeze.",
+    approvalState: "Active",
+  },
+  {
+    id: "ISO 27001 A.8.8",
+    framework: "ISO 27001",
+    functionArea: "Technology",
+    text: "Information about technical vulnerabilities is obtained, evaluated, and addressed.",
+    mappedControls: ["CTRL-VULN-004"],
+    coverage: 78,
+    gap: "Patch replacement criteria and end-of-life exception workflow are not fully mapped.",
+    approvalState: "Pending",
+  },
+];
+
+export const vendors: Vendor[] = [
+  {
+    id: "VEN-ACME-PAY",
+    name: "Acme Payments",
+    tier: "Tier 1",
+    dataAccess: "Customer payment metadata",
+    businessOwner: "finance-ops@company.com",
+    assessmentStatus: "Due Soon",
+    externalRating: "B+ stable",
+    reliedUponControls: ["CTRL-TPRM-002", "CTRL-EVID-007"],
+    riskSignal: "SOC 2 bridge letter expires in 21 days.",
+  },
+  {
+    id: "VEN-CLOUD-ID",
+    name: "Cloud Identity Labs",
+    tier: "Tier 1",
+    dataAccess: "Workforce identities and MFA state",
+    businessOwner: "it-ops@company.com",
+    assessmentStatus: "Current",
+    externalRating: "A improving",
+    reliedUponControls: ["CTRL-PAM-001"],
+    riskSignal: "No material exceptions in latest assessment.",
+  },
+  {
+    id: "VEN-SCAN-CO",
+    name: "ScanCo VM",
+    tier: "Tier 2",
+    dataAccess: "Asset metadata and vulnerability telemetry",
+    businessOwner: "platform-risk@company.com",
+    assessmentStatus: "Blocked",
+    externalRating: "C watch",
+    reliedUponControls: ["CTRL-VULN-004"],
+    riskSignal: "API scope missing container registry findings.",
+  },
+];
+
+export const policyArtifacts: PolicyArtifact[] = [
+  {
+    id: "POL-PAM-STD",
+    title: "Privileged Access Management Standard",
+    type: "Standard",
+    owner: "sec-ops@company.com",
+    status: "In Review",
+    approvedVersion: "v0.3 draft",
+    mappedControls: ["CTRL-PAM-001"],
+    lastUpdated: "2026-07-30",
+  },
+  {
+    id: "POL-EVID-SOP",
+    title: "Immutable Evidence Handling SOP",
+    type: "SOP",
+    owner: "grc-platform@company.com",
+    status: "Approved",
+    approvedVersion: "v1.0",
+    mappedControls: ["CTRL-EVID-007"],
+    lastUpdated: "2026-07-29",
+  },
+];
+
+export const remediations: RemediationItem[] = [
+  {
+    id: "REM-221",
+    playbook: "Open Jira remediation ticket",
+    trigger: "Critical vulnerability SLA breach",
+    controlId: "CTRL-VULN-004",
+    asset: "Internet-facing workload",
+    riskTier: "High",
+    approvalGate: "Analyst approval required before status reversal",
+    status: "Awaiting Approval",
+  },
+  {
+    id: "REM-228",
+    playbook: "Request vendor bridge letter",
+    trigger: "Tier 1 vendor assessment due soon",
+    controlId: "CTRL-TPRM-002",
+    asset: "Acme Payments",
+    riskTier: "Medium",
+    approvalGate: "TPRM analyst review",
+    status: "Recommended",
+  },
+  {
+    id: "REM-230",
+    playbook: "Rotate stale service credential",
+    trigger: "Identity lifecycle gap",
+    controlId: "CTRL-PAM-001",
+    asset: "AWS IAM service role",
+    riskTier: "Mission Critical",
+    approvalGate: "Second approver and change window",
+    status: "Recommended",
+  },
+];
+
+export const rbacGrants: RbacGrant[] = [
+  { role: "Admin", globalFair: "Yes", graphAccess: "Full tenant", evidence: "Upload/export", approvals: "Approve all", guardrails: "Modify" },
+  { role: "Analyst", globalFair: "Yes", graphAccess: "Full tenant", evidence: "Upload/export", approvals: "Approve mappings", guardrails: "Read-only" },
+  { role: "Owner", globalFair: "No", graphAccess: "Assigned controls", evidence: "Upload assigned", approvals: "No", guardrails: "No" },
+  { role: "TPRM", globalFair: "Vendor scope", graphAccess: "Vendor graph", evidence: "Upload vendor", approvals: "Vendor scope", guardrails: "No" },
+  { role: "Executive", globalFair: "Yes", graphAccess: "Read-only", evidence: "No", approvals: "No", guardrails: "No" },
+  { role: "Auditor", globalFair: "Scoped", graphAccess: "Scoped read-only", evidence: "Export package", approvals: "No", guardrails: "No" },
+];
+
+export const knowledgeAnswers: KnowledgeAnswer[] = [
+  {
+    id: "KMS-001",
+    question: "What controls are failing for public production assets?",
+    answer: "Critical Vulnerability Remediation is degraded because Security Hub evidence shows critical findings past SLA.",
+    confidence: 89,
+    graphPath: ["CTRL-VULN-004", "IMPLEMENTED_ON", "AWS Security Hub", "PROVED_BY", "EV-SHUB-FINDING-991"],
+    queryPreview: "MATCH (c:Control)-[:IMPLEMENTED_ON]->(a:Asset)-[:PROVED_BY]->(e:Evidence) WHERE c.status = 'Degraded'",
+  },
+  {
+    id: "KMS-002",
+    question: "Which policies govern privileged access evidence?",
+    answer: "The PAM Standard draft governs CTRL-PAM-001, which is proved by CloudTrail MFA evidence and reviewed by the Evidence Agent.",
+    confidence: 92,
+    graphPath: ["POL-PAM-STD", "GOVERNS", "CTRL-PAM-001", "PROVED_BY", "EV-PAM-LOGIN-774"],
+    queryPreview: "MATCH (p:PolicyDocument)-[:GOVERNS]->(c:Control)-[:PROVED_BY]->(e:Evidence) WHERE c.id = 'CTRL-PAM-001'",
+  },
 ];

@@ -1,5 +1,20 @@
 # Release Notes
 
+## Version 0.3.0
+
+This release reconciles the Google Doc implementation plan with the product prototype and makes the GitHub plan the source of truth.
+
+### Highlights
+
+- Added the tracked implementation plan at `docs/IMPLEMENTATION_PLAN.md`.
+- Expanded Governance with framework coverage, mapping gaps, policy traceability, and graph rules.
+- Expanded Compliance with audit package assembly and export readiness.
+- Expanded Admin with read-only knowledge answers, vendor risk, remediation playbooks, RBAC, and trust UX controls.
+
+### Still Pending
+
+- Production backend, authentication, real integrations, Neptune, S3 Object Lock evidence storage, and live AI orchestration remain future implementation work.
+
 ## Version 0.2.0
 
 `u dont GRC me` now has a product structure that better matches how GRC teams work day to day.

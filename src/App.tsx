@@ -4,6 +4,7 @@ import {
   AppWindow,
   BadgeCheck,
   BarChart3,
+  BookOpen,
   Bot,
   Boxes,
   BrainCircuit,
@@ -13,8 +14,10 @@ import {
   ClipboardCheck,
   Cloud,
   FileCheck2,
+  FileSearch,
   FileText,
   Filter,
+  Gauge,
   GitBranch,
   Landmark,
   LayoutDashboard,
@@ -25,20 +28,38 @@ import {
   PieChart,
   Play,
   PlugZap,
+  Route,
   RefreshCw,
   Save,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   TableProperties,
   UserCheck,
+  UsersRound,
+  Workflow,
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { agentWorkflows } from "./data";
 import { useGrcStore } from "./store";
-import type { Approval, AuditEvent, Control, EvidenceItem, GraphEdge, GraphNode, Integration } from "./types";
+import type {
+  Approval,
+  AuditEvent,
+  Control,
+  EvidenceItem,
+  FrameworkRequirement,
+  GraphEdge,
+  GraphNode,
+  Integration,
+  KnowledgeAnswer,
+  PolicyArtifact,
+  RbacGrant,
+  RemediationItem,
+  Vendor,
+} from "./types";
 import { aggregateAle, formatCurrency, healthScore, seededMonteCarlo, statusClass } from "./utils";
 
 type View = "command" | "governance" | "compliance" | "risk" | "admin";
@@ -115,13 +136,38 @@ function App() {
           <CommandCenterView controls={filteredControls} approvals={state.approvals} ale={ale} selectedControl={selectedControl} setActiveView={setActiveView} setSelectedControlId={setSelectedControlId} />
         )}
         {activeView === "governance" && (
-          <GovernanceView controls={filteredControls} selectedControl={selectedControl} graphNodes={state.graphNodes} graphEdges={state.graphEdges} setSelectedControlId={setSelectedControlId} />
+          <GovernanceView
+            controls={filteredControls}
+            selectedControl={selectedControl}
+            graphNodes={state.graphNodes}
+            graphEdges={state.graphEdges}
+            frameworkRequirements={state.frameworkRequirements}
+            policyArtifacts={state.policyArtifacts}
+            setSelectedControlId={setSelectedControlId}
+          />
         )}
         {activeView === "compliance" && (
-          <ComplianceView approvals={state.approvals} selectedControl={selectedControl} evidenceItems={state.evidenceItems} onDecision={approveMapping} onIngestEvidence={ingestEvidence} />
+          <ComplianceView
+            approvals={state.approvals}
+            selectedControl={selectedControl}
+            evidenceItems={state.evidenceItems}
+            frameworkRequirements={state.frameworkRequirements}
+            onDecision={approveMapping}
+            onIngestEvidence={ingestEvidence}
+          />
         )}
         {activeView === "risk" && <RiskView controls={filteredControls} selectedControl={selectedControl} setSelectedControlId={setSelectedControlId} />}
-        {activeView === "admin" && <AdminView auditEvents={state.auditEvents} integrations={state.integrations} onConnect={connectIntegration} />}
+        {activeView === "admin" && (
+          <AdminView
+            auditEvents={state.auditEvents}
+            integrations={state.integrations}
+            vendors={state.vendors}
+            remediations={state.remediations}
+            rbacGrants={state.rbacGrants}
+            knowledgeAnswers={state.knowledgeAnswers}
+            onConnect={connectIntegration}
+          />
+        )}
       </main>
     </div>
   );
@@ -298,6 +344,114 @@ function GovernanceSummary({ selectedControl }: { selectedControl: Control }) {
   );
 }
 
+function FrameworkMapper({ requirements }: { requirements: FrameworkRequirement[] }) {
+  const avgCoverage = Math.round(requirements.reduce((sum, requirement) => sum + requirement.coverage, 0) / requirements.length);
+  const pending = requirements.filter((requirement) => requirement.approvalState === "Pending").length;
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Framework mapper</p>
+          <h2>Requirements, Coverage & Approval State</h2>
+        </div>
+        <Route size={19} />
+      </div>
+      <div className="summary-strip">
+        <Detail label="Primary framework" value="NIST CSF 2.0" />
+        <Detail label="Average coverage" value={`${avgCoverage}%`} />
+        <Detail label="Pending mappings" value={String(pending)} />
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Mapped Controls</th>
+              <th>Coverage</th>
+              <th>Gap</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requirements.map((requirement) => (
+              <tr key={requirement.id}>
+                <td>
+                  <strong>{requirement.id}</strong>
+                  <span>{requirement.framework} / {requirement.functionArea}</span>
+                </td>
+                <td>{requirement.mappedControls.join(", ")}</td>
+                <td>
+                  <div className="coverage-cell">
+                    <strong>{requirement.coverage}%</strong>
+                    <div className="bar-track">
+                      <div className="bar-fill rose" style={{ width: `${requirement.coverage}%` }} />
+                    </div>
+                  </div>
+                </td>
+                <td>{requirement.gap}</td>
+                <td><StatusPill status={requirement.approvalState} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function PolicyLibrary({ policyArtifacts }: { policyArtifacts: PolicyArtifact[] }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Policy traceability</p>
+          <h2>Documents Connected to Controls</h2>
+        </div>
+        <BookOpen size={19} />
+      </div>
+      <div className="artifact-grid">
+        {policyArtifacts.map((artifact) => (
+          <div className="artifact-card" key={artifact.id}>
+            <div>
+              <strong>{artifact.title}</strong>
+              <span>{artifact.id} / {artifact.type}</span>
+            </div>
+            <StatusPill status={artifact.status} />
+            <p>{artifact.mappedControls.join(", ")} / {artifact.approvedVersion} / {artifact.owner}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DataModelRules() {
+  const rules = [
+    "Every node and edge carries tenant_id and business-unit scope.",
+    "AI writes start as PENDING_APPROVAL unless the middleware allow-list permits the action.",
+    "Evidence edges store exact S3 bucket, key, version ID, hash, and retention context.",
+    "The graph remains the source of truth; vector search only returns candidate graph identifiers.",
+  ];
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Graph data model</p>
+          <h2>Control-Centric Rules</h2>
+        </div>
+        <Network size={19} />
+      </div>
+      <div className="pipeline">
+        {rules.map((rule, index) => (
+          <PipelineStep key={rule} label={`Rule ${index + 1}`} detail={rule} active />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AuditReadiness({ controls, approvals, evidenceItems }: { controls: Control[]; approvals: Approval[]; evidenceItems: EvidenceItem[] }) {
   const pendingApprovals = approvals.filter((approval) => approval.state === "Pending").length;
   const validEvidence = evidenceItems.filter((item) => item.verdict === "Implemented").length;
@@ -389,18 +543,25 @@ function GovernanceView({
   selectedControl,
   graphNodes,
   graphEdges,
+  frameworkRequirements,
+  policyArtifacts,
   setSelectedControlId,
 }: {
   controls: Control[];
   selectedControl: Control;
   graphNodes: GraphNode[];
   graphEdges: GraphEdge[];
+  frameworkRequirements: FrameworkRequirement[];
+  policyArtifacts: PolicyArtifact[];
   setSelectedControlId: (id: string) => void;
 }) {
   return (
     <section className="view-stack">
       <GovernanceSummary selectedControl={selectedControl} />
       <ControlsView controls={controls} selectedControl={selectedControl} graphNodes={graphNodes} graphEdges={graphEdges} setSelectedControlId={setSelectedControlId} />
+      <FrameworkMapper requirements={frameworkRequirements} />
+      <DataModelRules />
+      <PolicyLibrary policyArtifacts={policyArtifacts} />
       <DocsView selectedControl={selectedControl} />
     </section>
   );
@@ -410,18 +571,21 @@ function ComplianceView({
   approvals,
   selectedControl,
   evidenceItems,
+  frameworkRequirements,
   onDecision,
   onIngestEvidence,
 }: {
   approvals: Approval[];
   selectedControl: Control;
   evidenceItems: EvidenceItem[];
+  frameworkRequirements: FrameworkRequirement[];
   onDecision: (id: string, state: "Approved" | "Rejected") => void;
   onIngestEvidence: (control: Control, payload: string) => void;
 }) {
   return (
     <section className="view-stack">
       <AuditReadiness controls={[selectedControl]} approvals={approvals} evidenceItems={evidenceItems} />
+      <AuditPackage requirements={frameworkRequirements} evidenceItems={evidenceItems} />
       <ApprovalsView approvals={approvals} onDecision={onDecision} />
       <EvidenceView selectedControl={selectedControl} evidenceItems={evidenceItems} onIngestEvidence={onIngestEvidence} />
     </section>
@@ -437,11 +601,31 @@ function RiskView({ controls, selectedControl, setSelectedControlId }: { control
   );
 }
 
-function AdminView({ auditEvents, integrations, onConnect }: { auditEvents: AuditEvent[]; integrations: Integration[]; onConnect: (id: string) => void }) {
+function AdminView({
+  auditEvents,
+  integrations,
+  vendors,
+  remediations,
+  rbacGrants,
+  knowledgeAnswers,
+  onConnect,
+}: {
+  auditEvents: AuditEvent[];
+  integrations: Integration[];
+  vendors: Vendor[];
+  remediations: RemediationItem[];
+  rbacGrants: RbacGrant[];
+  knowledgeAnswers: KnowledgeAnswer[];
+  onConnect: (id: string) => void;
+}) {
   return (
     <section className="view-stack">
       <AdminSummary />
       <IntegrationsView integrations={integrations} onConnect={onConnect} />
+      <KnowledgeSystemView answers={knowledgeAnswers} />
+      <VendorRiskView vendors={vendors} />
+      <RemediationView remediations={remediations} />
+      <TrustRbacView grants={rbacGrants} />
       <AgentsView auditEvents={auditEvents} />
     </section>
   );
@@ -817,6 +1001,33 @@ function EvidenceView({
   );
 }
 
+function AuditPackage({ requirements, evidenceItems }: { requirements: FrameworkRequirement[]; evidenceItems: EvidenceItem[] }) {
+  const exportReady = evidenceItems.filter((item) => item.hash.startsWith("sha256:") && item.s3VersionUri.includes("versionId")).length;
+  const gaps = requirements.filter((requirement) => requirement.approvalState !== "Active").length;
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Auditor workspace</p>
+          <h2>Audit Package Assembly</h2>
+        </div>
+        <FileSearch size={19} />
+      </div>
+      <div className="summary-strip">
+        <Detail label="Export-ready evidence" value={String(exportReady)} />
+        <Detail label="Framework gaps" value={String(gaps)} />
+        <Detail label="Package rule" value="Exact object versions only" />
+      </div>
+      <div className="pipeline">
+        <PipelineStep label="Scope framework" detail="Requirements inherit global filters and control mappings." active />
+        <PipelineStep label="Lock evidence set" detail="Only hashed artifacts with immutable version references enter the package." active={exportReady > 0} />
+        <PipelineStep label="Resolve mapping gaps" detail="Pending or gap states remain visible to auditors with rationale." active={gaps === 0} />
+      </div>
+    </section>
+  );
+}
+
 function RiskLab({ selectedControl }: { selectedControl: Control }) {
   const [baseLoss, setBaseLoss] = useState(selectedControl.fair.aleP90);
   const [strength, setStrength] = useState(selectedControl.fair.strength);
@@ -852,6 +1063,170 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
           <Metric label="P90 board case" value={formatCurrency(simulation.p90)} detail="Risk appetite comparison point." icon={AlertTriangle} />
         </div>
       </section>
+    </section>
+  );
+}
+
+function KnowledgeSystemView({ answers }: { answers: KnowledgeAnswer[] }) {
+  const [selectedId, setSelectedId] = useState(answers[0]?.id);
+  const selected = answers.find((answer) => answer.id === selectedId) ?? answers[0];
+
+  return (
+    <section className="knowledge-layout">
+      <div className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">AI knowledge system</p>
+            <h2>Read-Only Graph Answers</h2>
+          </div>
+          <BrainCircuit size={19} />
+        </div>
+        <div className="saved-view-list">
+          {answers.map((answer) => (
+            <button className={selected?.id === answer.id ? "saved-view selected" : "saved-view"} key={answer.id} onClick={() => setSelectedId(answer.id)}>
+              <strong>{answer.question}</strong>
+              <span>{answer.confidence}% confidence</span>
+              <p>{answer.answer}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+      {selected && (
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Query preview</p>
+              <h2>Cited Graph Path</h2>
+            </div>
+            <Route size={19} />
+          </div>
+          <code>{selected.queryPreview}</code>
+          <div className="graph-path">
+            {selected.graphPath.map((pathPart, index) => (
+              <span key={`${pathPart}-${index}`}>{pathPart}</span>
+            ))}
+          </div>
+          <div className="reasoning-box">
+            <LockKeyhole size={18} />
+            <p>Knowledge answers are read-only, source-grounded, and must cite graph nodes or edges before they are shown.</p>
+          </div>
+        </section>
+      )}
+    </section>
+  );
+}
+
+function VendorRiskView({ vendors }: { vendors: Vendor[] }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Third-party risk</p>
+          <h2>Vendor Nodes and Control Dependencies</h2>
+        </div>
+        <Boxes size={19} />
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Data Access</th>
+              <th>Controls Relied On</th>
+              <th>Assessment</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vendors.map((vendor) => (
+              <tr key={vendor.id}>
+                <td>
+                  <strong>{vendor.name}</strong>
+                  <span>{vendor.tier} / {vendor.externalRating}</span>
+                </td>
+                <td>
+                  {vendor.dataAccess}
+                  <span>{vendor.businessOwner}</span>
+                </td>
+                <td>{vendor.reliedUponControls.join(", ")}</td>
+                <td><StatusPill status={vendor.assessmentStatus} /></td>
+                <td>{vendor.riskSignal}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function RemediationView({ remediations }: { remediations: RemediationItem[] }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Remediation engine</p>
+          <h2>Playbooks with Human Gates</h2>
+        </div>
+        <Workflow size={19} />
+      </div>
+      <div className="artifact-grid">
+        {remediations.map((item) => (
+          <div className="artifact-card" key={item.id}>
+            <div>
+              <strong>{item.playbook}</strong>
+              <span>{item.id} / {item.controlId}</span>
+            </div>
+            <StatusPill status={item.status} />
+            <p>{item.trigger} on {item.asset}. Gate: {item.approvalGate}. Tier: {item.riskTier}.</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TrustRbacView({ grants }: { grants: RbacGrant[] }) {
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Trust UX and RBAC</p>
+          <h2>Role Permissions Matrix</h2>
+        </div>
+        <UsersRound size={19} />
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>FAIR</th>
+              <th>Graph Access</th>
+              <th>Evidence</th>
+              <th>Approvals</th>
+              <th>Guardrails</th>
+            </tr>
+          </thead>
+          <tbody>
+            {grants.map((grant) => (
+              <tr key={grant.role}>
+                <td><strong>{grant.role}</strong></td>
+                <td>{grant.globalFair}</td>
+                <td>{grant.graphAccess}</td>
+                <td>{grant.evidence}</td>
+                <td>{grant.approvals}</td>
+                <td>{grant.guardrails}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="trust-grid">
+        <PipelineStep label="Confidence surfaced" detail="AI recommendations show confidence, source context, and approval state." active />
+        <PipelineStep label="High-risk friction" detail="Mission-critical remediation calls out second approver and change-window gates." active />
+        <PipelineStep label="Deny-list active" detail="Unauthorized graph mutations are blocked and recorded in the audit ledger." active />
+      </div>
     </section>
   );
 }

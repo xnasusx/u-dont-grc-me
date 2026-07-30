@@ -400,6 +400,11 @@ td span {
   background: #fff4f5;
 }
 
+.saved-view.selected {
+  border-color: var(--rose);
+  background: #fff4f5;
+}
+
 .saved-view span {
   color: var(--muted);
   display: block;
@@ -572,7 +577,9 @@ td span {
 .pill.connected,
 .pill.approved,
 .pill.healthy,
-.pill.active {
+.pill.active,
+.pill.current,
+.pill.complete {
   background: #e7f5eb;
   color: var(--green);
 }
@@ -582,14 +589,20 @@ td span {
 .pill.pending,
 .pill.blocked,
 .pill.watching,
-.pill.needs-attention {
+.pill.needs-attention,
+.pill.due-soon,
+.pill.in-review,
+.pill.recommended,
+.pill.awaiting-approval,
+.pill.gap {
   background: #fff3df;
   color: var(--amber);
 }
 
 .pill.failed,
 .pill.rejected,
-.pill.paused {
+.pill.paused,
+.pill.draft {
   background: #fdebea;
   color: var(--red);
 }
@@ -945,6 +958,80 @@ code {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.coverage-cell {
+  display: grid;
+  gap: 7px;
+  min-width: 140px;
+}
+
+.artifact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.artifact-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.artifact-card span,
+.artifact-card p {
+  color: var(--muted);
+}
+
+.artifact-card span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+}
+
+.artifact-card p {
+  grid-column: 1 / -1;
+  line-height: 1.45;
+  margin-bottom: 0;
+}
+
+.knowledge-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+}
+
+.graph-path,
+.trust-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.graph-path span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #fbfdfc;
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .integration-card {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -986,7 +1073,10 @@ code {
 
   .dashboard-grid,
   .graph-shell,
-  .evidence-grid {
+  .evidence-grid,
+  .knowledge-layout,
+  .trust-grid,
+  .summary-strip {
     grid-template-columns: 1fr;
   }
 }

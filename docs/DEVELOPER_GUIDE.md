@@ -16,6 +16,7 @@
 - `src/types.ts`: domain model.
 - `src/utils.ts`: formatting, health scoring, and Monte Carlo helper.
 - `src/styles.css`: visual system and responsive layout.
+- `docs/IMPLEMENTATION_PLAN.md`: GitHub source of truth for PMO scope, phase status, and pending production work.
 
 ## Run
 
@@ -35,10 +36,10 @@ npm run build
 The UI is organized around business workflow areas:
 
 - **Command Center**: executive overview, dashboards, charts, Monte Carlo.
-- **Governance**: controls and documentation.
-- **Compliance**: audit readiness, evidence, approvals.
+- **Governance**: controls, graph explorer, framework mapper, policies, and documentation.
+- **Compliance**: audit readiness, package assembly, evidence, approvals.
 - **Risk**: risk register and FAIR.
-- **Admin**: integrations, agents, operational ledger.
+- **Admin**: integrations, knowledge system, third-party risk, remediation, RBAC, agents, operational ledger.
 
 `src/store.ts` should be replaced with API calls when a backend exists. Keep its function boundaries as the first service contract:
 

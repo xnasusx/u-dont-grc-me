@@ -1,20 +1,20 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 01:00 ET
+Last updated: 2026-07-30 01:35 ET
 PMO status: GREEN
-Current phase: Delivered
+Current phase: 0.3.0 delivered; production backlog pending
 Owner: Codex
 
 ## Objective
 
-Transform the existing control-centric GRC prototype into a branded, research-informed product slice named `u dont GRC me`, using the supplied palette and logo, with a reorganized IA around Command Center, Governance, Compliance, Risk, and Admin. Create operational documentation, version-control it in Susan's GitHub account, and deploy a static build to Susan's AWS account if credentials and permissions allow.
+Transform the existing control-centric GRC prototype into a branded, research-informed product slice named `u dont GRC me`, using the supplied palette and logo, with a reorganized IA around Command Center, Governance, Compliance, Risk, and Admin. Keep the Google Doc implementation plan represented in GitHub as the source of truth, use PMO checks against it for future work, create operational documentation, version-control it in Susan's GitHub account, and deploy a static build to Susan's AWS account if credentials and permissions allow.
 
 ## In Scope
 
 - Apply supplied color palette: `#C7848D`, `#F0DEE0`, `#BEB2B4`, `#7A7073`, `#3A3336`.
 - Use supplied image as the tool logo.
 - Reorganize left navigation into Command Center, Governance, Compliance, Risk, and Admin.
-- Build product modules inspired by researched GRC tools: dashboards, metrics, filters, saved views, chart creation, control library, documentation, audit readiness, evidence, risk register, FAIR calculator, Monte Carlo simulator, integrations, AI agent governance, and admin audit ledger.
+- Build product modules inspired by researched GRC tools and Susan's Google Doc implementation plan: dashboards, metrics, filters, saved views, chart creation, control library, framework mapper, graph explorer, documentation, policy traceability, audit readiness, audit package assembly, evidence, risk register, FAIR calculator, Monte Carlo simulator, third-party risk, remediation, RBAC/trust UX, knowledge query, integrations, AI agent governance, and admin audit ledger.
 - Create user/developer docs, changelog, release notes, and deployment notes.
 - Run build, browser/UI validation, React quality review, and AI-assisted security review.
 - Create GitHub repository, commit, and push source if GitHub auth/permissions allow.
@@ -22,7 +22,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 
 ## Out Of Scope
 
-- Production-grade multi-tenant backend, live Neptune graph, real S3 Object Lock evidence pipeline, real FAIR actuarial engine, and real AI agent execution.
+- Production-grade multi-tenant backend, live Neptune graph, real S3 Object Lock evidence pipeline, real FAIR actuarial engine, live integrations, and real AI agent execution.
 - Paid AWS architecture such as full CloudFront/WAF/Amplify unless explicitly approved later.
 - Handling live regulated/customer data.
 
@@ -44,7 +44,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 
 - Jira: not configured.
 - GitHub: to be created after local validation.
-- PMO source of truth: this file.
+- PMO project tracker: this file.
+- Implementation plan source of truth: `docs/IMPLEMENTATION_PLAN.md`.
 
 ## Human Gates
 
@@ -64,8 +65,10 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Build Compliance module | DONE | Codex | `src/App.tsx` | Audit readiness, evidence, framework coverage |
 | Product UI | Build Risk module | DONE | Codex | `src/App.tsx` | Risk register and FAIR calculator |
 | Product UI | Build Admin module | DONE | Codex | `src/App.tsx` | Agents, integrations, audit ledger, settings |
+| Product UI | Reconcile Google Doc implementation plan gaps | DONE | Codex | `src/App.tsx`, `src/data.ts`, `src/types.ts` | Added framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX |
+| Documentation | Create GitHub implementation plan source of truth | DONE | Codex | `docs/IMPLEMENTATION_PLAN.md` | Future PMO checks must compare against this file |
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
-| Quality | Run build, UI, React/design/security checks | TODO | Codex | command outputs, review notes | PMO validation gate |
+| Quality | Run build, UI, React/design/security checks | DONE | Codex | command outputs, review notes | PMO validation gate |
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
 | AWS | Deploy static site | DONE | Codex | `https://d1oxsqx3ua8bb7.cloudfront.net` | CloudFront + OAC, private S3 origin |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
@@ -83,6 +86,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 - 2026-07-30: Use static AWS hosting for first publish to minimize cost and complexity.
 - 2026-07-30: Preserve a control-centric model underneath the reorganized IA.
 - 2026-07-30: Treat AI actions as simulated and human-governed until a backend/orchestrator exists.
+- 2026-07-30: Keep the current CloudFront default domain rather than buying or configuring `udontgrcme.net`.
+- 2026-07-30: Treat `docs/IMPLEMENTATION_PLAN.md` as the GitHub source of truth for future implementation scope.
 
 ## Validation History
 
@@ -96,6 +101,10 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | GitHub publish | PASS | Created and pushed `https://github.com/xnasusx/u-dont-grc-me` |
 | 2026-07-30 | GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` |
 | 2026-07-30 | AWS hosting | PASS | CloudFront distribution `E2HL6YY0F2B5OW`; direct S3 endpoint returns `403` |
+| 2026-07-30 | Google Doc plan review | PASS | Draft plan reviewed and reconciled into `docs/IMPLEMENTATION_PLAN.md` |
+| 2026-07-30 | 0.3.0 TypeScript and production build | PASS | `npm run build` |
+| 2026-07-30 | 0.3.0 browser smoke | PASS | Playwright checked Command Center, Governance, Compliance, Risk, Admin on desktop/mobile; screenshots in `output/` |
+| 2026-07-30 | 0.3.0 security scan | PASS with notes | No live-format secret findings; documentation-only matches and package dependency names |
 
 ## Deliverable Verification
 
@@ -109,7 +118,10 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
 | AWS hosting | CloudFront static website deployed over private S3 origin | `https://d1oxsqx3ua8bb7.cloudfront.net` | PASS |
+| Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
+| Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
+| Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |
 
 ## Next Step
 
-Monitor GitHub Actions and avoid real GRC data until authentication/backend controls exist.
+Commit/push `0.3.0`, deploy the refreshed build to CloudFront, and avoid real GRC data until authentication/backend controls exist.

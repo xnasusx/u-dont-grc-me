@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { approvals, controls, evidenceItems, graphEdges, graphNodes, integrations } from "./data";
+import {
+  approvals,
+  controls,
+  evidenceItems,
+  frameworkRequirements,
+  graphEdges,
+  graphNodes,
+  integrations,
+  knowledgeAnswers,
+  policyArtifacts,
+  rbacGrants,
+  remediations,
+  vendors,
+} from "./data";
 import type { Approval, AuditEvent, Control, EvidenceItem, GraphEdge, GraphNode, GrcState } from "./types";
 
 const STORAGE_KEY = "ollie-grc-state-v1";
@@ -34,6 +47,12 @@ function initialState(): GrcState {
     approvals,
     evidenceItems,
     integrations,
+    frameworkRequirements,
+    vendors,
+    policyArtifacts,
+    remediations,
+    rbacGrants,
+    knowledgeAnswers,
     auditEvents: [
       {
         id: "AUD-1001",

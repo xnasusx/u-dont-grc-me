@@ -7,10 +7,10 @@
 ## Navigation
 
 - **Command Center**: Use this for program oversight. Review risk metrics, filter the program, save dashboard views, create charts, and run Monte Carlo scenarios.
-- **Governance**: Use this to manage the control library and control-grounded documentation.
-- **Compliance**: Use this to prepare for audits, approve AI-proposed mappings, and validate evidence.
+- **Governance**: Use this to manage the control library, framework mappings, graph path context, policies, and control-grounded documentation.
+- **Compliance**: Use this to prepare audit packages, approve AI-proposed mappings, and validate evidence.
 - **Risk**: Use this to manage risk scenarios and calculate FAIR-style exposure.
-- **Admin**: Use this for integrations, AI agent boundaries, and mutation audit logs.
+- **Admin**: Use this for integrations, knowledge answers, vendor risk, remediation, RBAC, AI agent boundaries, and mutation audit logs.
 
 ## Common Workflows
 
@@ -35,6 +35,18 @@
 3. Paste a common telemetry payload.
 4. Select **Validate Evidence**.
 5. Review the generated evidence record and immutable reference metadata.
+
+### Review Framework Coverage
+
+1. Open **Governance**.
+2. Review the framework mapper table.
+3. Check coverage, mapped controls, approval state, and remaining gaps.
+
+### Review Vendors and Remediation
+
+1. Open **Admin**.
+2. Review third-party risk for vendors connected to controls.
+3. Review remediation playbooks and approval gates before action.
 
 ### Assess Risk
 
