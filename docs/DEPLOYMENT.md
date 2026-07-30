@@ -17,15 +17,23 @@ For this prototype release, static hosting is preferred:
 3. Upload `dist/`.
 4. Configure a public-read bucket policy for website assets if acceptable for the account.
 
-## Current AWS Blocker
+## Current AWS Deployment
 
-Deployment was attempted on 2026-07-30 against AWS account `<AWS_ACCOUNT_ID>` with IAM user `arn:aws:iam::<AWS_ACCOUNT_ID>:user/<deploy-user>`.
+Deployment succeeded on 2026-07-30 against AWS account `<AWS_ACCOUNT_ID>` with IAM user `arn:aws:iam::<AWS_ACCOUNT_ID>:user/<deploy-user>`.
 
-The user can authenticate, but current IAM permissions do not allow AWS hosting setup:
+Hosted URL:
 
-- `s3:CreateBucket` denied for `u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1`.
-- `s3:ListAllMyBuckets` denied.
-- `amplify:ListApps` denied.
+- http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
+
+S3 bucket:
+
+- `u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1`
+
+Validation:
+
+- Website endpoint returned HTTP `200`.
+- Deployed HTML contains `u dont GRC me`.
+- S3 website configuration uses `index.html` for index and error routing.
 
 ## Required IAM Permissions For Static S3 Hosting
 

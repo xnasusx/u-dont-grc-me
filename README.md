@@ -11,6 +11,12 @@ npm run dev -- --port 5173
 
 Open http://127.0.0.1:5173/.
 
+## Hosted Prototype
+
+AWS S3 static website:
+
+http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
+
 ## Build
 
 ```powershell

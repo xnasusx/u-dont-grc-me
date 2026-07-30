@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 00:38 ET
-PMO status: YELLOW
-Current phase: AWS blocked, source published
+Last updated: 2026-07-30 00:51 ET
+PMO status: GREEN
+Current phase: Delivered
 Owner: Codex
 
 ## Objective
@@ -67,13 +67,13 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | TODO | Codex | command outputs, review notes | PMO validation gate |
 | GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
-| AWS | Deploy static site | BLOCKED | Codex | `docs/DEPLOYMENT.md` | IAM denies S3 and Amplify hosting actions |
+| AWS | Deploy static site | DONE | Codex | `http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com` | S3 static website |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
 
 ## Dependencies And Blockers
 
 - AWS permissions may block creating S3 buckets, bucket policies, or public website access.
-- 2026-07-30: AWS deployment is blocked by IAM. `<deploy-user>` lacks `s3:CreateBucket`, `s3:ListAllMyBuckets`, and `amplify:ListApps`.
+- 2026-07-30: AWS permissions were updated and S3 static hosting succeeded.
 - GitHub repo name availability may require a fallback name.
 - No production backend exists yet; local persistence remains a prototype boundary.
 
@@ -94,7 +94,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | Security scan | PASS with notes | No credential findings; `.gitignore` hardened for env/key files |
 | 2026-07-30 | GitHub publish | PASS | Created and pushed `https://github.com/xnasusx/u-dont-grc-me` |
 | 2026-07-30 | GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` |
-| 2026-07-30 | AWS hosting | BLOCKED | IAM denies S3 bucket creation/listing and Amplify listing |
+| 2026-07-30 | AWS hosting | PASS | S3 website endpoint returned HTTP `200` |
 
 ## Deliverable Verification
 
@@ -107,8 +107,8 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Use PMO skill | `PLANS.md` and plan tracking | This file | PASS |
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
 | GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
-| AWS hosting | Attempted but blocked by IAM | `docs/DEPLOYMENT.md` | BLOCKED |
+| AWS hosting | S3 static website deployed | `http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com` | PASS |
 
 ## Next Step
 
-Grant AWS hosting permissions or provide an existing deploy target, then rerun the static deployment.
+Monitor GitHub Actions and move to CloudFront/OAC before using the prototype with real GRC data.
