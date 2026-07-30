@@ -17,6 +17,31 @@ For this prototype release, static hosting is preferred:
 3. Upload `dist/`.
 4. Configure a public-read bucket policy for website assets if acceptable for the account.
 
+## Current AWS Blocker
+
+Deployment was attempted on 2026-07-30 against AWS account `<AWS_ACCOUNT_ID>` with IAM user `arn:aws:iam::<AWS_ACCOUNT_ID>:user/<deploy-user>`.
+
+The user can authenticate, but current IAM permissions do not allow AWS hosting setup:
+
+- `s3:CreateBucket` denied for `u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1`.
+- `s3:ListAllMyBuckets` denied.
+- `amplify:ListApps` denied.
+
+## Required IAM Permissions For Static S3 Hosting
+
+Minimum permissions for the current deployment approach:
+
+- `s3:CreateBucket`
+- `s3:PutBucketWebsite`
+- `s3:PutPublicAccessBlock`
+- `s3:PutBucketPolicy`
+- `s3:ListBucket`
+- `s3:PutObject`
+- `s3:DeleteObject`
+- `s3:GetObject`
+
+If public S3 website hosting is not acceptable, use CloudFront with Origin Access Control and keep the bucket private.
+
 ## Production Upgrade Path
 
 Before handling real GRC data, move to:

@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 00:24 ET
+Last updated: 2026-07-30 00:38 ET
 PMO status: YELLOW
-Current phase: Product expansion and publishing
+Current phase: AWS blocked, source published
 Owner: Codex
 
 ## Objective
@@ -66,13 +66,14 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Build Admin module | DONE | Codex | `src/App.tsx` | Agents, integrations, audit ledger, settings |
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | TODO | Codex | command outputs, review notes | PMO validation gate |
-| GitHub | Create repo, commit, push | TODO | Codex | remote URL, commit hash | Requires `gh` |
-| AWS | Deploy static site | TODO | Codex | hosted URL or blocker | Requires AWS permissions |
+| GitHub | Create repo, commit, push | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, commit `72461f7` | Private repo |
+| AWS | Deploy static site | BLOCKED | Codex | `docs/DEPLOYMENT.md` | IAM denies S3 and Amplify hosting actions |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
 
 ## Dependencies And Blockers
 
 - AWS permissions may block creating S3 buckets, bucket policies, or public website access.
+- 2026-07-30: AWS deployment is blocked by IAM. `<deploy-user>` lacks `s3:CreateBucket`, `s3:ListAllMyBuckets`, and `amplify:ListApps`.
 - GitHub repo name availability may require a fallback name.
 - No production backend exists yet; local persistence remains a prototype boundary.
 
@@ -89,6 +90,10 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | GitHub CLI auth | PASS | `gh auth status` authenticated as `MoffPotato` |
 | 2026-07-30 | AWS CLI auth | PASS | `aws sts get-caller-identity` returned account `<AWS_ACCOUNT_ID>` |
 | 2026-07-30 | TypeScript and production build | PASS | `npm run build` |
+| 2026-07-30 | Browser UI validation | PASS | Playwright CLI checked Command Center, Governance, Compliance, Risk, Admin, desktop/mobile, no console errors |
+| 2026-07-30 | Security scan | PASS with notes | No credential findings; `.gitignore` hardened for env/key files |
+| 2026-07-30 | GitHub publish | PASS | Created and pushed `https://github.com/xnasusx/u-dont-grc-me` |
+| 2026-07-30 | AWS hosting | BLOCKED | IAM denies S3 bucket creation/listing and Amplify listing |
 
 ## Deliverable Verification
 
@@ -98,11 +103,11 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Rename tool | Product renamed | `index.html`, `src/App.tsx`, docs | PASS |
 | Reorganize left panel | New IA implemented | Command Center, Governance, Compliance, Risk, Admin | PASS |
 | Research GRC tools and build features | Research-informed modules implemented | `src/App.tsx`, docs | PASS |
-| Use PMO skill | `PLANS.md` and plan tracking | This file | IN PROGRESS |
-| Secure code and quality skills | Pending review |  | TODO |
-| GitHub repo | Pending |  | TODO |
-| AWS hosting | Pending |  | TODO |
+| Use PMO skill | `PLANS.md` and plan tracking | This file | PASS |
+| Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
+| GitHub repo | Private repo created and pushed | `https://github.com/xnasusx/u-dont-grc-me` | PASS |
+| AWS hosting | Attempted but blocked by IAM | `docs/DEPLOYMENT.md` | BLOCKED |
 
 ## Next Step
 
-Run validation, security review, GitHub publishing, and AWS deployment.
+Grant AWS hosting permissions or provide an existing deploy target, then rerun the static deployment.
