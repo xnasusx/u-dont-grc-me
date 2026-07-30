@@ -105,6 +105,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.3.0 TypeScript and production build | PASS | `npm run build` |
 | 2026-07-30 | 0.3.0 browser smoke | PASS | Playwright checked Command Center, Governance, Compliance, Risk, Admin on desktop/mobile; screenshots in `output/` |
 | 2026-07-30 | 0.3.0 security scan | PASS with notes | No live-format secret findings; documentation-only matches and package dependency names |
+| 2026-07-30 | 0.3.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I2SW86NIG9MQG7IPUO1Q5G1IVD` completed, live HTML serves bundle `index-CuUwbFWI.js` |
 
 ## Deliverable Verification
 
@@ -124,4 +125,4 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 
 ## Next Step
 
-Commit/push `0.3.0`, deploy the refreshed build to CloudFront, and avoid real GRC data until authentication/backend controls exist.
+Monitor GitHub Actions and avoid real GRC data until authentication/backend controls exist.
