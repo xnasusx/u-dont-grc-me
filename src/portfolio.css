@@ -91,8 +91,8 @@ select:focus-visible {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: var(--ink);
-  color: var(--paper);
+  background: transparent;
+  color: var(--ink);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -433,15 +433,53 @@ ul li + li {
   margin-bottom: 4px;
 }
 
-.experience-copy h3 span {
+.experience-copy h3 span,
+.experience-copy h3 a {
   color: var(--accent);
   font-weight: 600;
+}
+
+.experience-copy h3 a {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.12s ease;
+}
+
+.experience-copy h3 a:hover {
+  border-bottom-color: var(--accent);
 }
 
 .experience-context {
   color: var(--muted);
   font-size: 0.88rem;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
+}
+
+.experience-roles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.experience-roles li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+.experience-role-title {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.experience-role-period {
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .experience-copy p {

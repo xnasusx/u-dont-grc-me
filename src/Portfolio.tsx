@@ -85,63 +85,90 @@ const principles = [
 
 const experience = [
   {
-    period: "Feb 2026 — present",
-    role: "Staff Trust, Risk, and Compliance Analyst",
+    period: "Sep 2021 — present",
     company: "Rapid7",
-    context: "Public cybersecurity company · Boston, MA",
+    companyUrl: "https://www.linkedin.com/company/rapid7/",
+    location: "Boston, MA",
+    roles: [
+      { title: "Staff Trust, Risk, and Compliance Analyst", period: "Feb 2026 — present" },
+      { title: "Lead Security Risk Analyst", period: "Feb 2023 — Feb 2026" },
+      { title: "Lead Security Compliance Analyst", period: "Sep 2021 — Feb 2023" },
+    ],
     body:
       "Owning the Integrated IS Risk Management framework end-to-end: quantitative risk, third-party risk, and customer risk assessment as one operating model with board-level visibility.",
     highlights: [
       "Architected the first Integrated IS Risk Management (ISIRM) framework, consolidating three siloed functions into one governance model.",
       "Designed a FAIR-based quantification model and embedded it in an LLM application — one of the earliest production AI + GRC integrations in the org.",
       "Built the Incident Severity Calculator (OWASP + EO-14028 materiality) and led the SEC Cyber Incident Disclosure program.",
-    ],
-    tags: ["FAIR", "SEC materiality", "LLM integration", "OneTrust"],
-  },
-  {
-    period: "Feb 2023 — Feb 2026",
-    role: "Lead Security Risk Analyst",
-    company: "Rapid7",
-    context: "Prior title · Boston, MA",
-    body:
       "Built and administered the OneTrust GRC platform from scratch — risk register, intake, control library — and engineered API integrations with Jira and ICON to automate remediation.",
-    highlights: [
       "Created the Findings Management Calculator to standardize risk ratings and cut triage time by 40%.",
       "Founded the annual Security Risk Assessment: an executive review that established an ongoing board-visibility cadence.",
       "Redesigned Customer Risk Assessment; response SLAs went from weeks to days.",
+      "Directed SOC 2 and FedRAMP audit readiness — 100% evidence submission, zero findings.",
     ],
-    tags: ["OneTrust", "Jira API", "Risk register", "CRA"],
+    tags: ["FAIR", "SEC materiality", "LLM integration", "OneTrust", "Jira API", "SOC 2", "FedRAMP"],
   },
   {
-    period: "Sep 2021 — Feb 2023",
-    role: "Lead Security Compliance Analyst",
-    company: "Rapid7",
-    context: "Prior title · Boston, MA",
-    body:
-      "Directed SOC 2 and FedRAMP audit readiness — 100% evidence submission, zero findings — while standing up the compliance function that later fed the risk platform.",
-    tags: ["SOC 2", "FedRAMP", "Audit readiness"],
-  },
-  {
-    period: "2017 — 2021",
-    role: "Enterprise & healthcare GRC",
-    company: "Acquia · Seven Bridges · Nuance",
-    context: "Boston, MA & Burlington, MA",
-    body:
-      "Ran vendor risk at scale (650+ / 900+ vendors), stood up a global GDPR program at Acquia, and built the healthcare-division security & privacy GRC program at Nuance across HIPAA, HITRUST, ISO, NIST, SOC, and FedRAMP.",
-    highlights: [
-      "Negotiated BAA / ISA / MSA terms that directly unblocked $1.5M+ quarterly bookings.",
-      "Delivered 14+ audit assurance activities across privacy and security frameworks.",
+    period: "Mar 2020 — Sep 2021",
+    company: "Seven Bridges",
+    companyUrl: "https://www.linkedin.com/company/seven-bridges/",
+    location: "Boston, MA",
+    roles: [
+      { title: "Senior Risk and Compliance Analyst", period: "Mar 2020 — Sep 2021" },
     ],
-    tags: ["GDPR", "HIPAA", "HITRUST", "Vendor risk"],
+    body:
+      "Managed 650+ vendors and executed audits for HIPAA, ISO, NIST, SOC, and FedRAMP compliance. Negotiated security and privacy contracts that directly enabled $1.5M+ in quarterly bookings.",
+    tags: ["Vendor risk", "HIPAA", "FedRAMP", "Contract review"],
   },
   {
-    period: "2015 — 2017",
-    role: "Foundational roles",
-    company: "iRobot · Veritas (formerly Symantec)",
-    context: "Bedford, MA",
+    period: "Nov 2017 — Mar 2020",
+    company: "Acquia",
+    companyUrl: "https://www.linkedin.com/company/acquia/",
+    location: "Boston, MA",
+    roles: [
+      { title: "Senior Information Security Analyst", period: "Nov 2019 — Mar 2020" },
+      { title: "Senior Risk and Controls Analyst, Information Security", period: "Aug 2018 — Mar 2019" },
+      { title: "Risk and Controls Analyst, Information Security", period: "Nov 2017 — Aug 2018" },
+    ],
     body:
-      "Ran an information security program through PMO at iRobot; before that, UAT-tested backup hardware against Backup Exec at Veritas. The audit reflexes and product instincts date back to here.",
-    tags: ["PMO", "UAT", "Program coordination"],
+      "Designed and implemented a global GDPR compliance program (policies, vendor due diligence, lawful processing, breach response, training). Managed 900+ vendors with audits against HIPAA, ISO, NIST, SOC, and FedRAMP standards.",
+    tags: ["GDPR", "HIPAA", "ISO", "NIST", "SOC", "FedRAMP"],
+  },
+  {
+    period: "Jan 2017 — Nov 2017",
+    company: "Nuance Communications",
+    companyUrl: "https://www.linkedin.com/company/nuance-communications/",
+    location: "Burlington, MA",
+    roles: [
+      { title: "Healthcare IT GRC Analyst, Information Security", period: "Jan 2017 — Nov 2017" },
+    ],
+    body:
+      "Built formal security and privacy GRC program for healthcare division, aligned to HIPAA, HITRUST, ISO, NIST, SOC, and FedRAMP. Reviewed security and privacy contracts, enabling $1.2M+ in quarterly compliant revenue.",
+    tags: ["HIPAA", "HITRUST", "Healthcare"],
+  },
+  {
+    period: "May 2016 — Jan 2017",
+    company: "iRobot",
+    companyUrl: "https://www.linkedin.com/company/irobot/",
+    location: "Bedford, MA",
+    roles: [
+      { title: "Program Coordinator - Information Security, Intern", period: "May 2016 — Jan 2017" },
+    ],
+    body:
+      "Managed the information security program through PMO.",
+    tags: ["PMO", "Program coordination"],
+  },
+  {
+    period: "Nov 2015 — May 2016",
+    company: "Veritas (formerly Symantec)",
+    companyUrl: "https://www.linkedin.com/company/veritas-technologies-llc/",
+    location: "Massachusetts",
+    roles: [
+      { title: "Backup and Recovery Testing Engineer, Intern", period: "Nov 2015 — May 2016" },
+    ],
+    body:
+      "UAT testing on new hardware against Backup and Backup Exec software.",
+    tags: ["UAT", "Backup Exec"],
   },
 ];
 
@@ -849,9 +876,23 @@ function MainPortfolio() {
               <div className="experience-period">{chapter.period}</div>
               <div className="experience-copy">
                 <h3>
-                  {chapter.role} · <span>{chapter.company}</span>
+                  {chapter.companyUrl ? (
+                    <a href={chapter.companyUrl} target="_blank" rel="noopener noreferrer">
+                      {chapter.company}
+                    </a>
+                  ) : (
+                    chapter.company
+                  )}
                 </h3>
-                <p className="experience-context">{chapter.context}</p>
+                <p className="experience-context">{chapter.location}</p>
+                <ul className="experience-roles">
+                  {chapter.roles.map((role) => (
+                    <li key={role.title}>
+                      <span className="experience-role-title">{role.title}</span>
+                      <span className="experience-role-period">{role.period}</span>
+                    </li>
+                  ))}
+                </ul>
                 <p>{chapter.body}</p>
                 {chapter.highlights && (
                   <ul>
