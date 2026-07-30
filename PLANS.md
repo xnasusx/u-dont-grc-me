@@ -144,6 +144,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.6.0 TypeScript and production build | PASS | `VITE_API_BASE_URL=... npm run build` produced bundle `index-CIpw5eTm.js` |
 | 2026-07-30 | 0.6.0 AWS deployment | PASS | S3 sync completed, CloudFront invalidation `I28ELX5E0XYX00XYZD94VWNBDH` completed, live HTML serves bundle `index-CIpw5eTm.js` |
 | 2026-07-30 | 0.6.0 security scan | PASS with notes | No live-format secrets; documentation/dependency/demo hardening text only, generated and local package folders ignored |
+| 2026-07-30 | 0.6.0 GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.6.0` |
 
 ## Deliverable Verification
 
