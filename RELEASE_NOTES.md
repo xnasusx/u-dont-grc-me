@@ -17,7 +17,7 @@ This release adds a GitHub Pages static mirror while preserving the existing AWS
 
 ### Deployment Note
 
-After the workflow is pushed, GitHub Pages must be set to `Source: GitHub Actions` in the repository settings.
+The workflow requests GitHub Pages enablement automatically. If GitHub blocks first-run enablement, set Pages to `Source: GitHub Actions` in the repository settings.
 
 ## Version 0.4.0
 

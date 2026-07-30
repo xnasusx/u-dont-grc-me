@@ -82,7 +82,7 @@ The workflow:
 4. Uploads `dist/` with `actions/upload-pages-artifact`.
 5. Deploys through `actions/deploy-pages`.
 
-Repository setting required after pushing the workflow:
+The workflow requests GitHub Pages enablement through `actions/configure-pages`. If GitHub blocks first-run enablement, set this manually:
 
 - Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
 
