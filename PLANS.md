@@ -66,7 +66,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Build Admin module | DONE | Codex | `src/App.tsx` | Agents, integrations, audit ledger, settings |
 | Documentation | Add user/dev docs, changelog, release notes, deployment guide | DONE | Codex | `README.md`, `docs/`, `CHANGELOG.md`, `RELEASE_NOTES.md` | Required before publishing |
 | Quality | Run build, UI, React/design/security checks | TODO | Codex | command outputs, review notes | PMO validation gate |
-| GitHub | Create repo, commit, push | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, commit `72461f7` | Private repo |
+| GitHub | Create repo, commit, push, release | DONE | Codex | `https://github.com/xnasusx/u-dont-grc-me`, release `v0.2.0` | Private repo |
 | AWS | Deploy static site | BLOCKED | Codex | `docs/DEPLOYMENT.md` | IAM denies S3 and Amplify hosting actions |
 | Closure | Final PMO deliverable check | TODO | Codex | final status | Compare against ask |
 
@@ -93,6 +93,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | Browser UI validation | PASS | Playwright CLI checked Command Center, Governance, Compliance, Risk, Admin, desktop/mobile, no console errors |
 | 2026-07-30 | Security scan | PASS with notes | No credential findings; `.gitignore` hardened for env/key files |
 | 2026-07-30 | GitHub publish | PASS | Created and pushed `https://github.com/xnasusx/u-dont-grc-me` |
+| 2026-07-30 | GitHub release | PASS | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` |
 | 2026-07-30 | AWS hosting | BLOCKED | IAM denies S3 bucket creation/listing and Amplify listing |
 
 ## Deliverable Verification
@@ -105,7 +106,7 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Research GRC tools and build features | Research-informed modules implemented | `src/App.tsx`, docs | PASS |
 | Use PMO skill | `PLANS.md` and plan tracking | This file | PASS |
 | Secure code and quality skills | Build, browser, security scan, interface fixes | Validation history | PASS |
-| GitHub repo | Private repo created and pushed | `https://github.com/xnasusx/u-dont-grc-me` | PASS |
+| GitHub repo | Private repo created, pushed, and released | `https://github.com/xnasusx/u-dont-grc-me/releases/tag/v0.2.0` | PASS |
 | AWS hosting | Attempted but blocked by IAM | `docs/DEPLOYMENT.md` | BLOCKED |
 
 ## Next Step
