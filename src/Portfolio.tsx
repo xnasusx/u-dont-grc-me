@@ -24,7 +24,8 @@ const links = {
   product: "https://xnasusx.github.io/u-dont-grc-me/",
   riskTools: "#/risk-tools",
   calendly: "https://calendly.com/susanshepard",
-  headshot: `${import.meta.env.BASE_URL}shepard_headshot.png`,
+  headshot: `${import.meta.env.BASE_URL}shepard-headshot.jpg`,
+  headshot2x: `${import.meta.env.BASE_URL}shepard-headshot@2x.jpg`,
   resumePdf: `${import.meta.env.BASE_URL}susan-shepard-resume.pdf`,
   resumeJson: `${import.meta.env.BASE_URL}susan-shepard-resume.json`,
   resumeMarkdown: `${import.meta.env.BASE_URL}susan-shepard-resume.md`,
@@ -916,7 +917,10 @@ function MainPortfolio() {
           <div className="hero-portrait">
             <img
               src={links.headshot}
+              srcSet={`${links.headshot} 1x, ${links.headshot2x} 2x`}
               alt="Susan Shepard"
+              width={440}
+              height={574}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
