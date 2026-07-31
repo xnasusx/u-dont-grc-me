@@ -2,9 +2,11 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BookOpen,
+  Dices,
   ExternalLink,
   FileText,
   Github,
+  Grid3x3,
   Landmark,
   Linkedin,
   Mail,
@@ -52,6 +54,71 @@ const riskQuantifier = {
     },
   ],
 };
+
+const monteCarloDemo = {
+  url: "https://xnasusx.github.io/monte-carlo-demo/",
+  repo: "https://github.com/xnasusx/monte-carlo-demo",
+  steps: [
+    {
+      eyebrow: "Step 1 · Flip",
+      title: "Flip a fair coin",
+      body: "Drag from 10 flips up to 100,000 and watch the running proportion of heads after every single flip. Ten flips land anywhere; ten thousand settle down.",
+    },
+    {
+      eyebrow: "Step 2 · Compare",
+      title: "Read the noise band",
+      body: "The shaded band is where 95% of fair-coin runs fall at each flip count, from the standard error of a binomial proportion: SE = 0.5/√n. It narrows as n grows.",
+    },
+    {
+      eyebrow: "Step 3 · Repeat",
+      title: "Run it 200 more times",
+      body: "The histogram reruns the whole experiment 200 times at the same flip count, so you can see where your single run landed inside the spread of possible ones.",
+    },
+  ],
+};
+
+const riskLabTools = [
+  {
+    id: "heatmaps",
+    label: "Heatmaps & Histograms",
+    icon: Grid3x3,
+    title: (
+      <>
+        Risk <em>Quantifier</em>
+      </>
+    ),
+    blurb:
+      "Place your risks on a heat map, give each one a frequency and a loss range, then run 10,000 Monte Carlo iterations and watch the matrix become a distribution. Built to show exactly how much information a qualitative risk matrix throws away.",
+    credit:
+      "Susan Shepard. A learning tool — each risk is modelled independently, so read the output as intuition rather than a production model.",
+    stepsHeading: (
+      <>
+        From heat map to histogram, in <em>three</em> steps.
+      </>
+    ),
+    tool: riskQuantifier,
+  },
+  {
+    id: "monte-carlo",
+    label: "Monte Carlo",
+    icon: Dices,
+    title: (
+      <>
+        Your first <em>Monte Carlo</em>
+      </>
+    ),
+    blurb:
+      "Monte Carlo starts with something as ordinary as a coin flip: an event with a known probability, simulated over and over until the outcomes take a shape. This is the law of large numbers doing the work — the reason a simulation gives you a range you can defend instead of a single number you have to.",
+    credit:
+      "Susan Shepard. A learning build on a fair coin with independent flips — intuition for why simulation converges, not a risk model.",
+    stepsHeading: (
+      <>
+        Why more trials means <em>less</em> noise.
+      </>
+    ),
+    tool: monteCarloDemo,
+  },
+];
 
 const focusAreas = [
   { label: "FAIR cyber risk quantification", tone: "rose" },
@@ -1510,10 +1577,16 @@ function RiskStepCard({ step }: { step: RiskStep }) {
 // can read its height and grow the frame to match instead of trapping it in a
 // scrolling window. In local dev the origins differ and this throws, which just
 // leaves the CSS fallback height in place.
-function useFrameAutoHeight(frameRef: React.RefObject<HTMLIFrameElement | null>) {
+// `resetKey` changes when the frame is pointed at a different tool, so the
+// height measured for the previous one does not stick to the new document.
+function useFrameAutoHeight(
+  frameRef: React.RefObject<HTMLIFrameElement | null>,
+  resetKey?: string,
+) {
   React.useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
+    frame.style.height = "";
 
     const sync = () => {
       // Cross-origin (local dev) hands back null, and the CSS height stands.
@@ -1536,16 +1609,18 @@ function useFrameAutoHeight(frameRef: React.RefObject<HTMLIFrameElement | null>)
       frame.removeEventListener("load", sync);
       window.clearInterval(timer);
     };
-  }, [frameRef]);
+  }, [frameRef, resetKey]);
 }
 
 function RiskLabPage() {
+  const [activeId, setActiveId] = React.useState(riskLabTools[0].id);
+  const active = riskLabTools.find((entry) => entry.id === activeId) ?? riskLabTools[0];
   const frameRef = React.useRef<HTMLIFrameElement>(null);
-  useFrameAutoHeight(frameRef);
+  useFrameAutoHeight(frameRef, active.id);
 
   return (
     <main className="portfolio-shell risk-lab-shell">
-      <header className="site-header case-header" aria-label="Risk Quantifier">
+      <header className="site-header case-header" aria-label="Risk lab">
         <a className="brand-link" href="#/">
           <span>Susan Shepard</span>
         </a>
@@ -1554,68 +1629,88 @@ function RiskLabPage() {
         </a>
       </header>
 
-      <section className="risk-tool-detail">
-        <div className="risk-tool-detail-copy">
-          <p className="section-label">Risk lab · Interactive tool</p>
-          <h1>
-            Risk <em>Quantifier</em>
-          </h1>
-          <p>
-            Place your risks on a heat map, give each one a frequency and a loss range, then run
-            10,000 Monte Carlo iterations and watch the matrix become a distribution. Built to show
-            exactly how much information a qualitative risk matrix throws away.
-          </p>
-          <div className="risk-tool-actions">
-            <a
-              className="primary-link"
-              href={riskQuantifier.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Open full screen <ExternalLink size={16} />
-            </a>
-            <a
-              className="secondary-link"
-              href={riskQuantifier.repo}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub <Github size={16} />
-            </a>
+      <div className="risk-tab-bar">
+        <div className="risk-tab-list" role="tablist" aria-label="Risk lab tools">
+          {riskLabTools.map((entry) => {
+            const Icon = entry.icon;
+            const isActive = entry.id === activeId;
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                role="tab"
+                id={`risk-tab-${entry.id}`}
+                aria-selected={isActive}
+                aria-controls={`risk-panel-${entry.id}`}
+                className={isActive ? "risk-tab active" : "risk-tab"}
+                onClick={() => setActiveId(entry.id)}
+              >
+                <Icon size={16} />
+                <span>{entry.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className="risk-tab-panel"
+        id={`risk-panel-${active.id}`}
+        role="tabpanel"
+        aria-labelledby={`risk-tab-${active.id}`}
+      >
+        <section className="risk-tool-detail">
+          <div className="risk-tool-detail-copy">
+            <p className="section-label">Risk lab · Interactive tool</p>
+            <h1>{active.title}</h1>
+            <p>{active.blurb}</p>
+            <div className="risk-tool-actions">
+              <a
+                className="primary-link"
+                href={active.tool.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open full screen <ExternalLink size={16} />
+              </a>
+              <a
+                className="secondary-link"
+                href={active.tool.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub <Github size={16} />
+              </a>
+            </div>
           </div>
-        </div>
-        <aside className="risk-tool-credit">
-          <span>Built by</span>
-          <p>
-            Susan Shepard. A learning tool — each risk is modelled independently, so read the output
-            as intuition rather than a production model.
-          </p>
-        </aside>
-      </section>
+          <aside className="risk-tool-credit">
+            <span>Built by</span>
+            <p>{active.credit}</p>
+          </aside>
+        </section>
 
-      <section className="risk-embed-shell" aria-label="Risk Quantifier interactive tool">
-        <iframe
-          ref={frameRef}
-          className="risk-tool-frame"
-          src={riskQuantifier.url}
-          title="Risk Quantifier interactive tool"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </section>
+        <section className="risk-embed-shell" aria-label={`${active.label} interactive tool`}>
+          <iframe
+            ref={frameRef}
+            className="risk-tool-frame"
+            src={active.tool.url}
+            title={`${active.label} interactive tool`}
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </section>
 
-      <section className="risk-lab-section" aria-labelledby="risk-quantifier-steps">
-        <div className="section-heading">
-          <p className="section-label">How it works</p>
-          <h2 id="risk-quantifier-steps">
-            From heat map to histogram, in <em>three</em> steps.
-          </h2>
-        </div>
-        <div className="risk-tool-grid">
-          {riskQuantifier.steps.map((step) => (
-            <RiskStepCard step={step} key={step.title} />
-          ))}
-        </div>
-      </section>
+        <section className="risk-lab-section" aria-labelledby="risk-lab-steps">
+          <div className="section-heading">
+            <p className="section-label">How it works</p>
+            <h2 id="risk-lab-steps">{active.stepsHeading}</h2>
+          </div>
+          <div className="risk-tool-grid">
+            {active.tool.steps.map((step) => (
+              <RiskStepCard step={step} key={step.title} />
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
