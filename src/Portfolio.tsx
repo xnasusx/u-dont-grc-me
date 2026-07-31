@@ -1587,8 +1587,17 @@ function useFrameAutoHeight(
     const sync = () => {
       // Cross-origin (local dev) hands back null, and the CSS height stands.
       const doc = frame.contentDocument;
-      if (!doc?.body) return;
-      const height = doc.documentElement.scrollHeight;
+      const view = frame.contentWindow;
+      const body = doc?.body;
+      if (!body || !view) return;
+      // Measure the body, not documentElement: documentElement.scrollHeight is
+      // clamped to the frame's own viewport, so it can only ever report the
+      // height we already set and the frame would never shrink back down.
+      const margins = view.getComputedStyle(body);
+      const height =
+        body.scrollHeight +
+        parseFloat(margins.marginTop || "0") +
+        parseFloat(margins.marginBottom || "0");
       // Guard against a blank or half-parsed document collapsing the frame.
       if (height > 400 && Math.abs(height - frame.offsetHeight) > 1) {
         frame.style.height = `${height}px`;
