@@ -1169,33 +1169,32 @@ function MainPortfolio() {
           </aside>
           <div className="about-prose">
             <p>
-              My work lives at the intersection of risk judgment, product thinking, and hands-on
+              My work sits at the intersection of risk judgment, product thinking, and hands-on
               engineering. I quantify cyber risk in dollars (FAIR, not colors), treat controls as the
-              foundational data model, wire evidence collection into the pipeline instead of the
-              audit checklist, and use AI where it measurably sharpens the decision instead of just
-              producing more of the same output.
+              core data model, build evidence collection into the pipeline instead of the audit
+              checklist, and use AI only where it sharpens a decision — not where it just produces
+              more output.
             </p>
             <p>
-              That stance came from doing the work the slow way first. I've built a privacy program
-              from nothing, run vendor risk across portfolios of 900+ suppliers, sat through the
-              audits where the evidence lived in someone's inbox, and watched good teams burn a
-              quarter proving things a system should have been proving continuously. Every one of
-              those experiences pointed at the same root cause: the control data underneath the
-              program was never modeled properly, so everything downstream had to be rebuilt by hand
-              every cycle.
+              That stance came from doing it the slow way first: building a privacy program from
+              scratch, running vendor risk across 900+ suppliers, sitting through audits where the
+              evidence lived in someone's inbox, watching good teams burn a quarter proving things a
+              system should have proven continuously. Every one of those pointed to the same root
+              cause — the control data was never modeled properly, so everything downstream had to be
+              rebuilt by hand each cycle.
             </p>
             <p>
-              Ten years and counting across enterprise security, healthcare and privacy, GDPR, vendor
-              risk at scale, SEC materiality and disclosure, audit readiness across SOC 2 / FedRAMP /
-              HITRUST / ISO / NIST, and now full-stack GRC platform design. Military background
-              shaped my discipline around execution and my respect for process rigor. Boston-based.
+              Ten years across enterprise security, healthcare and privacy, GDPR, vendor risk at
+              scale, SEC materiality and disclosure, audit readiness (SOC 2, FedRAMP, HITRUST, ISO,
+              NIST), and now full-stack GRC platform design. Military background shaped my discipline
+              around execution and respect for process rigor. Boston-based.
             </p>
             <p>
-              These days that means designing risk programs that answer in dollars, building the
-              automation that keeps them honest between audits, and teaching the next set of analysts
-              to think like engineers. President of the GRC Engineering Club Boston chapter.
-              Currently at Rapid7 as Staff Trust, Risk, and Compliance Analyst — where the fun is
-              proving GRC is a <em>revenue enabler</em>, not paperwork.
+              Today that means designing risk programs that answer in dollars, building the
+              automation that keeps them honest between audits, and teaching the next generation of
+              analysts to think like engineers. I'm president of the GRC Engineering Club's Boston
+              chapter, and currently Staff Trust, Risk, and Compliance Analyst at Rapid7 — where the
+              job is proving GRC is a <em>revenue enabler</em>, not paperwork.
             </p>
           </div>
         </div>
