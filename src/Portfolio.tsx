@@ -1514,33 +1514,27 @@ function useFrameAutoHeight(frameRef: React.RefObject<HTMLIFrameElement | null>)
   React.useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
-    let observer: ResizeObserver | undefined;
 
-    const attach = () => {
-      try {
-        const doc = frame.contentDocument;
-        if (!doc?.body) return;
-        const sync = () => {
-          const height = doc.documentElement.scrollHeight;
-          // Guard against a blank or half-parsed document collapsing the frame.
-          if (height > 400 && Math.abs(height - frame.offsetHeight) > 1) {
-            frame.style.height = `${height}px`;
-          }
-        };
-        sync();
-        observer?.disconnect();
-        observer = new ResizeObserver(sync);
-        observer.observe(doc.body);
-      } catch {
-        /* cross-origin (local dev) — keep the CSS height */
+    const sync = () => {
+      // Cross-origin (local dev) hands back null, and the CSS height stands.
+      const doc = frame.contentDocument;
+      if (!doc?.body) return;
+      const height = doc.documentElement.scrollHeight;
+      // Guard against a blank or half-parsed document collapsing the frame.
+      if (height > 400 && Math.abs(height - frame.offsetHeight) > 1) {
+        frame.style.height = `${height}px`;
       }
     };
 
-    attach();
-    frame.addEventListener("load", attach);
+    // The tool grows by ~500px once a simulation renders its charts. A
+    // ResizeObserver on the frame's body never delivered across the document
+    // boundary in testing, so poll instead — it is one layout read.
+    sync();
+    frame.addEventListener("load", sync);
+    const timer = window.setInterval(sync, 300);
     return () => {
-      frame.removeEventListener("load", attach);
-      observer?.disconnect();
+      frame.removeEventListener("load", sync);
+      window.clearInterval(timer);
     };
   }, [frameRef]);
 }
