@@ -17,14 +17,84 @@ const links = {
   email: "HireSusanShepard@pm.me",
   mailto: "mailto:HireSusanShepard@pm.me",
   github: "https://github.com/xnasusx",
+  githubProduct: "https://github.com/xnasusx/u-dont-grc-me",
   linkedin: "https://www.linkedin.com/in/xnasusx/",
   grcEngineeringClub: "https://grcengclub.com/chapters/boston#join",
   medium: "https://medium.com/@xnasusx",
   product: "https://xnasusx.github.io/u-dont-grc-me/",
+  riskTools: "#/risk-tools",
+  calendly: "https://calendly.com/susanshepard",
+  headshot: `${import.meta.env.BASE_URL}shepard_headshot.png`,
   resumePdf: `${import.meta.env.BASE_URL}susan-shepard-resume.pdf`,
   resumeJson: `${import.meta.env.BASE_URL}susan-shepard-resume.json`,
   resumeMarkdown: `${import.meta.env.BASE_URL}susan-shepard-resume.md`,
 };
+
+const riskTools = [
+  {
+    slug: "heatmap-to-histogram",
+    eyebrow: "Chapter 2 · Concept",
+    title: "Heat map to histogram",
+    body: "Place the same risk on a heat map and a histogram side by side to see what the matrix hides.",
+    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/heatmap-to-histogram.html",
+    cta: "Open the visualization",
+  },
+  {
+    slug: "calibration-trainer",
+    eyebrow: "Chapter 4 · Practice",
+    title: "Calibration trainer",
+    body: "Practice confidence intervals and get immediate feedback on whether your estimates are calibrated.",
+    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/calibration-trainer.html",
+    cta: "Train calibration",
+  },
+  {
+    slug: "your-first-monte-carlo",
+    eyebrow: "Chapter 5 · Simulation",
+    title: "Your first Monte Carlo",
+    body: "Run a live simulation and watch the distribution settle as the number of trials increases.",
+    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/your-first-monte-carlo.html",
+    cta: "Run the simulation",
+  },
+  {
+    slug: "loss-exceedance-curve",
+    eyebrow: "Chapter 6 · Decision support",
+    title: "Loss exceedance curve",
+    body: "Build a loss exceedance curve step by step, then overlay risk tolerance and materiality thresholds.",
+    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/loss-exceedance-curve.html",
+    cta: "Read the curve",
+  },
+];
+
+const aiCoaches = [
+  {
+    title: "The Board Translator",
+    opening:
+      "Paste simulation output and turn it into loss exceedance statements, board-ready language, and decision framing.",
+    href: "https://chatgpt.com/g/g-6999464347308191aee6a70ab1f0031e-the-board-translator",
+    prompt: "Help me explain this P50 / P90 cyber-loss result to a board audience.",
+  },
+  {
+    title: "Cyber Risk Scenario Coach",
+    opening:
+      "Turn a fuzzy concern into a scoped cyber-risk scenario that is ready for quantitative analysis.",
+    href: "https://chatgpt.com/g/g-6997f34b45bc819196dccb92585c6a61-cyber-risk-scenario-coach",
+    prompt: "Help me scope a ransomware scenario for FAIR analysis.",
+  },
+  {
+    title: "The Loss Estimator",
+    opening:
+      "Walk through the major forms of loss and build a magnitude estimate that is easier to defend.",
+    href: "https://chatgpt.com/g/g-6999452f6b0881919985b7af55625662-the-loss-estimator",
+    prompt: "Help me estimate response, productivity, replacement, and secondary losses.",
+  },
+  {
+    title: "Roast My Risk Register",
+    opening:
+      "Pressure-test vague register entries and rebuild them into decision-useful risk statements.",
+    href: "https://chatgpt.com/g/g-69994331a5508191bdffc44511757006-roast-my-risk-register",
+    prompt: "Roast this risk register entry and rewrite it as a quantified scenario.",
+  },
+];
 
 const focusAreas = [
   "FAIR cyber risk quantification",
@@ -66,164 +136,379 @@ const objectives = [
 
 const principles = [
   {
-    title: "Risk should be a number, not a color.",
-    body: "Heat maps are where decisions go to die. FAIR belongs in the operating model — with ranges, appetite, and loss exposure a board can actually act on.",
+    titleHtml: (
+      <>
+        Controls are the <em>foundation</em>. Everything else pulls from the controls.
+      </>
+    ),
+    body:
+      "If you build controls out properly, audit evidence, risks, policy, and compliance automatically compose. But if you don't understand the layers at which a control sits (product, platform, customer, enterprise) and how much the control costs you (TCO — total cost of ownership), you'll never effectively calculate risk, mature controls down the road, establish realistic KRIs/KPIs, or implement a continuous monitoring program. Bad control data is the path to a weakened or failing GRC program.",
   },
   {
-    title: "If a human chases the same evidence every cycle, the system is underbuilt.",
-    body: "Assurance should be a byproduct of the work — not a second job that eats a quarter every audit season.",
+    titleHtml: (
+      <>
+        Financial quantification in GRC is <em>non-negotiable</em>.
+      </>
+    ),
+    body:
+      'Heatmaps are dead. Red is a color, not a unit of risk measurement. You cannot tell leadership "how risky" something is by calling it red. You have to know the true impact and likelihood of risks in dollars to inform leadership of the threat landscape and equip them to make real decisions. FAIR gives you defensible loss exposure ranges that a CFO can budget against.',
   },
   {
-    title: "Controls need architecture, not paperwork.",
-    body: "Frameworks scale when controls, evidence, risk, owners, and policies are modeled as one system instead of five parallel spreadsheets.",
+    titleHtml: (
+      <>
+        Risk is not a point in time. Risk is <em>scenarios</em>.
+      </>
+    ),
+    body:
+      "Static risk registers are legacy. We already know controls are the foundation for GRC, but specifically for risk, we need to stop looking at it as a snapshot and start thinking of it as scenarios—the same way we run tabletops for BCP/DR. Risk is continuous and ever-evolving. We run scenarios, Monte Carlo simulations, and populate loss exceedance curves to show where threats actually live. When risk is forward-looking instead of reactionary—when it's preventative instead of response-based—you have a mature program.",
   },
   {
-    title: "AI should sharpen judgment, not launder it.",
-    body: "I use LLMs where they measurably speed scoring, mapping, and evidence review — and keep the decision itself legible, reviewable, and human-owned.",
+    titleHtml: (
+      <>
+        GRC engineering and <em>automation</em> take programs to the next level.
+      </>
+    ),
+    body:
+      "Even with great processes in place, manual workload will eventually take its toll and employee fatigue will cause error. The best way to maintain your program's maturity while not burning out your team is to automate the workflows and engineer solutions. Leverage AI to calculate risks, respond to customer questionnaires, review vendor assessments, and perform threat modeling. AI and engineering take already-mature programs to the next level and give struggling teams a shortcut to the top.",
   },
 ];
 
-const experience = [
+type Role = {
+  period: string;
+  location: string;
+  company: string;
+  companyUrl?: string;
+  context: string;
+  headline: string;
+  roles: { title: string; period: string }[];
+  summary: string;
+  built: string[];
+  impact: string[];
+  tags: string[];
+  current?: boolean;
+};
+
+const experience: Role[] = [
   {
     period: "Sep 2021 — present",
+    location: "Boston, MA",
     company: "Rapid7",
     companyUrl: "https://www.linkedin.com/company/rapid7/",
-    location: "Boston, MA",
+    context: "Public-company security · Trust, Risk & Compliance",
+    headline: "Staff Trust, Risk, and Compliance Analyst",
     roles: [
       { title: "Staff Trust, Risk, and Compliance Analyst", period: "Feb 2026 — present" },
       { title: "Lead Security Risk Analyst", period: "Feb 2023 — Feb 2026" },
       { title: "Lead Security Compliance Analyst", period: "Sep 2021 — Feb 2023" },
     ],
-    body:
-      "Owning the Integrated IS Risk Management framework end-to-end: quantitative risk, third-party risk, and customer risk assessment as one operating model with board-level visibility.",
-    highlights: [
-      "Architected the first Integrated IS Risk Management (ISIRM) framework, consolidating three siloed functions into one governance model.",
+    summary:
+      "Owning the Integrated IS Risk Management framework end-to-end — quantitative risk, third-party risk, and customer risk assessment run as one operating model with board-level visibility. This is where the control-first, quantify-everything stance stopped being a philosophy and became a program.",
+    built: [
+      "Architected the first Integrated IS Risk Management (ISIRM) framework, consolidating three siloed functions into a single governance model with one control spine underneath it.",
       "Designed a FAIR-based quantification model and embedded it in an LLM application — one of the earliest production AI + GRC integrations in the org.",
-      "Built the Incident Severity Calculator (OWASP + EO-14028 materiality) and led the SEC Cyber Incident Disclosure program.",
-      "Built and administered the OneTrust GRC platform from scratch — risk register, intake, control library — and engineered API integrations with Jira and ICON to automate remediation.",
-      "Created the Findings Management Calculator to standardize risk ratings and cut triage time by 40%.",
-      "Founded the annual Security Risk Assessment: an executive review that established an ongoing board-visibility cadence.",
-      "Redesigned Customer Risk Assessment; response SLAs went from weeks to days.",
-      "Directed SOC 2 and FedRAMP audit readiness — 100% evidence submission, zero findings.",
+      "Built the Incident Severity Calculator, scoring OWASP severity and EO-14028 materiality separately, and led the SEC Cyber Incident Disclosure program around it.",
+      "Stood up and administered the OneTrust GRC platform from scratch — risk register, intake, control library — with API integrations into Jira and ICON that route remediation automatically.",
+      "Created the Findings Management Calculator so every team rates risk against the same rubric instead of their own instinct.",
+    ],
+    impact: [
+      "Cut findings triage time by 40% by replacing per-team judgment with one standardized rating rubric.",
+      "Founded the annual Security Risk Assessment — an executive review that turned into an ongoing board-visibility cadence.",
+      "Redesigned Customer Risk Assessment; response SLAs moved from weeks to days without adding headcount.",
+      "Directed SOC 2 and FedRAMP audit readiness: 100% evidence submission, zero findings.",
     ],
     tags: ["FAIR", "SEC materiality", "LLM integration", "OneTrust", "Jira API", "SOC 2", "FedRAMP"],
+    current: true,
   },
   {
     period: "Mar 2020 — Sep 2021",
-    company: "Seven Bridges",
-    companyUrl: "https://www.linkedin.com/company/seven-bridges/",
     location: "Boston, MA",
-    roles: [
-      { title: "Senior Risk and Compliance Analyst", period: "Mar 2020 — Sep 2021" },
+    company: "Seven Bridges",
+    companyUrl: "https://www.linkedin.com/company/sevenbridges/",
+    context: "Biotechnology · Genomics data platform",
+    headline: "Senior Risk and Compliance Analyst",
+    roles: [{ title: "Senior Risk and Compliance Analyst", period: "Mar 2020 — Sep 2021" }],
+    summary:
+      "Third-party risk and multi-framework audit for a genomics data platform, where the same control had to satisfy healthcare regulators, federal auditors, and enterprise customers at the same time.",
+    built: [
+      "Ran third-party risk across a 650+ vendor portfolio, from intake through assessment, findings, and remediation tracking.",
+      "Executed audit cycles against HIPAA, ISO, NIST, SOC, and FedRAMP requirements on a single evidence base.",
+      "Negotiated the security and privacy terms inside customer and vendor contracts alongside legal and sales.",
     ],
-    body:
-      "Managed 650+ vendors and executed audits for HIPAA, ISO, NIST, SOC, and FedRAMP compliance. Negotiated security and privacy contracts that directly enabled $1.5M+ in quarterly bookings.",
-    tags: ["Vendor risk", "HIPAA", "FedRAMP", "Contract review"],
+    impact: [
+      "Directly enabled $1.5M+ in quarterly bookings by clearing security and privacy contract terms instead of stalling them.",
+      "Kept a regulated biotech platform continuously audit-ready across five frameworks at once.",
+      "Proved out the pattern I still use: assess the control once, report it five ways.",
+    ],
+    tags: ["Vendor risk", "HIPAA", "FedRAMP", "ISO 27001", "Contract review"],
   },
   {
     period: "Nov 2017 — Mar 2020",
+    location: "Boston, MA",
     company: "Acquia",
     companyUrl: "https://www.linkedin.com/company/acquia/",
-    location: "Boston, MA",
+    context: "Enterprise SaaS · Global privacy program",
+    headline: "Senior Information Security Analyst",
     roles: [
       { title: "Senior Information Security Analyst", period: "Nov 2019 — Mar 2020" },
       { title: "Senior Risk and Controls Analyst, Information Security", period: "Aug 2018 — Mar 2019" },
       { title: "Risk and Controls Analyst, Information Security", period: "Nov 2017 — Aug 2018" },
     ],
-    body:
-      "Designed and implemented a global GDPR compliance program (policies, vendor due diligence, lawful processing, breach response, training). Managed 900+ vendors with audits against HIPAA, ISO, NIST, SOC, and FedRAMP standards.",
+    summary:
+      "Built a global GDPR program from nothing while running vendor risk at enterprise SaaS scale — the role that taught me a program is only as good as the data model underneath it.",
+    built: [
+      "Designed and implemented a global GDPR compliance program: policies, vendor due diligence, lawful basis for processing, breach response, and company-wide training.",
+      "Managed a 900+ vendor portfolio with audits against HIPAA, ISO, NIST, SOC, and FedRAMP standards.",
+      "Authored the control and evidence documentation that the privacy and security programs both resolved against.",
+    ],
+    impact: [
+      "Took the company from no formal privacy program to GDPR-operational ahead of its enforcement exposure.",
+      "Scaled vendor due diligence past 900 vendors without proportionally scaling the team.",
+      "Established reusable control language that stopped privacy and security from documenting the same thing twice.",
+    ],
     tags: ["GDPR", "HIPAA", "ISO", "NIST", "SOC", "FedRAMP"],
   },
   {
     period: "Jan 2017 — Nov 2017",
+    location: "Burlington, MA",
     company: "Nuance Communications",
     companyUrl: "https://www.linkedin.com/company/nuance-communications/",
-    location: "Burlington, MA",
+    context: "Healthcare IT · HITRUST",
+    headline: "Healthcare IT GRC Analyst, Information Security",
     roles: [
       { title: "Healthcare IT GRC Analyst, Information Security", period: "Jan 2017 — Nov 2017" },
     ],
-    body:
-      "Built formal security and privacy GRC program for healthcare division, aligned to HIPAA, HITRUST, ISO, NIST, SOC, and FedRAMP. Reviewed security and privacy contracts, enabling $1.2M+ in quarterly compliant revenue.",
-    tags: ["HIPAA", "HITRUST", "Healthcare"],
+    summary:
+      "Stood up the formal security and privacy GRC program for a healthcare division that had the obligations of a regulated entity and none of the structure.",
+    built: [
+      "Built the division's formal security and privacy GRC program, aligned to HIPAA, HITRUST, ISO, NIST, SOC, and FedRAMP.",
+      "Reviewed the security and privacy terms in healthcare customer contracts before they reached signature.",
+    ],
+    impact: [
+      "Enabled $1.2M+ in quarterly compliant revenue by clearing contracts that would otherwise have stalled.",
+      "Gave a regulated healthcare business its first repeatable control and evidence baseline.",
+    ],
+    tags: ["HIPAA", "HITRUST", "Healthcare", "Contract review"],
   },
   {
     period: "May 2016 — Jan 2017",
+    location: "Bedford, MA",
     company: "iRobot",
     companyUrl: "https://www.linkedin.com/company/irobot/",
-    location: "Bedford, MA",
+    context: "Robotics · Security PMO",
+    headline: "Program Coordinator, Information Security",
     roles: [
-      { title: "Program Coordinator - Information Security, Intern", period: "May 2016 — Jan 2017" },
+      { title: "Program Coordinator — Information Security (Intern)", period: "May 2016 — Jan 2017" },
     ],
-    body:
-      "Managed the information security program through PMO.",
-    tags: ["PMO", "Program coordination"],
+    summary:
+      "Ran the information security program through the PMO — intake, scheduling, and delivery tracking across concurrent workstreams.",
+    built: [
+      "Coordinated the security program's intake and delivery cadence across engineering and IT workstreams.",
+      "Maintained the reporting that leadership used to see program status in one place.",
+    ],
+    impact: [
+      "Gave security leadership a single view of status across parallel projects instead of per-team updates.",
+      "Learned program discipline first — which is why every GRC system I build now starts with the operating cadence.",
+    ],
+    tags: ["PMO", "Program coordination", "Robotics"],
   },
   {
     period: "Nov 2015 — May 2016",
-    company: "Veritas (formerly Symantec)",
+    location: "Lake Mary, FL",
+    company: "Veritas",
     companyUrl: "https://www.linkedin.com/company/veritas-technologies-llc/",
-    location: "Massachusetts",
+    context: "Backup & recovery engineering",
+    headline: "Backup and Recovery Testing Engineer",
     roles: [
-      { title: "Backup and Recovery Testing Engineer, Intern", period: "Nov 2015 — May 2016" },
+      { title: "Backup and Recovery Testing Engineer (Intern)", period: "Nov 2015 — May 2016" },
     ],
-    body:
-      "UAT testing on new hardware against Backup and Backup Exec software.",
-    tags: ["UAT", "Backup Exec"],
+    summary:
+      "User acceptance testing on new hardware against Backup and Backup Exec software — the hands-on start of a career that kept circling back to whether a control actually works when you test it.",
+    built: [
+      "Executed UAT cycles on new hardware configurations against Backup and Backup Exec.",
+      "Documented defects and recovery behavior against expected results.",
+    ],
+    impact: [
+      "First-hand exposure to the difference between a documented recovery capability and a tested one.",
+      "The instinct behind every evidence pipeline I've built since: if nobody tested it, it isn't a control.",
+    ],
+    tags: ["UAT", "Backup Exec", "Disaster recovery"],
   },
+];
+
+const roadmapSteps = [
+  { num: "01", title: "Controls Library", desc: "Single source of truth", status: "LIVE" },
+  { num: "02", title: "Framework Crosswalks", desc: "SOC 2, NIST, ISO, HITRUST", status: "LIVE" },
+  { num: "03", title: "Evidence Automation", desc: "Pipeline-native collection", status: "BUILDING" },
+  { num: "04", title: "FAIR Risk Workflows", desc: "Loss exposure per scenario", status: "BUILDING" },
+  { num: "05", title: "AI Evidence Scout", desc: "Freshness & relevance scoring", status: "COMING" },
 ];
 
 const writing = [
   {
+    eyebrow: "Boston · President",
     title: "GRC Engineering Club — Boston Chapter",
-    body: "President of the Boston chapter. Growing the local practice around systems, automation, and modern controls work — meetups, mentorship, and community writing.",
+    body: "President of the Boston chapter. Building the local practice around systems, automation, and modern controls work — meetups, mentorship, and community writing.",
     href: links.grcEngineeringClub,
-    cta: "Visit chapter",
+    cta: "Get #WickedCompliant",
   },
   {
-    title: "Writing on Medium",
-    body: "Essays on cyber risk quantification, AI in GRC, and where technical judgment belongs in compliance work.",
+    eyebrow: "Medium · Writing",
+    title: "Essays on risk quantification & AI in GRC",
+    body: "Long-form pieces on FAIR, compliance-as-code, GRC engineering, and where technical judgment actually belongs in compliance work.",
     href: links.medium,
-    cta: "Read the essays",
+    cta: "Read on Medium",
   },
   {
-    title: "ISC2 technical guidance",
-    body: "Co-author on ISC2 technical guidance work and AAISM beta tester / item writer for ISACA — translating security complexity into usable practice.",
+    eyebrow: "ISACA · Certification development",
+    title: "ISACA AI exam beta tester & contributor",
+    body: "Participating in advanced AI security and AI risk certification beta test groups and exam writing development. Helping shape how the industry certifies GRC engineering competency in the age of LLMs.",
   },
-];
-
-const whatsNext = [
-  "CISSP (in progress) to close the last formal credential loop.",
-  "Publishing the FAIR + LLM scoring pattern as a public reference build.",
-  "Prototyping agentic evidence collection tied to the u dont GRC me control model.",
+  {
+    eyebrow: "ISC2 · Technical guidance",
+    title: "AI technical guidance contributor",
+    body: "Co-author on ISC2 technical guidance work around AI security and compliance. Translating complex GRC concepts into accessible reference material for the global security community.",
+  },
 ];
 
 const skillGroups = [
   {
     title: "Risk & quantification",
-    items: ["FAIR", "Monte Carlo simulation", "CVSS", "OWASP scoring", "EO-14028 materiality", "Risk appetite modeling"],
+    blurb:
+      "Turning exposure into numbers leadership can act on: frequency, magnitude, tolerance, and the math that makes a control investment hold up in a budget conversation.",
+    items: [
+      "FAIR (OpenFAIR)",
+      "Monte Carlo simulation",
+      "Loss exceedance curves",
+      "CVSS / OWASP scoring",
+      "EO-14028 materiality",
+      "Risk appetite modeling",
+      "Third-party / vendor risk",
+      "SEC 8-K cyber disclosure",
+    ],
   },
   {
-    title: "Frameworks",
-    items: ["SOC 2", "FedRAMP", "ISO 27001", "NIST CSF / 800-53", "HIPAA", "HITRUST", "GDPR"],
+    title: "Frameworks & attestations",
+    blurb:
+      "Multi-framework fluency built in regulated SaaS, healthcare, and public-company environments — where one control has to satisfy five auditors without being written five times.",
+    items: [
+      "SOC 2 Type II",
+      "FedRAMP",
+      "ISO 27001 / 27017 / 27018",
+      "NIST CSF · 800-53 · 800-171 · SSDF",
+      "HIPAA / HITRUST",
+      "GDPR / CCPA",
+      "PCI DSS",
+      "OSCAL",
+    ],
+  },
+  {
+    title: "GRC engineering",
+    blurb:
+      "The engineering layer that turns a framework into something a system enforces and proves on its own — every day, without a human chasing screenshots before an audit.",
+    items: [
+      "Control-first data modeling",
+      "Compliance-as-code",
+      "Policy-as-code",
+      "Continuous control monitoring",
+      "Evidence automation",
+      "Framework crosswalk parsers",
+      "Audit workspace design",
+      "React / Node / PostgreSQL",
+    ],
   },
   {
     title: "AI & automation",
-    items: ["LLM-assisted risk scoring", "Prompt engineering", "Agentic workflow design", "RAG-based GRC tooling"],
+    blurb:
+      "Where AI measurably sharpens the work — scoring, mapping, questionnaire response, vendor review — with the decision itself still legible, reviewable, and human-owned.",
+    items: [
+      "LLM-assisted risk scoring",
+      "Prompt engineering",
+      "Agentic workflow design",
+      "RAG-based GRC tooling",
+      "Model risk / AAISM",
+      "AI/ML risk assessment (AAIR)",
+    ],
   },
   {
-    title: "Platforms & code",
-    items: ["OneTrust", "Archer", "ServiceNow GRC", "AuditBoard", "Python", "SQL", "Jira API"],
+    title: "Platforms",
+    blurb:
+      "The systems the work actually runs on — enterprise GRC suites plus the ticketing and cloud tooling that evidence has to come out of in the first place.",
+    items: ["OneTrust", "Archer", "ServiceNow GRC", "AuditBoard", "Jira / ICON", "AWS (CLF)"],
+  },
+  {
+    title: "Leadership & judgment",
+    blurb:
+      "The part that turns a function into a program: executive translation, cross-functional partnership, and building the next set of practitioners behind you.",
+    items: [
+      "Executive risk narrative",
+      "Board reporting",
+      "Program design",
+      "Cross-functional partnership",
+      "Chapter president · Boston GRC Engineering Club",
+      "Mentorship (ISACA · BBBS · BU)",
+    ],
   },
 ];
 
 const credentials = [
-  { label: "CISM", detail: "ISACA · Certified Information Security Manager" },
-  { label: "CRISC", detail: "ISACA · Risk & Information Systems Control" },
-  { label: "AAISM", detail: "ISACA · Advanced in AI Security Management" },
-  { label: "AAIR", detail: "ISACA · Advanced in AI Risk" },
-  { label: "ISC2 CC", detail: "Certified in Cybersecurity" },
-  { label: "AWS CCP", detail: "Cloud Practitioner (CLF-C02)" },
-  { label: "CISSP", detail: "In progress" },
+  {
+    abbr: "CISM",
+    name: "Certified Information Security Manager",
+    detail: "ISACA · security program management and governance leadership.",
+    status: "Active",
+    tone: "rose",
+  },
+  {
+    abbr: "CRISC",
+    name: "Certified in Risk and Information Systems Control",
+    detail: "ISACA · enterprise risk identification, response, and control monitoring.",
+    status: "Active",
+    tone: "amber",
+  },
+  {
+    abbr: "AAISM",
+    name: "Advanced in AI Security Management",
+    detail: "ISACA · securing and governing AI systems in production.",
+    status: "Active",
+    tone: "sage",
+  },
+  {
+    abbr: "AAIR",
+    name: "Advanced in AI Risk",
+    detail: "ISACA · risk assessment and assurance for AI and ML systems.",
+    status: "Active",
+    tone: "rose",
+  },
+  {
+    abbr: "CC",
+    name: "Certified in Cybersecurity",
+    detail: "ISC2 · security principles, access control, and operations fundamentals.",
+    status: "Active",
+    tone: "amber",
+  },
+  {
+    abbr: "CCP",
+    name: "AWS Certified Cloud Practitioner",
+    detail: "Amazon Web Services · CLF-C02.",
+    status: "Active",
+    tone: "sage",
+  },
+  {
+    abbr: "CISA",
+    name: "Certified Information Systems Auditor",
+    detail: "ISACA · IS audit process, governance, and control evaluation.",
+    status: "In progress",
+    note: "Expected EOY 2026",
+    tone: "rose",
+  },
+  {
+    abbr: "AIAA",
+    name: "Advanced in AI Audit",
+    detail: "ISACA · auditing AI systems, models, and the controls around them.",
+    status: "In progress",
+    note: "Expected EOY 2026",
+    tone: "amber",
+  },
 ];
 
 const education = [
@@ -236,14 +521,13 @@ const contactLinks = [
   { label: "LinkedIn", meta: "linkedin.com/in/xnasusx", href: links.linkedin, icon: Linkedin },
   { label: "GitHub", meta: "github.com/xnasusx", href: links.github, icon: Github },
   { label: "Medium", meta: "medium.com/@xnasusx", href: links.medium, icon: BookOpen },
-  { label: "GRC Engineering Club", meta: "Boston chapter", href: links.grcEngineeringClub, icon: Landmark },
+  {
+    label: "GRC Engineering Club",
+    meta: "Boston chapter",
+    href: links.grcEngineeringClub,
+    icon: Landmark,
+  },
   { label: "u dont GRC me", meta: "Live prototype", href: links.product, icon: ArrowUpRight },
-];
-
-const resumeFormats = [
-  { label: "PDF", href: links.resumePdf },
-  { label: "Markdown", href: links.resumeMarkdown },
-  { label: "JSON", href: links.resumeJson },
 ];
 
 const structuredData = {
@@ -273,6 +557,7 @@ const structuredData = {
 /* -------------------- Hash routing -------------------- */
 
 const CASE_ROUTES = new Set(objectives.map((o) => o.route));
+const RISK_TOOL_ROUTES = new Set(riskTools.map((t) => `risk-tools/${t.slug}`));
 
 function useHashRoute() {
   const [route, setRoute] = React.useState<string>(() =>
@@ -284,176 +569,6 @@ function useHashRoute() {
     return () => window.removeEventListener("hashchange", handler);
   }, []);
   return route;
-}
-
-/* -------------------- FAIR mini calculator -------------------- */
-
-const CURRENCY = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
-const scenarios = [
-  {
-    id: "phishing",
-    label: "Credential phishing → BEC",
-    freqLow: 2,
-    freqHigh: 6,
-    magLow: 40_000,
-    magHigh: 250_000,
-    heatmap: "Medium",
-  },
-  {
-    id: "ransomware",
-    label: "Ransomware on production",
-    freqLow: 0.05,
-    freqHigh: 0.4,
-    magLow: 500_000,
-    magHigh: 6_000_000,
-    heatmap: "High",
-  },
-  {
-    id: "third-party",
-    label: "Third-party data breach",
-    freqLow: 0.1,
-    freqHigh: 0.6,
-    magLow: 250_000,
-    magHigh: 3_500_000,
-    heatmap: "High",
-  },
-];
-
-type ScenarioState = {
-  freqLow: number;
-  freqHigh: number;
-  magLow: number;
-  magHigh: number;
-  heatmap: string;
-};
-
-function FairMiniCalculator() {
-  const [scenarioId, setScenarioId] = React.useState(scenarios[0].id);
-  const scenario = scenarios.find((s) => s.id === scenarioId)!;
-  const [state, setState] = React.useState<ScenarioState>(() => ({ ...scenario }));
-
-  React.useEffect(() => {
-    const s = scenarios.find((x) => x.id === scenarioId)!;
-    setState({ ...s });
-  }, [scenarioId]);
-
-  const aleLow = state.freqLow * state.magLow;
-  const aleHigh = state.freqHigh * state.magHigh;
-  const alePoint = (aleLow + aleHigh) / 2;
-
-  const update = (key: keyof ScenarioState) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    setState((prev) => ({ ...prev, [key]: raw === "" ? 0 : Number(raw) }));
-  };
-
-  return (
-    <div className="fair-calc">
-      <div className="fair-calc-header">
-        <div>
-          <p className="section-label">Try it</p>
-          <h3>Same risk, two answers.</h3>
-          <p className="fair-calc-lede">
-            Pick a scenario. The left side is what a heat map tells your CFO. The right side is what FAIR
-            tells them. Adjust the inputs and watch which number moves.
-          </p>
-        </div>
-        <label className="fair-scenario-select" htmlFor="fair-scenario">
-          <span>Scenario</span>
-          <select
-            id="fair-scenario"
-            value={scenarioId}
-            onChange={(e) => setScenarioId(e.target.value)}
-          >
-            {scenarios.map((s) => (
-              <option value={s.id} key={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="fair-calc-body">
-        <div className="fair-inputs">
-          <fieldset>
-            <legend>Loss event frequency (per year)</legend>
-            <label>
-              <span>Low estimate</span>
-              <input
-                type="number"
-                min={0}
-                step={0.05}
-                value={state.freqLow}
-                onChange={update("freqLow")}
-              />
-            </label>
-            <label>
-              <span>High estimate</span>
-              <input
-                type="number"
-                min={0}
-                step={0.05}
-                value={state.freqHigh}
-                onChange={update("freqHigh")}
-              />
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend>Loss magnitude per event (USD)</legend>
-            <label>
-              <span>Low estimate</span>
-              <input
-                type="number"
-                min={0}
-                step={5000}
-                value={state.magLow}
-                onChange={update("magLow")}
-              />
-            </label>
-            <label>
-              <span>High estimate</span>
-              <input
-                type="number"
-                min={0}
-                step={5000}
-                value={state.magHigh}
-                onChange={update("magHigh")}
-              />
-            </label>
-          </fieldset>
-        </div>
-
-        <div className="fair-outputs">
-          <div className="fair-output heatmap">
-            <span className="fair-output-label">Heat-map answer</span>
-            <strong>{state.heatmap}</strong>
-            <p>A color that can't be defended, budgeted against, or compared to any other risk.</p>
-          </div>
-          <div className="fair-output fair">
-            <span className="fair-output-label">FAIR annualized loss</span>
-            <strong>
-              {CURRENCY.format(aleLow)}
-              <span className="fair-dash"> — </span>
-              {CURRENCY.format(aleHigh)}
-            </strong>
-            <p>
-              Point estimate <em>{CURRENCY.format(alePoint)}</em>. A range leadership can size a control
-              investment against.
-            </p>
-          </div>
-        </div>
-      </div>
-      <p className="fair-footnote">
-        Illustrative math for demonstration. A production FAIR analysis models each variable as a
-        distribution and runs a Monte Carlo simulation to produce P10 / P50 / P90 exposure curves.
-      </p>
-    </div>
-  );
 }
 
 /* -------------------- Case study shell + pages -------------------- */
@@ -512,11 +627,7 @@ const caseStudies: Record<string, CaseStudy> = {
         heading: "Ontology → decision surface",
         columns: ["FAIR variable", "Where it comes from", "What it lets leaders decide"],
         rows: [
-          [
-            "Loss event frequency",
-            "Threat intel + control failure rate",
-            "Whether to prevent, detect, or accept",
-          ],
+          ["Loss event frequency", "Threat intel + control failure rate", "Whether to prevent, detect, or accept"],
           [
             "Primary loss magnitude",
             "Productivity, response, replacement modeling",
@@ -540,7 +651,7 @@ const caseStudies: Record<string, CaseStudy> = {
         body: "Everything on this page describes approach and public-facing design decisions.",
         items: [
           "No proprietary employer data, dashboards, or scenario libraries are reproduced here.",
-          "FAIR distributions shown in the mini-calculator on the home page are illustrative, not sampled from real Monte Carlo runs.",
+          "FAIR distributions shown in the interactive tools on this site are illustrative, not sampled from real Monte Carlo runs.",
           "LLM prompts, scoring rubrics, and human-in-the-loop review criteria stay inside my employer's environment.",
         ],
       },
@@ -611,7 +722,10 @@ const caseStudies: Record<string, CaseStudy> = {
         items: [
           { value: "1", label: "Incident Severity Calculator, replacing three parallel scoring habits" },
           { value: "4 days", label: "SEC disclosure clock — measured from a defensible materiality trigger" },
-          { value: "OWASP + EO-14028", label: "grounded in existing severity and materiality references, not invented from scratch" },
+          {
+            value: "OWASP + EO-14028",
+            label: "grounded in existing severity and materiality references, not invented from scratch",
+          },
         ],
       },
       {
@@ -637,7 +751,11 @@ const caseStudies: Record<string, CaseStudy> = {
         columns: ["Input", "Answers", "Owned by"],
         rows: [
           ["OWASP likelihood + impact", "Operational severity", "Incident commander"],
-          ["Confidentiality / integrity / availability loss magnitude", "Primary loss exposure", "Risk analyst"],
+          [
+            "Confidentiality / integrity / availability loss magnitude",
+            "Primary loss exposure",
+            "Risk analyst",
+          ],
           ["Regulated data classes touched", "Notification triggers", "Privacy / counsel"],
           ["Reasonable-investor test factors", "SEC materiality", "Counsel + CISO"],
         ],
@@ -660,7 +778,6 @@ function CaseStudyView({ study }: { study: CaseStudy }) {
     <main className="portfolio-shell case-shell">
       <header className="site-header case-header" aria-label="Case study">
         <a className="brand-link" href="#/">
-          <span className="brand-mark">SS</span>
           <span>Susan Shepard</span>
         </a>
         <a className="case-back" href="#/">
@@ -764,77 +881,187 @@ function renderSection(section: CaseSection) {
 function MainPortfolio() {
   return (
     <main className="portfolio-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
 
       <header className="site-header" aria-label="Primary">
         <a className="brand-link" href="#/">
-          <span className="brand-mark">SS</span>
           <span>Susan Shepard</span>
         </a>
         <nav className="site-nav" aria-label="Sections">
           <a href="#about">About</a>
           <a href="#principles">Philosophy</a>
-          <a href="#bring">What I bring</a>
+          <a href="#bring">Case studies</a>
           <a href="#experience">Experience</a>
           <a href="#try">Try it</a>
+          <a href="#/risk-tools">Risk lab</a>
           <a href="#credentials">Credentials</a>
-          <a href="#contact">Contact</a>
         </nav>
+        <a className="nav-cta" href={links.calendly} target="_blank" rel="noopener noreferrer">
+          Let's connect <ArrowUpRight size={14} />
+        </a>
       </header>
 
       <section id="top" className="hero-section">
-        <p className="section-label">Staff Trust, Risk & Compliance Analyst · Rapid7</p>
-        <h1>Cyber risk, quantified into decisions leaders can defend.</h1>
-        <p className="hero-intro">
-          Fifteen-plus years across enterprise, healthcare, and public-company security work — now building
-          FAIR-based risk quantification, compliance-as-code, and AI-assisted GRC systems that replace the
-          audit spreadsheet with something a board can actually read.
-        </p>
-        <div className="hero-actions">
-          <a className="primary-link" href={links.product}>
-            View work <ArrowUpRight size={18} />
-          </a>
-          <a className="secondary-link" href={links.resumePdf}>
-            Resume (PDF) <FileText size={18} />
-          </a>
+        <aside className="hero-card" aria-label="Contact card">
+          <div className="hero-portrait">
+            <img
+              src={links.headshot}
+              alt="Susan Shepard"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <span className="hero-portrait-fallback" aria-hidden="true">
+              Susan
+            </span>
+          </div>
+          <div className="hero-card-body">
+            <strong className="hero-name">Susan Shepard</strong>
+            <span className="hero-role">Staff · TRC Analyst, InfoSec · Rapid7</span>
+          </div>
+          <div className="hero-card-stats">
+            <div className="hero-stat">
+              <span className="hero-stat-label">Experience</span>
+              <span className="hero-stat-value">10+ yrs</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-label">Based in</span>
+              <span className="hero-stat-value">Boston</span>
+            </div>
+          </div>
+          <div className="hero-card-skills">
+            <span className="hero-skill-tag">RMF</span>
+            <span className="hero-skill-tag amber">Policy-as-Code</span>
+            <span className="hero-skill-tag">GRC Engineering</span>
+            <span className="hero-skill-tag ink">USAF Veteran</span>
+            <span className="hero-skill-tag sage">CRQ</span>
+            <span className="hero-skill-tag amber">FAIR</span>
+            <span className="hero-skill-tag sage">AI Automation</span>
+          </div>
+        </aside>
+
+        <div className="hero-copy">
+          <p className="section-label">
+            GRC engineering · FAIR risk quantification · AI-assisted GRC
+          </p>
+          <h1>
+            Cyber risk, <em>quantified</em> into decisions leaders can defend.
+          </h1>
+          <p className="hero-intro">
+            Over a decade across enterprise SaaS, biotechnology, healthcare, and public-company
+            security work — now building FAIR-based risk quantification, compliance-as-code, and
+            AI-assisted GRC systems that replace the audit spreadsheet with something a board can
+            actually read.
+          </p>
+          <div className="hero-actions">
+            <a
+              className="primary-link"
+              href={links.product}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View my work <ArrowUpRight size={18} />
+            </a>
+            <a className="secondary-link" href={links.riskTools}>
+              Explore GRC <ArrowUpRight size={18} />
+            </a>
+          </div>
+          <ul className="hero-focus" aria-label="Focus areas">
+            {focusAreas.map((area) => (
+              <li key={area}>{area}</li>
+            ))}
+          </ul>
         </div>
-        <ul className="hero-focus" aria-label="Focus areas">
-          {focusAreas.map((area) => (
-            <li key={area}>{area}</li>
-          ))}
-        </ul>
       </section>
 
       <section id="about" className="content-section">
         <div className="section-heading">
           <p className="section-label">About</p>
-          <h2>Security is strongest when it's built into the workflow, not stapled on top of it.</h2>
+          <h2>
+            Controls aren't the paperwork. They're the <em>foundation.</em>
+          </h2>
         </div>
-        <div className="prose-grid">
-          <p>
-            My work sits at the intersection of risk judgment, product thinking, and hands-on engineering.
-            I build systems that quantify cyber risk in dollars, encode controls as code, and turn
-            technical exposure into decisions leaders can act on.
-          </p>
-          <p>
-            That perspective comes from a career that runs through enterprise security, healthcare and
-            privacy, third-party risk, SEC materiality and disclosure, audit readiness, and now full-stack
-            GRC platform design. Military veteran. Boston-based. Currently at Rapid7 as Staff Trust, Risk,
-            and Compliance Analyst.
-          </p>
+        <div className="about-layout">
+          <aside className="about-boxes">
+            <article className="about-box">
+              <span className="about-box-num">01</span>
+              <h3>Quantifying what was invisible</h3>
+              <p>
+                Built the first FAIR-based quantification model at Rapid7, embedding it in an LLM
+                application to turn heat-map colors into defensible dollar ranges. Created the
+                Incident Severity Calculator that consolidated three parallel scoring habits into one
+                defensible materiality workflow.
+              </p>
+            </article>
+            <article className="about-box">
+              <span className="about-box-num">02</span>
+              <h3>Engineering compliance systems</h3>
+              <p>
+                Architected the Integrated IS Risk Management framework consolidating three siloed
+                functions. Designed and administered OneTrust from scratch with API integrations to
+                automate remediation. Built evidence automation pipelines that replace manual audit
+                checklists with pipeline-native collection.
+              </p>
+            </article>
+            <article className="about-box">
+              <span className="about-box-num">03</span>
+              <h3>Leading without authority</h3>
+              <p>
+                Redesigned Customer Risk Assessment cutting response SLAs from weeks to days. Founded
+                the annual Security Risk Assessment establishing board-visibility cadence.
+                Established ongoing partnerships with Authorizing Officials through transparent risk
+                signals, not static packages.
+              </p>
+            </article>
+            <article className="about-box">
+              <span className="about-box-num">04</span>
+              <h3>Building the community</h3>
+              <p>
+                Founded and lead the GRC Engineering Club Boston chapter. Active mentor through
+                ISACA, Big Brothers Big Sisters, and Boston University. Designing programs that help
+                analysts transition into GRC engineering roles and showing students security is a
+                real, viable career.
+              </p>
+            </article>
+          </aside>
+          <div className="about-prose">
+            <p>
+              My work lives at the intersection of risk judgment, product thinking, and hands-on
+              engineering. I quantify cyber risk in dollars (FAIR, not colors), treat controls as the
+              foundational data model, wire evidence collection into the pipeline instead of the
+              audit checklist, and use AI where it measurably sharpens the decision instead of just
+              producing more of the same output.
+            </p>
+            <p>
+              Ten years and counting across enterprise security, healthcare and privacy, GDPR, vendor
+              risk at scale, SEC materiality and disclosure, audit readiness across SOC 2 / FedRAMP /
+              HITRUST / ISO / NIST, and now full-stack GRC platform design. Military background
+              shaped my discipline around execution and my respect for process rigor. Boston-based.
+            </p>
+            <p>
+              President of the GRC Engineering Club Boston chapter. Currently at Rapid7 as Staff
+              Trust, Risk, and Compliance Analyst — where the fun is proving GRC is a{" "}
+              <em>revenue enabler</em>, not paperwork.
+            </p>
+          </div>
         </div>
       </section>
 
       <section id="principles" className="content-section band">
         <div className="section-heading">
           <p className="section-label">Philosophy</p>
-          <h2>How I think about modern GRC engineering.</h2>
+          <h2>
+            My <em>GRC</em> philosophy.
+          </h2>
         </div>
         <div className="principles-grid">
           {principles.map((principle, index) => (
-            <article className="principle-card" key={principle.title}>
+            <article className="principle-card" key={index}>
               <span className="principle-number">Principle 0{index + 1}</span>
-              <h3>{principle.title}</h3>
+              <h3>{principle.titleHtml}</h3>
               <p>{principle.body}</p>
             </article>
           ))}
@@ -843,8 +1070,10 @@ function MainPortfolio() {
 
       <section id="bring" className="content-section">
         <div className="section-heading">
-          <p className="section-label">What I bring to a security team</p>
-          <h2>Three objectives. Three case studies. Same operating stance.</h2>
+          <p className="section-label">Case studies</p>
+          <h2>
+            Three <em>objectives</em>. Three case studies. Same operating stance.
+          </h2>
         </div>
         <div className="objectives-grid">
           {objectives.map((obj) => (
@@ -868,69 +1097,189 @@ function MainPortfolio() {
       <section id="experience" className="content-section band">
         <div className="section-heading">
           <p className="section-label">Experience</p>
-          <h2>A career built at the intersection of security, software, risk, and scale.</h2>
+          <h2>
+            Over a decade of GRC experience in a variety of industries such as enterprise SaaS,
+            <em> biotechnology, healthcare, and robotics</em>.
+          </h2>
         </div>
-        <div className="experience-list">
-          {experience.map((chapter) => (
-            <article className="experience-row" key={`${chapter.company}-${chapter.period}`}>
-              <div className="experience-period">{chapter.period}</div>
-              <div className="experience-copy">
-                <h3>
-                  {chapter.companyUrl ? (
-                    <a href={chapter.companyUrl} target="_blank" rel="noopener noreferrer">
-                      {chapter.company}
-                    </a>
-                  ) : (
-                    chapter.company
-                  )}
-                </h3>
-                <p className="experience-context">{chapter.location}</p>
-                <ul className="experience-roles">
-                  {chapter.roles.map((role) => (
+        <div className="exp-stack">
+          {experience.map((job) => (
+            <article
+              className={`exp-block${job.current ? " feature" : ""}`}
+              key={`${job.company}-${job.period}`}
+            >
+              <div className="exp-top">
+                <div className="exp-headline">
+                  <p className="exp-period">
+                    {job.period} · {job.location}
+                  </p>
+                  <h3 className="exp-role">{job.headline}</h3>
+                  <p className="exp-company">
+                    {job.companyUrl ? (
+                      <a href={job.companyUrl} target="_blank" rel="noopener noreferrer">
+                        {job.company}
+                      </a>
+                    ) : (
+                      job.company
+                    )}
+                    <span className="dot">·</span>
+                    {job.context}
+                  </p>
+                </div>
+                {job.current && <span className="exp-badge">Current role</span>}
+              </div>
+
+              {job.roles.length > 1 && (
+                <ul className="exp-roles">
+                  {job.roles.map((role) => (
                     <li key={role.title}>
-                      <span className="experience-role-title">{role.title}</span>
-                      <span className="experience-role-period">{role.period}</span>
+                      <span className="exp-role-title">{role.title}</span>
+                      <span className="exp-role-period">{role.period}</span>
                     </li>
                   ))}
                 </ul>
-                <p>{chapter.body}</p>
-                {chapter.highlights && (
+              )}
+
+              <p className="exp-summary">{job.summary}</p>
+
+              <div className="exp-cols">
+                <div className="exp-col">
+                  <h5>What I built</h5>
                   <ul>
-                    {chapter.highlights.map((line) => (
+                    {job.built.map((line) => (
                       <li key={line}>{line}</li>
                     ))}
                   </ul>
-                )}
-                {chapter.tags && (
-                  <div className="tag-row">
-                    {chapter.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
+                </div>
+                <div className="exp-col impact">
+                  <h5>Impact</h5>
+                  <ul>
+                    {job.impact.map((line) => (
+                      <li key={line}>{line}</li>
                     ))}
-                  </div>
-                )}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="tag-row">
+                {job.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
               </div>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="try" className="content-section">
+      <section id="flagship" className="content-section">
         <div className="section-heading">
-          <p className="section-label">Interactive</p>
-          <h2>The pitch, in your hands.</h2>
+          <p className="section-label">— Flagship project · 2026 to present</p>
+          <h2>
+            u dont <em>GRC</em> me
+          </h2>
         </div>
-        <FairMiniCalculator />
+        <div className="roadmap-container">
+          <div className="roadmap">
+            {roadmapSteps.map((step, index) => (
+              <div className="roadmap-step" key={step.num}>
+                <div className="roadmap-card">
+                  <span className="roadmap-num">{step.num}</span>
+                  <h4>{step.title}</h4>
+                  <p>{step.desc}</p>
+                  <span className={`roadmap-status ${step.status.toLowerCase()}`}>
+                    {step.status}
+                  </span>
+                </div>
+                {index < roadmapSteps.length - 1 && <div className="roadmap-connector" />}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flagship-copy">
+          <p>
+            The roadmap above is my philosophy compiled into software. It starts with the controls
+            library because controls are the foundation — get the layer and the cost of a control
+            right and audit evidence, risk, and policy all resolve off that one spine. Frameworks
+            come second, as <em>views</em> over the same data, which is why crosswalks are step two
+            and not a rewrite.
+          </p>
+          <p>
+            Steps three and four are where the manual workload dies. Evidence gets collected by the
+            pipeline that produced it, and risk stops being a static register entry: each scenario
+            carries its own loss exposure, so leadership gets a dollar range instead of a color.
+            Step five points the AI at the part humans are worst at — noticing that evidence went
+            stale three weeks ago.
+          </p>
+          <p>
+            Built in the open with React, Node/Express, and PostgreSQL, and opinionated on purpose:
+            control-first, evidence-attached, framework-agnostic, AI-augmented where it earns its
+            keep. Break it, argue with it, or fork it.
+          </p>
+          <div className="flagship-tags">
+            <span>Control-first data model</span>
+            <span>OSCAL-shaped</span>
+            <span>15+ frameworks</span>
+            <span>AI Evidence Scout</span>
+            <span>Public prototype</span>
+          </div>
+          <div className="hero-actions">
+            <a
+              className="primary-link"
+              href={links.product}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Visit u dont GRC me <ArrowUpRight size={18} />
+            </a>
+            <a
+              className="secondary-link"
+              href={links.githubProduct}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub <Github size={18} />
+            </a>
+          </div>
+        </div>
       </section>
 
-      <section id="writing" className="content-section band">
+      <section id="try" className="content-section band">
         <div className="section-heading">
-          <p className="section-label">Writing & community</p>
-          <h2>Shaping the conversation around modern GRC.</h2>
+          <p className="section-label">Interactive · risk quantification</p>
+          <h2>
+            The pitch, in <em>your</em> hands.
+          </h2>
+          <p className="try-lede">Practice your skills at FAIRly good risk management.</p>
+          <a className="primary-link risk-lab-button" href="#/risk-tools">
+            learn to quantify my risks <ArrowUpRight size={18} />
+          </a>
+        </div>
+        <div className="risk-preview-grid">
+          {riskTools.map((tool) => (
+            <a className="risk-preview-card" href={`#/risk-tools/${tool.slug}`} key={tool.slug}>
+              <span className="try-link-eyebrow">{tool.eyebrow}</span>
+              <strong>{tool.title}</strong>
+              <span className="try-link-body">{tool.body}</span>
+              <span className="try-link-cta">
+                {tool.cta} <ArrowUpRight size={14} />
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section id="writing" className="content-section">
+        <div className="section-heading">
+          <p className="section-label">Writing, community, mentorship</p>
+          <h2>
+            Building the practice — and the <em>people</em> — around modern GRC.
+          </h2>
         </div>
         <div className="writing-grid">
           {writing.map((item) =>
             item.href ? (
               <a className="writing-card linked" href={item.href} key={item.title}>
+                {item.eyebrow && <span className="writing-eyebrow">{item.eyebrow}</span>}
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
                 <span className="writing-cta">
@@ -939,6 +1288,7 @@ function MainPortfolio() {
               </a>
             ) : (
               <article className="writing-card" key={item.title}>
+                {item.eyebrow && <span className="writing-eyebrow">{item.eyebrow}</span>}
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
               </article>
@@ -947,32 +1297,88 @@ function MainPortfolio() {
         </div>
       </section>
 
-      <section className="content-section">
+      <section id="next" className="content-section next-section">
         <div className="section-heading">
-          <p className="section-label">What's next</p>
-          <h2>Where the work is heading.</h2>
+          <p className="section-label">— What I'm building next</p>
+          <h2>
+            Quantitative GRC for the companies that <em>can't</em> hire a whole team to do it.
+          </h2>
+          <p className="next-lede">
+            Fortune 500s can staff GRC engineering. Small and mid-sized businesses can't. That's
+            where the next tool has to live: shrink the complex GRC engineering ideas — controls-first
+            data modeling, FAIR quantification, automated evidence, continuous control monitoring —
+            into something a company without a program manager can actually stand up.
+          </p>
         </div>
-        <ul className="next-list">
-          {whatsNext.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
+        <div className="next-grid">
+          <article className="next-card">
+            <div className="next-card-head">
+              <span className="next-num">i</span>
+              <h3>Controls-first, out of the box</h3>
+            </div>
+            <p>
+              The tool starts where every program should: helping the customer identify and encode
+              their controls before it asks them about frameworks. Everything else — risk scoring,
+              audit prep, evidence — resolves off that spine.
+            </p>
+          </article>
+          <article className="next-card">
+            <div className="next-card-head">
+              <span className="next-num">ii</span>
+              <h3>AI as the implementation team</h3>
+            </div>
+            <p>
+              Instead of paying six months of consulting to configure the platform, an in-product AI
+              guide walks the customer through setup like a "new computer" wizard. Controls,
+              integrations, framework scoping, thresholds — all conversational, all reviewable, all
+              persisted.
+            </p>
+          </article>
+          <article className="next-card">
+            <div className="next-card-head">
+              <span className="next-num">iii</span>
+              <h3>Real integrations, real data, real risk</h3>
+            </div>
+            <p>
+              Connectors pull the actual environment (cloud, endpoint, ticketing, identity), the AI
+              threat-hunts against it, and every risk number — TCO, ROI, KPIs, KRIs, FAIR loss
+              exposure — gets computed against the customer's real footprint, not a generic industry
+              benchmark.
+            </p>
+          </article>
+          <article className="next-card">
+            <div className="next-card-head">
+              <span className="next-num">iv</span>
+              <h3>One brain for the whole program</h3>
+            </div>
+            <p>
+              Same AI runs audits, collects evidence, flags drift, quantifies the next scenario, and
+              writes the exec update. Not four disconnected copilots — one persistent GRC brain that
+              remembers what happened last quarter and what changed since.
+            </p>
+          </article>
+        </div>
       </section>
 
       <section className="content-section band">
         <div className="section-heading">
-          <p className="section-label">Skills & tooling</p>
-          <h2>The technical depth behind the frameworks.</h2>
+          <p className="section-label">Skills &amp; tooling</p>
+          <h2>
+            The operational <em>architecture</em> of modern GRC.
+          </h2>
         </div>
         <div className="skills-grid">
           {skillGroups.map((group) => (
             <article className="skill-group" key={group.title}>
               <h3>{group.title}</h3>
-              <ul>
+              <p className="skill-blurb">{group.blurb}</p>
+              <div className="skill-pills">
                 {group.items.map((item) => (
-                  <li key={item}>{item}</li>
+                  <span className="skill-pill" key={item}>
+                    {item}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </article>
           ))}
         </div>
@@ -980,45 +1386,96 @@ function MainPortfolio() {
 
       <section id="credentials" className="content-section">
         <div className="section-heading">
-          <p className="section-label">Credentials & education</p>
-          <h2>Formal training and ongoing learning.</h2>
+          <p className="section-label">Credentials &amp; education</p>
+          <h2>
+            Credentialed, degreed, and <em>still studying.</em>
+          </h2>
         </div>
-        <div className="credentials-layout">
-          <div className="credentials-column">
-            <h3>Certifications</h3>
-            <ul className="credentials-list">
+        <div className="credentials-grid">
+          <div className="cred-column">
+            <h3 className="cred-column-title">Certifications</h3>
+            <div className="cert-boxes">
               {credentials.map((cred) => (
-                <li key={cred.label}>
-                  <strong>{cred.label}</strong>
-                  <span>{cred.detail}</span>
-                </li>
+                <div className="cert-box" key={cred.abbr + cred.name}>
+                  <span className={`cert-mark ${cred.tone}`} aria-hidden="true">
+                    {cred.abbr}
+                  </span>
+                  <div className="cert-info">
+                    <h4>
+                      {cred.name}
+                      <span
+                        className={`cert-status ${
+                          cred.status === "Active" ? "active" : "progress"
+                        }`}
+                      >
+                        {cred.status}
+                      </span>
+                    </h4>
+                    <p>
+                      {cred.detail}
+                      {cred.note ? ` ${cred.note}.` : ""}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
-          <div className="credentials-column">
-            <h3>Education</h3>
-            <ul className="credentials-list plain">
-              {education.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-            <h3>Service</h3>
-            <p className="supporting-note">Military veteran.</p>
+
+          <div className="cred-column">
+            <div className="education-box">
+              <h3 className="cred-column-title">Education</h3>
+              <ul className="education-list">
+                {education.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="service-card">
+              <p className="service-eyebrow">// Service</p>
+              <h3>
+                United States Air Force <em>veteran</em>
+              </h3>
+              <p>
+                The foundation underneath everything after it. Military service is where I learned
+                execution discipline, how systems get used under pressure, and why a control nobody
+                tested is a control nobody has.
+              </p>
+              <div className="service-divider" />
+              <p className="service-eyebrow">// Community</p>
+              <p>
+                President, GRC Engineering Club Boston chapter. Mentor through ISACA, Big Brothers
+                Big Sisters, and Boston University.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       <section id="contact" className="contact-section">
         <div className="section-heading contact-heading">
-          <p className="section-label">Contact</p>
-          <h2>Let's build engineering-grade risk and compliance systems together.</h2>
+          <p className="section-label">— Let's connect</p>
+          <h2>
+            Want to bring <em>quantitative, engineered</em> GRC to your organization?
+          </h2>
+          <p>
+            I'm open to conversations about GRC engineering leadership, FAIR risk quantification
+            programs, cyber materiality and disclosure work, and AI-augmented compliance platforms —
+            especially if you're trying to shape the function around what actually generates value,
+            not what fills a binder.
+          </p>
         </div>
 
         <div className="contact-grid">
           {contactLinks.map((item) => {
             const Icon = item.icon;
+            const external = item.href.startsWith("http");
             return (
-              <a className="contact-link" href={item.href} key={item.label}>
+              <a
+                className="contact-link"
+                href={item.href}
+                key={item.label}
+                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
                 <span className="contact-icon" aria-hidden="true">
                   <Icon size={18} />
                 </span>
@@ -1032,31 +1489,621 @@ function MainPortfolio() {
           })}
         </div>
 
-        <p className="resume-line">
-          Resume in{" "}
-          {resumeFormats.map((format, index) => (
-            <React.Fragment key={format.label}>
-              <a href={format.href}>{format.label}</a>
-              {index < resumeFormats.length - 1 ? " · " : ""}
-            </React.Fragment>
-          ))}
-          .
+        <div className="contact-resume">
+          <a className="primary-link" href={links.resumePdf}>
+            Download resume (PDF) <FileText size={16} />
+          </a>
+          <p className="resume-line">
+            Also available as <a href={links.resumeMarkdown}>Markdown</a> ·{" "}
+            <a href={links.resumeJson}>JSON</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+/* -------------------- Risk lab -------------------- */
+
+type RiskTool = (typeof riskTools)[number];
+
+function RiskToolCard({ tool }: { tool: RiskTool }) {
+  return (
+    <a className="risk-tool-card" href={`#/risk-tools/${tool.slug}`}>
+      <span className="try-link-eyebrow">{tool.eyebrow}</span>
+      <strong>{tool.title}</strong>
+      <span>{tool.body}</span>
+      <span className="try-link-cta">
+        {tool.cta} <ArrowUpRight size={14} />
+      </span>
+    </a>
+  );
+}
+
+function AiCoachCard({ coach }: { coach: (typeof aiCoaches)[number] }) {
+  return (
+    <article className="ai-coach-card">
+      <div className="ai-chat-window" aria-hidden="true">
+        <span className="ai-chat-dot" />
+        <span className="ai-chat-line">{coach.opening}</span>
+        <span className="ai-chat-prompt">{coach.prompt}</span>
+      </div>
+      <div>
+        <span className="try-link-eyebrow">Custom GPT · Launch</span>
+        <h3>{coach.title}</h3>
+        <p>{coach.opening}</p>
+      </div>
+      <a
+        className="secondary-link ai-coach-link"
+        href={coach.href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open in ChatGPT <ExternalLink size={15} />
+      </a>
+    </article>
+  );
+}
+
+function RiskLabPage() {
+  return (
+    <main className="portfolio-shell risk-lab-shell">
+      <header className="site-header case-header" aria-label="Risk tools">
+        <a className="brand-link" href="#/">
+          <span>Susan Shepard</span>
+        </a>
+        <a className="case-back" href="#/">
+          <ArrowLeft size={16} /> Back to portfolio
+        </a>
+      </header>
+
+      <section className="risk-lab-hero">
+        <p className="section-label">Risk lab · FAIR practice tools</p>
+        <h1>
+          Learn to quantify <em>your</em> risks.
+        </h1>
+        <p>
+          A portfolio-native launchpad for the public tools from{" "}
+          <cite>From Heatmaps to Histograms</cite>: risk visualization, calibration, Monte Carlo
+          intuition, and loss exceedance curve reading.
         </p>
       </section>
+
+      <section className="risk-lab-section" aria-labelledby="risk-web-tools">
+        <div className="section-heading">
+          <p className="section-label">Interactive web apps</p>
+          <h2 id="risk-web-tools">Practice the quantification muscle.</h2>
+        </div>
+        <div className="risk-tool-grid">
+          {riskTools.map((tool) => (
+            <RiskToolCard tool={tool} key={tool.slug} />
+          ))}
+        </div>
+      </section>
+
+      <section className="risk-lab-section ai-coach-section" aria-labelledby="risk-ai-coaches">
+        <div className="section-heading">
+          <p className="section-label">AI coaches</p>
+          <h2 id="risk-ai-coaches">Chat-shaped help for the parts where people get stuck.</h2>
+          <p className="try-lede">
+            ChatGPT does not expose these custom GPTs as embeddable widgets, so these stay as
+            portfolio-styled launch panels instead of iframes.
+          </p>
+        </div>
+        <div className="ai-coach-grid">
+          {aiCoaches.map((coach) => (
+            <AiCoachCard coach={coach} key={coach.title} />
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function RiskToolPage({ tool }: { tool: RiskTool }) {
+  return (
+    <main className="portfolio-shell risk-lab-shell">
+      <header className="site-header case-header" aria-label={tool.title}>
+        <a className="brand-link" href="#/">
+          <span>Susan Shepard</span>
+        </a>
+        <a className="case-back" href="#/risk-tools">
+          <ArrowLeft size={16} /> Back to risk lab
+        </a>
+      </header>
+
+      <section className="risk-tool-detail">
+        <div className="risk-tool-detail-copy">
+          <p className="section-label">{tool.eyebrow}</p>
+          <h1>{tool.title}</h1>
+          <p>{tool.body}</p>
+          <div className="risk-tool-actions">
+            <a
+              className="primary-link"
+              href={tool.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open original <ExternalLink size={16} />
+            </a>
+            <a className="secondary-link" href="#/risk-tools">
+              Browse all tools
+            </a>
+          </div>
+        </div>
+        <aside className="risk-tool-credit">
+          <span>Source</span>
+          <p>
+            Embedded from Tony Martin-Vegue's public <cite>From Heatmaps to Histograms</cite> tools.
+          </p>
+        </aside>
+      </section>
+
+      <section className="risk-embed-shell" aria-label={`${tool.title} embedded tool`}>
+        <iframe
+          className="risk-tool-frame"
+          src={tool.sourceUrl}
+          title={`${tool.title} interactive tool`}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      </section>
+    </main>
+  );
+}
+
+/* -------------------- Heat map vs histogram -------------------- */
+
+const heatmapRows = [
+  { likelihood: "Rare", impact: "High", label: "Ransomware on prod", loss: 3_200_000, color: "#c7848d" },
+  { likelihood: "Unlikely", impact: "High", label: "Third-party breach", loss: 1_900_000, color: "#c7848d" },
+  {
+    likelihood: "Possible",
+    impact: "Medium",
+    label: "BEC / credential phishing",
+    loss: 145_000,
+    color: "#e6b04a",
+  },
+  { likelihood: "Likely", impact: "Low", label: "Laptop loss", loss: 8_500, color: "#e6b04a" },
+  {
+    likelihood: "Almost certain",
+    impact: "Low",
+    label: "Phishing click-through",
+    loss: 2_800,
+    color: "#e6b04a",
+  },
+];
+
+function HeatmapVsHistogram() {
+  const sorted = [...heatmapRows].sort((a, b) => b.loss - a.loss);
+  const max = sorted[0].loss;
+  return (
+    <main className="portfolio-shell case-shell">
+      <header className="site-header case-header" aria-label="Case study">
+        <a className="brand-link" href="#/">
+          <span>Susan Shepard</span>
+        </a>
+        <a className="case-back" href="#/">
+          <ArrowLeft size={16} /> Back to portfolio
+        </a>
+      </header>
+
+      <article className="case-article">
+        <p className="section-label">Interactive · concept 01</p>
+        <h1>
+          Heat map vs <em>histogram</em>.
+        </h1>
+        <p className="case-tagline">What a 3-by-3 matrix hides that a histogram makes obvious.</p>
+        <p className="case-intro">
+          Heat maps look decisive. That's their job — five colored buckets, one glance, done. The
+          problem is that "one glance, done" is the same summary whether the exposure is $8,500 or
+          $3,200,000. Compress five very different risks into "High" and "Low" and you've thrown away
+          the only information anyone needed to actually allocate capital against them.
+        </p>
+
+        <section className="case-section">
+          <h2>The heat map</h2>
+          <p>
+            Five real scenarios, plotted the way most risk registers plot them. Every red cell is
+            "High." Every yellow cell is "Medium" or "Low." That is the entire signal.
+          </p>
+          <div className="hv-heatmap-wrap">
+            <table className="hv-heatmap">
+              <caption className="hv-caption">
+                Risk register color-coded by likelihood × impact
+              </caption>
+              <thead>
+                <tr>
+                  <th />
+                  <th>Likelihood</th>
+                  <th>Impact</th>
+                  <th>Heat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {heatmapRows.map((row) => (
+                  <tr key={row.label}>
+                    <td>{row.label}</td>
+                    <td>{row.likelihood}</td>
+                    <td>{row.impact}</td>
+                    <td>
+                      <span className="hv-heat-cell" style={{ background: row.color }}>
+                        {row.color === "#c7848d" ? "High" : "Medium"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="case-section">
+          <h2>The histogram</h2>
+          <p>
+            Same five scenarios, plotted as expected annual loss in dollars. The board can now tell
+            which "High" risk is 400× more expensive than the other. That's the decision the heat map
+            was hiding.
+          </p>
+          <div
+            className="hv-histogram"
+            role="img"
+            aria-label="Bar chart of expected annual loss per scenario"
+          >
+            {sorted.map((row) => {
+              const pct = (row.loss / max) * 100;
+              return (
+                <div className="hv-bar-row" key={row.label}>
+                  <span className="hv-bar-label">{row.label}</span>
+                  <div className="hv-bar-track">
+                    <div className="hv-bar-fill" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="hv-bar-value">${row.loss.toLocaleString()}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="case-section">
+          <h2>What just happened</h2>
+          <p>
+            Nothing about the underlying risks changed — same five scenarios, same likelihoods, same
+            impacts. All that changed was the visualization. The heat map treated "$3.2M ransomware"
+            and "$1.9M third-party breach" as the same problem. The histogram lets you see that
+            fixing the top two exposures reduces annual loss by ~$5M — a number a CFO can weigh
+            against control investment cost.
+          </p>
+          <p>
+            This is the shape FAIR-based quantification enforces by default. Every risk is expressed
+            as a distribution of possible losses, which stack into an aggregate loss exceedance
+            curve. Colors don't stack. Distributions do.
+          </p>
+        </section>
+
+        <div className="case-footer">
+          <a className="primary-link" href="#/monte-carlo">
+            Next: your first Monte Carlo <ArrowUpRight size={16} />
+          </a>
+          <a className="secondary-link" href="#/">
+            <ArrowLeft size={16} /> Back to portfolio
+          </a>
+        </div>
+      </article>
+    </main>
+  );
+}
+
+/* -------------------- Monte Carlo -------------------- */
+
+function triangular(low: number, mode: number, high: number) {
+  const u = Math.random();
+  const c = (mode - low) / (high - low);
+  return u < c
+    ? low + Math.sqrt(u * (high - low) * (mode - low))
+    : high - Math.sqrt((1 - u) * (high - low) * (high - mode));
+}
+
+function percentile(sorted: number[], p: number) {
+  if (sorted.length === 0) return 0;
+  const idx = (p / 100) * (sorted.length - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+function MonteCarloPage() {
+  const [freqLow, setFreqLow] = React.useState(0.1);
+  const [freqMode, setFreqMode] = React.useState(0.25);
+  const [freqHigh, setFreqHigh] = React.useState(0.6);
+  const [magLow, setMagLow] = React.useState(250_000);
+  const [magMode, setMagMode] = React.useState(1_200_000);
+  const [magHigh, setMagHigh] = React.useState(4_000_000);
+  const [samples, setSamples] = React.useState<number[]>([]);
+  const [running, setRunning] = React.useState(false);
+  const frameRef = React.useRef<number | null>(null);
+  const TOTAL = 10_000;
+  const BATCH = 200;
+
+  const step = React.useCallback(() => {
+    setSamples((prev) => {
+      if (prev.length >= TOTAL) {
+        setRunning(false);
+        return prev;
+      }
+      const next = prev.slice();
+      const take = Math.min(BATCH, TOTAL - prev.length);
+      for (let i = 0; i < take; i += 1) {
+        const f = triangular(freqLow, freqMode, freqHigh);
+        const m = triangular(magLow, magMode, magHigh);
+        next.push(f * m);
+      }
+      return next;
+    });
+  }, [freqLow, freqMode, freqHigh, magLow, magMode, magHigh]);
+
+  React.useEffect(() => {
+    if (!running) return;
+    frameRef.current = window.requestAnimationFrame(() => {
+      step();
+    });
+    return () => {
+      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    };
+  }, [running, samples, step]);
+
+  const run = () => {
+    setSamples([]);
+    setRunning(true);
+  };
+  const stop = () => setRunning(false);
+
+  const stats = React.useMemo(() => {
+    if (samples.length === 0) return { p10: 0, p50: 0, p90: 0, mean: 0 };
+    const sorted = [...samples].sort((a, b) => a - b);
+    const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
+    return {
+      p10: percentile(sorted, 10),
+      p50: percentile(sorted, 50),
+      p90: percentile(sorted, 90),
+      mean,
+    };
+  }, [samples]);
+
+  const histogram = React.useMemo(() => {
+    if (samples.length === 0) return { bins: [] as { x: number; count: number }[], max: 0 };
+    const lo = Math.min(...samples);
+    const hi = Math.max(...samples);
+    const binCount = 24;
+    const width = (hi - lo) / binCount || 1;
+    const bins = Array.from({ length: binCount }, (_, i) => ({ x: lo + i * width, count: 0 }));
+    for (const s of samples) {
+      const idx = Math.min(binCount - 1, Math.floor((s - lo) / width));
+      bins[idx].count += 1;
+    }
+    return { bins, max: Math.max(...bins.map((b) => b.count)) };
+  }, [samples]);
+
+  return (
+    <main className="portfolio-shell case-shell">
+      <header className="site-header case-header" aria-label="Case study">
+        <a className="brand-link" href="#/">
+          <span>Susan Shepard</span>
+        </a>
+        <a className="case-back" href="#/">
+          <ArrowLeft size={16} /> Back to portfolio
+        </a>
+      </header>
+
+      <article className="case-article">
+        <p className="section-label">Interactive · simulation 02</p>
+        <h1>
+          Your first <em>Monte Carlo</em>.
+        </h1>
+        <p className="case-tagline">
+          Watch a defensible loss distribution take shape, one sample at a time.
+        </p>
+        <p className="case-intro">
+          A single point estimate is a lie the math tells to look confident. A Monte Carlo simulation
+          samples each input as a distribution instead, and the output is the shape of the answer —
+          not a number, a curve. Set the inputs below, press run, and watch 10,000 possible futures
+          settle into a range you can actually defend.
+        </p>
+
+        <section className="case-section">
+          <h2>The inputs</h2>
+          <p>
+            Two distributions: how often the loss event happens per year (frequency), and how big
+            each occurrence costs (magnitude). Each is a triangular distribution — low / most likely
+            / high — because most calibrated experts can give you those three numbers before they can
+            give you a mean and a standard deviation.
+          </p>
+          <div className="mc-inputs">
+            <fieldset>
+              <legend>Loss event frequency (per year)</legend>
+              <label>
+                <span>Low</span>
+                <input
+                  type="number"
+                  step="0.05"
+                  min={0}
+                  value={freqLow}
+                  onChange={(e) => setFreqLow(Number(e.target.value))}
+                />
+              </label>
+              <label>
+                <span>Most likely</span>
+                <input
+                  type="number"
+                  step="0.05"
+                  min={0}
+                  value={freqMode}
+                  onChange={(e) => setFreqMode(Number(e.target.value))}
+                />
+              </label>
+              <label>
+                <span>High</span>
+                <input
+                  type="number"
+                  step="0.05"
+                  min={0}
+                  value={freqHigh}
+                  onChange={(e) => setFreqHigh(Number(e.target.value))}
+                />
+              </label>
+            </fieldset>
+            <fieldset>
+              <legend>Loss magnitude per event (USD)</legend>
+              <label>
+                <span>Low</span>
+                <input
+                  type="number"
+                  step="10000"
+                  min={0}
+                  value={magLow}
+                  onChange={(e) => setMagLow(Number(e.target.value))}
+                />
+              </label>
+              <label>
+                <span>Most likely</span>
+                <input
+                  type="number"
+                  step="10000"
+                  min={0}
+                  value={magMode}
+                  onChange={(e) => setMagMode(Number(e.target.value))}
+                />
+              </label>
+              <label>
+                <span>High</span>
+                <input
+                  type="number"
+                  step="10000"
+                  min={0}
+                  value={magHigh}
+                  onChange={(e) => setMagHigh(Number(e.target.value))}
+                />
+              </label>
+            </fieldset>
+          </div>
+          <div className="mc-controls">
+            <button type="button" className="primary-link" onClick={run} disabled={running}>
+              {running ? "Running…" : samples.length > 0 ? "Run again" : "Run 10,000 trials"}
+            </button>
+            {running && (
+              <button type="button" className="secondary-link" onClick={stop}>
+                Stop
+              </button>
+            )}
+            <span className="mc-progress">
+              {samples.length.toLocaleString()} / {TOTAL.toLocaleString()} trials
+            </span>
+          </div>
+        </section>
+
+        <section className="case-section">
+          <h2>The distribution</h2>
+          <p>
+            Each bar is a bucket of annualized loss outcomes. The percentiles below mark where 10%,
+            50%, and 90% of outcomes fall. A board conversation lives on those three numbers.
+          </p>
+          <div
+            className="mc-histogram"
+            role="img"
+            aria-label="Monte Carlo histogram of annualized loss"
+          >
+            {histogram.bins.map((bin, i) => (
+              <div
+                className="mc-bar"
+                key={i}
+                style={{ height: histogram.max ? `${(bin.count / histogram.max) * 100}%` : "0%" }}
+                title={`~$${Math.round(bin.x).toLocaleString()} — ${bin.count} trials`}
+              />
+            ))}
+          </div>
+          <div className="mc-stats">
+            <div>
+              <span>P10</span>
+              <strong>${Math.round(stats.p10).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>P50 (median)</span>
+              <strong>${Math.round(stats.p50).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>P90</span>
+              <strong>${Math.round(stats.p90).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>Mean</span>
+              <strong>${Math.round(stats.mean).toLocaleString()}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="case-section">
+          <h2>What the shape tells you</h2>
+          <p>
+            A right-skewed distribution — the shape almost every real cyber-risk scenario produces —
+            has a mean that's noticeably higher than the median. That's the tail: rare but expensive
+            events that a heat map can't represent at all. Underwriters and treasurers reason about
+            the tail directly; risk teams that only report point estimates unintentionally hide it.
+          </p>
+          <p>
+            The next step in a production FAIR program is stacking many of these distributions into a
+            single organization-level loss exceedance curve — one chart that answers "how much annual
+            loss are we willing to fund on our own balance sheet, and how much do we want to
+            transfer?"
+          </p>
+        </section>
+
+        <div className="case-footer">
+          <a className="secondary-link" href="#/heatmap-vs-histogram">
+            <ArrowLeft size={16} /> Back: heat map vs histogram
+          </a>
+          <a className="primary-link" href="#/">
+            Back to portfolio <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </article>
     </main>
   );
 }
 
 /* -------------------- App root -------------------- */
 
+const INTERACTIVE_ROUTES = new Set(["heatmap-vs-histogram", "monte-carlo"]);
+const ALL_ROUTES = (() => {
+  const set = new Set(CASE_ROUTES);
+  INTERACTIVE_ROUTES.forEach((r) => set.add(r));
+  set.add("risk-tools");
+  RISK_TOOL_ROUTES.forEach((r) => set.add(r));
+  return set;
+})();
+
 function App() {
   const route = useHashRoute();
+  const prevRoute = React.useRef(route);
+
   React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    const prev = prevRoute.current;
+    const wasRouted = ALL_ROUTES.has(prev);
+    const isRouted = ALL_ROUTES.has(route);
+    if (route !== prev && (wasRouted || isRouted)) {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    }
+    prevRoute.current = route;
   }, [route]);
-  if (CASE_ROUTES.has(route)) {
-    return <CaseStudyView study={caseStudies[route]} />;
+
+  if (CASE_ROUTES.has(route)) return <CaseStudyView study={caseStudies[route]} />;
+  if (route === "risk-tools") return <RiskLabPage />;
+  if (route.startsWith("risk-tools/")) {
+    const slug = route.replace("risk-tools/", "");
+    const tool = riskTools.find((t) => t.slug === slug);
+    return tool ? <RiskToolPage tool={tool} /> : <RiskLabPage />;
   }
+  if (route === "heatmap-vs-histogram") return <HeatmapVsHistogram />;
+  if (route === "monte-carlo") return <MonteCarloPage />;
   return <MainPortfolio />;
 }
 
