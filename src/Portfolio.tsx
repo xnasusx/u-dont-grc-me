@@ -1169,32 +1169,33 @@ function MainPortfolio() {
           </aside>
           <div className="about-prose">
             <p>
-              My work sits at the intersection of risk judgment, product thinking, and hands-on
-              engineering. I quantify cyber risk in dollars (FAIR, not colors), treat controls as the
-              core data model, build evidence collection into the pipeline instead of the audit
-              checklist, and use AI only where it sharpens a decision — not where it just produces
-              more output.
+              Cyber risk, quantified into decisions leaders can defend — that's the throughline. My
+              work sits at the intersection of GRC engineering, FAIR-based risk quantification, and
+              AI-assisted systems: treating controls as the foundational data model, replacing static
+              risk registers with scenario-based modeling (Monte Carlo, loss exceedance curves), and
+              building the automation that lets a program hold its shape continuously instead of
+              being rebuilt by hand.
+            </p>
+            <p>
+              Heatmaps are dead — red is a color, not a unit of risk. I build FAIR models that give
+              leadership defensible loss-exposure ranges a CFO can budget against, and I use AI only
+              where it sharpens that decision: scoring vendor questionnaires, running threat
+              modeling, calculating risk — not where it just produces more output for someone to
+              review.
             </p>
             <p>
               That stance came from doing it the slow way first: building a privacy program from
-              scratch, running vendor risk across 900+ suppliers, sitting through audits where the
-              evidence lived in someone's inbox, watching good teams burn a quarter proving things a
-              system should have proven continuously. Every one of those pointed to the same root
-              cause — the control data was never modeled properly, so everything downstream had to be
-              rebuilt by hand each cycle.
+              scratch, running vendor risk across 900+ suppliers, standing up a GRC platform's
+              control library and intake from nothing. Ten years across enterprise security,
+              healthcare and privacy, GDPR, and vendor risk at scale — now focused on
+              compliance-as-code, control-as-data architecture, and the AI layer built on top of it.
+              Military background shaped my discipline around execution and respect for process
+              rigor. Boston-based.
             </p>
             <p>
-              Ten years across enterprise security, healthcare and privacy, GDPR, vendor risk at
-              scale, SEC materiality and disclosure, audit readiness (SOC 2, FedRAMP, HITRUST, ISO,
-              NIST), and now full-stack GRC platform design. Military background shaped my discipline
-              around execution and respect for process rigor. Boston-based.
-            </p>
-            <p>
-              Today that means designing risk programs that answer in dollars, building the
-              automation that keeps them honest between audits, and teaching the next generation of
-              analysts to think like engineers. I'm president of the GRC Engineering Club's Boston
-              chapter, and currently Staff Trust, Risk, and Compliance Analyst at Rapid7 — where the
-              job is proving GRC is a <em>revenue enabler</em>, not paperwork.
+              Today that means designing risk programs that answer in dollars, engineering the
+              automation that keeps them honest, and teaching the next generation of analysts to
+              think like engineers.
             </p>
           </div>
         </div>
