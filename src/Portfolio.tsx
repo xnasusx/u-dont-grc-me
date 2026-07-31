@@ -903,7 +903,6 @@ function MainPortfolio() {
           <a href="#principles">Philosophy</a>
           <a href="#bring">Case studies</a>
           <a href="#experience">Experience</a>
-          <a href="#try">Try it</a>
           <a href="#/risk-tools">Risk lab</a>
           <a href="#credentials">Credentials</a>
         </nav>
