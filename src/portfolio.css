@@ -2108,8 +2108,7 @@ ul li + li {
 
 .risk-lab-hero,
 .risk-lab-section,
-.risk-tool-detail,
-.risk-embed-shell {
+.risk-tool-detail {
   max-width: var(--max);
   margin-inline: auto;
   padding-inline: clamp(20px, 5vw, 56px);
@@ -2323,18 +2322,22 @@ ul li + li {
   font-size: 0.9rem;
 }
 
+/* Full bleed, no window chrome. The tool needs more than 1024px of its own
+   width to put Step 1 and Step 2 side by side; the max-width container was
+   handing it 1008px, so it collapsed into a single stacked column. */
 .risk-embed-shell {
-  padding-bottom: clamp(42px, 7vw, 84px);
+  width: 100%;
+  padding: 0;
+  border-top: 1px solid var(--soft-line);
 }
 
 .risk-tool-frame {
   display: block;
   width: 100%;
-  min-height: min(860px, 78vh);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel);
-  box-shadow: 0 18px 50px rgba(58, 51, 54, 0.12);
+  /* Fallback only — the frame is resized to the tool's own height in JS. */
+  height: 1560px;
+  border: 0;
+  background: var(--paper);
 }
 
 /* -------- Heat map vs histogram page -------- */

@@ -1506,7 +1506,49 @@ function RiskStepCard({ step }: { step: RiskStep }) {
   );
 }
 
+// The tool is served from the same origin as the portfolio, so in production we
+// can read its height and grow the frame to match instead of trapping it in a
+// scrolling window. In local dev the origins differ and this throws, which just
+// leaves the CSS fallback height in place.
+function useFrameAutoHeight(frameRef: React.RefObject<HTMLIFrameElement | null>) {
+  React.useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    let observer: ResizeObserver | undefined;
+
+    const attach = () => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc?.body) return;
+        const sync = () => {
+          const height = doc.documentElement.scrollHeight;
+          // Guard against a blank or half-parsed document collapsing the frame.
+          if (height > 400 && Math.abs(height - frame.offsetHeight) > 1) {
+            frame.style.height = `${height}px`;
+          }
+        };
+        sync();
+        observer?.disconnect();
+        observer = new ResizeObserver(sync);
+        observer.observe(doc.body);
+      } catch {
+        /* cross-origin (local dev) — keep the CSS height */
+      }
+    };
+
+    attach();
+    frame.addEventListener("load", attach);
+    return () => {
+      frame.removeEventListener("load", attach);
+      observer?.disconnect();
+    };
+  }, [frameRef]);
+}
+
 function RiskLabPage() {
+  const frameRef = React.useRef<HTMLIFrameElement>(null);
+  useFrameAutoHeight(frameRef);
+
   return (
     <main className="portfolio-shell risk-lab-shell">
       <header className="site-header case-header" aria-label="Risk Quantifier">
@@ -1559,10 +1601,10 @@ function RiskLabPage() {
 
       <section className="risk-embed-shell" aria-label="Risk Quantifier interactive tool">
         <iframe
+          ref={frameRef}
           className="risk-tool-frame"
           src={riskQuantifier.url}
           title="Risk Quantifier interactive tool"
-          loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
       </section>
