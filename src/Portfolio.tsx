@@ -1171,10 +1171,9 @@ function MainPortfolio() {
             <p>
               Cyber risk, quantified into decisions leaders can defend — that's the throughline. My
               work sits at the intersection of GRC engineering, FAIR-based risk quantification, and
-              AI-assisted systems: treating controls as the foundational data model, replacing static
-              risk registers with scenario-based modeling (Monte Carlo, loss exceedance curves), and
-              building the automation that lets a program hold its shape continuously instead of
-              being rebuilt by hand.
+              AI-assisted systems: treating controls as the foundational data model, quantifying what
+              used to be invisible, and replacing static risk registers with scenario-based modeling
+              (Monte Carlo, loss exceedance curves).
             </p>
             <p>
               Heatmaps are dead — red is a color, not a unit of risk. I build FAIR models that give
@@ -1186,16 +1185,21 @@ function MainPortfolio() {
             <p>
               That stance came from doing it the slow way first: building a privacy program from
               scratch, running vendor risk across 900+ suppliers, standing up a GRC platform's
-              control library and intake from nothing. Ten years across enterprise security,
-              healthcare and privacy, GDPR, and vendor risk at scale — now focused on
-              compliance-as-code, control-as-data architecture, and the AI layer built on top of it.
-              Military background shaped my discipline around execution and respect for process
-              rigor. Boston-based.
+              control library and intake from nothing, and leading change without formal authority —
+              cutting assessment SLAs from weeks to days, founding a review that became a standing
+              board cadence. Now the focus is compliance-as-code, control-as-data architecture, and
+              the AI layer built on top of it.
+            </p>
+            <p>
+              Military service is the foundation underneath all of it — execution discipline, how
+              systems hold up under pressure, and why a control nobody tested is a control nobody
+              has.
             </p>
             <p>
               Today that means designing risk programs that answer in dollars, engineering the
-              automation that keeps them honest, and teaching the next generation of analysts to
-              think like engineers.
+              automation that keeps them honest, and mentoring the next generation of analysts to
+              think like engineers — president of the GRC Engineering Club's Boston chapter, mentor
+              through ISACA, Big Brothers Big Sisters, and Boston University.
             </p>
           </div>
         </div>
