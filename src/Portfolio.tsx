@@ -162,9 +162,9 @@ const riskLabTools: RiskLabTool[] = [
     id: "monte-carlo",
     label: "Monte Carlo",
     icon: Dices,
-    // The tool page carries this same copy as its "1 · The Lesson" act, so it is
+    // The tool page carries this same copy as its "The Lesson" act, so it is
     // hidden there when embedded and lives here instead.
-    eyebrow: "1 · The Lesson",
+    eyebrow: "The Lesson",
     title: (
       <>
         Your First <em>Monte Carlo</em>
@@ -185,13 +185,16 @@ const riskLabTools: RiskLabTool[] = [
     id: "fair-model",
     label: "FAIR Model Study",
     icon: Network,
+    eyebrow: "The Lesson",
     title: (
       <>
-        FAIR <em>Model Study</em>
+        The FAIR Model, <em>from Memory</em>
       </>
     ),
-    blurb:
-      "The FAIR taxonomy is 13 components, three units, and 22 definitions worth knowing cold. Study the decomposition tree, then rebuild it from memory — place every factor, assign its unit, and match every definition — with placement and unit accuracy scored separately so you can see which half you actually know.",
+    blurb: [
+      "The FAIR model decomposes risk into its fundamental components. For certification you need this taxonomy cold: every factor, where it sits in the tree, and what unit it carries. Dollars ($) for financial amounts, percent (%) for probabilities, and count (#) for frequencies.",
+      "Study the tree below, then switch to practice mode and rebuild it from memory — place each component, then assign its unit. The definitions quiz underneath is a separate exercise covering all 22 testable items: the 13 model components, the 6 forms of loss, and the 3 Probability of Action sub-factors.",
+    ],
     stepsHeading: (
       <>
         From study mode to <em>memory</em>, in three steps.
@@ -203,13 +206,16 @@ const riskLabTools: RiskLabTool[] = [
     id: "loss-exceedance",
     label: "Loss Exceedance Curve",
     icon: LineChart,
+    eyebrow: "The Lesson",
     title: (
       <>
-        Loss <em>Exceedance Curve</em>
+        How to Read a <em>Loss Exceedance Curve</em>
       </>
     ),
-    blurb:
-      "The most useful chart in cyber risk quantification, built from scratch. Give one risk a frequency and a loss range, run 10,000 simulated years, then overlay risk tolerance, loss reserves, and materiality thresholds to read the odds that annual losses exceed any dollar amount you care about.",
+    blurb: [
+      "A histogram shows you the shape of the risk. A loss exceedance curve answers the question everyone in the room is thinking: “What are the odds we lose more than $X?”",
+      "Reading it is simple: pick any dollar amount on the horizontal axis, look up to the curve, then read across to the vertical axis. That number is the probability that annual losses from this risk will meet or exceed that amount. Once you can read this chart, you can have a real conversation about risk tolerance, loss reserves, and how much exposure your organization carries.",
+    ],
     stepsHeading: (
       <>
         From a range to a curve you can <em>read</em>, in three steps.
