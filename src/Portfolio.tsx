@@ -8,8 +8,10 @@ import {
   Github,
   Grid3x3,
   Landmark,
+  LineChart,
   Linkedin,
   Mail,
+  Network,
 } from "lucide-react";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -77,7 +79,67 @@ const monteCarloDemo = {
   ],
 };
 
-const riskLabTools = [
+const fairModelStudy = {
+  url: "https://xnasusx.github.io/fair-model-study/",
+  repo: "https://github.com/xnasusx/fair-model-study",
+  steps: [
+    {
+      eyebrow: "Step 1 · Study",
+      title: "Walk the tree",
+      body: "The full FAIR decomposition, from Risk down to Secondary Loss Magnitude, with the unit every factor carries: dollars, probability, or frequency.",
+    },
+    {
+      eyebrow: "Step 2 · Rebuild",
+      title: "Build it from memory",
+      body: "The tree comes back empty. Place all 13 components from a shuffled pool, then assign each one its unit — placement and unit accuracy are scored separately.",
+    },
+    {
+      eyebrow: "Step 3 · Define",
+      title: "Match 22 definitions",
+      body: "The 13 model components, the 6 forms of loss, and the 3 Probability of Action sub-factors, in one pool. Match each name to what it actually measures.",
+    },
+  ],
+};
+
+const lossExceedanceCurve = {
+  url: "https://xnasusx.github.io/loss-exceedance-curve/",
+  repo: "https://github.com/xnasusx/loss-exceedance-curve",
+  steps: [
+    {
+      eyebrow: "Step 1 · Estimate",
+      title: "Give the risk a range",
+      body: "A three-point frequency estimate and a three-point loss magnitude — minimum, most likely, maximum. The same inputs a FAIR model runs on.",
+    },
+    {
+      eyebrow: "Step 2 · Simulate",
+      title: "Run 10,000 years",
+      body: "Those ranges become a histogram of annual loss: the shape of the risk, before anyone has drawn a single threshold on it.",
+    },
+    {
+      eyebrow: "Step 3 · Read",
+      title: "Plot the curve",
+      body: "The same output, re-plotted as an exceedance curve. Overlay risk tolerance, loss reserves, and materiality to read the odds of crossing each one.",
+    },
+  ],
+};
+
+type RiskLabTool = {
+  id: string;
+  label: string;
+  icon: typeof Grid3x3;
+  /** Overrides the default "Risk lab · Interactive tool" kicker. */
+  eyebrow?: string;
+  title: React.ReactNode;
+  blurb: string | string[];
+  stepsHeading: React.ReactNode;
+  tool: {
+    url: string;
+    repo: string;
+    steps: { eyebrow: string; title: string; body: string }[];
+  };
+};
+
+const riskLabTools: RiskLabTool[] = [
   {
     id: "heatmaps",
     label: "Heatmaps & Histograms",
@@ -100,19 +162,60 @@ const riskLabTools = [
     id: "monte-carlo",
     label: "Monte Carlo",
     icon: Dices,
+    // The tool page carries this same copy as its "1 · The Lesson" act, so it is
+    // hidden there when embedded and lives here instead.
+    eyebrow: "1 · The Lesson",
     title: (
       <>
-        Your first <em>Monte Carlo</em>
+        Your First <em>Monte Carlo</em>
       </>
     ),
-    blurb:
-      "Monte Carlo starts with something as ordinary as a coin flip: an event with a known probability, simulated over and over until the outcomes take a shape. This is the law of large numbers doing the work — the reason a simulation gives you a range you can defend instead of a single number you have to.",
+    blurb: [
+      "Every Monte Carlo model rests on one unglamorous fact: run a random process enough times and the aggregate stops behaving randomly. That is the law of large numbers. Any single trial is still a toss-up; the average of a hundred thousand of them is a measurement. A fair coin is the smallest honest version of this — one event, one known probability, nothing else in the way.",
+      "The tool below does exactly that. The line chart plots the share of heads after every flip, so you can watch one run wander and then settle. The histogram underneath runs the same experiment 200 separate times and bins where each one finished — that is the spread you would have seen on a less lucky afternoon. Move the slider from 10 flips to 100,000 and watch both of them tighten.",
+    ],
     stepsHeading: (
       <>
         Why more trials means <em>less</em> noise.
       </>
     ),
     tool: monteCarloDemo,
+  },
+  {
+    id: "fair-model",
+    label: "FAIR Model Study",
+    icon: Network,
+    title: (
+      <>
+        FAIR <em>Model Study</em>
+      </>
+    ),
+    blurb:
+      "The FAIR taxonomy is 13 components, three units, and 22 definitions worth knowing cold. Study the decomposition tree, then rebuild it from memory — place every factor, assign its unit, and match every definition — with placement and unit accuracy scored separately so you can see which half you actually know.",
+    stepsHeading: (
+      <>
+        From study mode to <em>memory</em>, in three steps.
+      </>
+    ),
+    tool: fairModelStudy,
+  },
+  {
+    id: "loss-exceedance",
+    label: "Loss Exceedance Curve",
+    icon: LineChart,
+    title: (
+      <>
+        Loss <em>Exceedance Curve</em>
+      </>
+    ),
+    blurb:
+      "The most useful chart in cyber risk quantification, built from scratch. Give one risk a frequency and a loss range, run 10,000 simulated years, then overlay risk tolerance, loss reserves, and materiality thresholds to read the odds that annual losses exceed any dollar amount you care about.",
+    stepsHeading: (
+      <>
+        From a range to a curve you can <em>read</em>, in three steps.
+      </>
+    ),
+    tool: lossExceedanceCurve,
   },
 ];
 
@@ -1666,9 +1769,11 @@ function RiskLabPage() {
       >
         <section className="risk-tool-detail">
           <div className="risk-tool-detail-copy">
-            <p className="section-label">Risk lab · Interactive tool</p>
+            <p className="section-label">{active.eyebrow ?? "Risk lab · Interactive tool"}</p>
             <h1>{active.title}</h1>
-            <p>{active.blurb}</p>
+            {(Array.isArray(active.blurb) ? active.blurb : [active.blurb]).map((para) => (
+              <p key={para.slice(0, 40)}>{para}</p>
+            ))}
             <div className="risk-tool-actions">
               <a
                 className="primary-link"

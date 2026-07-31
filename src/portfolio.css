@@ -2104,14 +2104,20 @@ ul li + li {
 
 .risk-lab-shell {
   background: var(--paper);
+  /* Every embedded tool lays itself out in a 1400px container with a 24px
+     gutter (16px under 768px). The page chrome around the iframe uses the same
+     numbers so the tab strip, the copy and the step cards all sit on the same
+     left edge as the charts inside the frame. */
+  --risk-max: 1400px;
+  --risk-gutter: 24px;
 }
 
 .risk-lab-hero,
 .risk-lab-section,
 .risk-tool-detail {
-  max-width: var(--max);
+  max-width: var(--risk-max, var(--max));
   margin-inline: auto;
-  padding-inline: clamp(20px, 5vw, 56px);
+  padding-inline: var(--risk-gutter, clamp(20px, 5vw, 56px));
 }
 
 .risk-lab-hero {
@@ -2279,9 +2285,9 @@ ul li + li {
 /* Same shape as the governance module tabs in the product: a raised folder tab
    sitting on a hairline, with the active one lifted onto the panel colour. */
 .risk-tab-bar {
-  max-width: var(--max);
+  max-width: var(--risk-max, var(--max));
   margin-inline: auto;
-  padding-inline: clamp(20px, 5vw, 56px);
+  padding-inline: var(--risk-gutter, clamp(20px, 5vw, 56px));
   padding-top: clamp(28px, 4.5vw, 52px);
 }
 
@@ -2340,9 +2346,14 @@ ul li + li {
   font-size: clamp(2.1rem, 4.6vw, 3.6rem);
 }
 
+/* Runs the full width of the tool below it rather than stopping at a measure. */
 .risk-tool-detail-copy p {
-  max-width: 62ch;
+  max-width: none;
   margin-bottom: 0;
+}
+
+.risk-tool-detail-copy p + p {
+  margin-top: 16px;
 }
 
 .risk-tool-actions {
@@ -2359,6 +2370,13 @@ ul li + li {
   width: 100%;
   padding: 0;
   border-top: 1px solid var(--soft-line);
+}
+
+/* Matches the tools' own `useIsMobile` breakpoint so the gutters stay in step. */
+@media (max-width: 767px) {
+  .risk-lab-shell {
+    --risk-gutter: 16px;
+  }
 }
 
 .risk-tool-frame {
