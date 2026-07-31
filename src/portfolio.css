@@ -2012,7 +2012,7 @@ ul li + li {
 
 .risk-preview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-top: 26px;
 }
@@ -2139,7 +2139,7 @@ ul li + li {
 .risk-tool-grid,
 .ai-coach-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -2181,6 +2181,18 @@ ul li + li {
 
 .risk-tool-card .try-link-cta {
   margin-top: auto;
+}
+
+/* Step cards describe the tool, they do not link anywhere. */
+.risk-step-card {
+  aspect-ratio: auto;
+  min-height: 210px;
+}
+
+.risk-step-card:hover {
+  border-color: var(--line);
+  transform: none;
+  box-shadow: none;
 }
 
 .ai-coach-section {

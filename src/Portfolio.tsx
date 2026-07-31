@@ -31,71 +31,27 @@ const links = {
   resumeMarkdown: `${import.meta.env.BASE_URL}susan-shepard-resume.md`,
 };
 
-const riskTools = [
-  {
-    slug: "heatmap-to-histogram",
-    eyebrow: "Chapter 2 · Concept",
-    title: "Heat map to histogram",
-    body: "Place the same risk on a heat map and a histogram side by side to see what the matrix hides.",
-    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/heatmap-to-histogram.html",
-    cta: "Open the visualization",
-  },
-  {
-    slug: "calibration-trainer",
-    eyebrow: "Chapter 4 · Practice",
-    title: "Calibration trainer",
-    body: "Practice confidence intervals and get immediate feedback on whether your estimates are calibrated.",
-    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/calibration-trainer.html",
-    cta: "Train calibration",
-  },
-  {
-    slug: "your-first-monte-carlo",
-    eyebrow: "Chapter 5 · Simulation",
-    title: "Your first Monte Carlo",
-    body: "Run a live simulation and watch the distribution settle as the number of trials increases.",
-    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/your-first-monte-carlo.html",
-    cta: "Run the simulation",
-  },
-  {
-    slug: "loss-exceedance-curve",
-    eyebrow: "Chapter 6 · Decision support",
-    title: "Loss exceedance curve",
-    body: "Build a loss exceedance curve step by step, then overlay risk tolerance and materiality thresholds.",
-    sourceUrl: "https://tonym-v.github.io/heatmapstohistograms/loss-exceedance-curve.html",
-    cta: "Read the curve",
-  },
-];
-
-const aiCoaches = [
-  {
-    title: "The Board Translator",
-    opening:
-      "Paste simulation output and turn it into loss exceedance statements, board-ready language, and decision framing.",
-    href: "https://chatgpt.com/g/g-6999464347308191aee6a70ab1f0031e-the-board-translator",
-    prompt: "Help me explain this P50 / P90 cyber-loss result to a board audience.",
-  },
-  {
-    title: "Cyber Risk Scenario Coach",
-    opening:
-      "Turn a fuzzy concern into a scoped cyber-risk scenario that is ready for quantitative analysis.",
-    href: "https://chatgpt.com/g/g-6997f34b45bc819196dccb92585c6a61-cyber-risk-scenario-coach",
-    prompt: "Help me scope a ransomware scenario for FAIR analysis.",
-  },
-  {
-    title: "The Loss Estimator",
-    opening:
-      "Walk through the major forms of loss and build a magnitude estimate that is easier to defend.",
-    href: "https://chatgpt.com/g/g-6999452f6b0881919985b7af55625662-the-loss-estimator",
-    prompt: "Help me estimate response, productivity, replacement, and secondary losses.",
-  },
-  {
-    title: "Roast My Risk Register",
-    opening:
-      "Pressure-test vague register entries and rebuild them into decision-useful risk statements.",
-    href: "https://chatgpt.com/g/g-69994331a5508191bdffc44511757006-roast-my-risk-register",
-    prompt: "Roast this risk register entry and rewrite it as a quantified scenario.",
-  },
-];
+const riskQuantifier = {
+  url: "https://xnasusx.github.io/risk-quantifier/",
+  repo: "https://github.com/xnasusx/risk-quantifier",
+  steps: [
+    {
+      eyebrow: "Step 1 · Place",
+      title: "Place your risks",
+      body: "Drop up to five risks onto a 5×5 likelihood-by-impact matrix — the same qualitative heat map most risk registers already run on.",
+    },
+    {
+      eyebrow: "Step 2 · Parameterize",
+      title: "Define the parameters",
+      body: "Give each risk a frequency in events per year and an impact in dollars per event. This is where the detail the matrix flattened comes back.",
+    },
+    {
+      eyebrow: "Step 3 · Simulate",
+      title: "Run 10,000 iterations",
+      body: "A Monte Carlo run turns the matrix into a loss distribution — a range you can budget against instead of a color you can only argue about.",
+    },
+  ],
+};
 
 const focusAreas = [
   { label: "FAIR cyber risk quantification", tone: "rose" },
@@ -566,7 +522,6 @@ const structuredData = {
 /* -------------------- Hash routing -------------------- */
 
 const CASE_ROUTES = new Set(objectives.map((o) => o.route));
-const RISK_TOOL_ROUTES = new Set(riskTools.map((t) => `risk-tools/${t.slug}`));
 
 function useHashRoute() {
   const [route, setRoute] = React.useState<string>(() =>
@@ -1275,19 +1230,22 @@ function MainPortfolio() {
           <h2>
             The pitch, in <em>your</em> hands.
           </h2>
-          <p className="try-lede">Practice your skills at FAIRly good risk management.</p>
+          <p className="try-lede">
+            The Risk Quantifier turns a qualitative heat map into a Monte Carlo loss distribution —
+            live, in the browser, with your own numbers.
+          </p>
           <a className="primary-link risk-lab-button" href="#/risk-tools">
             learn to quantify my risks <ArrowUpRight size={18} />
           </a>
         </div>
         <div className="risk-preview-grid">
-          {riskTools.map((tool) => (
-            <a className="risk-preview-card" href={`#/risk-tools/${tool.slug}`} key={tool.slug}>
-              <span className="try-link-eyebrow">{tool.eyebrow}</span>
-              <strong>{tool.title}</strong>
-              <span className="try-link-body">{tool.body}</span>
+          {riskQuantifier.steps.map((step) => (
+            <a className="risk-preview-card" href="#/risk-tools" key={step.title}>
+              <span className="try-link-eyebrow">{step.eyebrow}</span>
+              <strong>{step.title}</strong>
+              <span className="try-link-body">{step.body}</span>
               <span className="try-link-cta">
-                {tool.cta} <ArrowUpRight size={14} />
+                Open the tool <ArrowUpRight size={14} />
               </span>
             </a>
           ))}
@@ -1536,42 +1494,14 @@ function MainPortfolio() {
 
 /* -------------------- Risk lab -------------------- */
 
-type RiskTool = (typeof riskTools)[number];
+type RiskStep = (typeof riskQuantifier.steps)[number];
 
-function RiskToolCard({ tool }: { tool: RiskTool }) {
+function RiskStepCard({ step }: { step: RiskStep }) {
   return (
-    <a className="risk-tool-card" href={`#/risk-tools/${tool.slug}`}>
-      <span className="try-link-eyebrow">{tool.eyebrow}</span>
-      <strong>{tool.title}</strong>
-      <span>{tool.body}</span>
-      <span className="try-link-cta">
-        {tool.cta} <ArrowUpRight size={14} />
-      </span>
-    </a>
-  );
-}
-
-function AiCoachCard({ coach }: { coach: (typeof aiCoaches)[number] }) {
-  return (
-    <article className="ai-coach-card">
-      <div className="ai-chat-window" aria-hidden="true">
-        <span className="ai-chat-dot" />
-        <span className="ai-chat-line">{coach.opening}</span>
-        <span className="ai-chat-prompt">{coach.prompt}</span>
-      </div>
-      <div>
-        <span className="try-link-eyebrow">Custom GPT · Launch</span>
-        <h3>{coach.title}</h3>
-        <p>{coach.opening}</p>
-      </div>
-      <a
-        className="secondary-link ai-coach-link"
-        href={coach.href}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Open in ChatGPT <ExternalLink size={15} />
-      </a>
+    <article className="risk-tool-card risk-step-card">
+      <span className="try-link-eyebrow">{step.eyebrow}</span>
+      <strong>{step.title}</strong>
+      <span>{step.body}</span>
     </article>
   );
 }
@@ -1579,7 +1509,7 @@ function AiCoachCard({ coach }: { coach: (typeof aiCoaches)[number] }) {
 function RiskLabPage() {
   return (
     <main className="portfolio-shell risk-lab-shell">
-      <header className="site-header case-header" aria-label="Risk tools">
+      <header className="site-header case-header" aria-label="Risk Quantifier">
         <a className="brand-link" href="#/">
           <span>Susan Shepard</span>
         </a>
@@ -1588,96 +1518,67 @@ function RiskLabPage() {
         </a>
       </header>
 
-      <section className="risk-lab-hero">
-        <p className="section-label">Risk lab · FAIR practice tools</p>
-        <h1>
-          Learn to quantify <em>your</em> risks.
-        </h1>
-        <p>
-          A portfolio-native launchpad for the public tools from{" "}
-          <cite>From Heatmaps to Histograms</cite>: risk visualization, calibration, Monte Carlo
-          intuition, and loss exceedance curve reading.
-        </p>
-      </section>
-
-      <section className="risk-lab-section" aria-labelledby="risk-web-tools">
-        <div className="section-heading">
-          <p className="section-label">Interactive web apps</p>
-          <h2 id="risk-web-tools">Practice the quantification muscle.</h2>
-        </div>
-        <div className="risk-tool-grid">
-          {riskTools.map((tool) => (
-            <RiskToolCard tool={tool} key={tool.slug} />
-          ))}
-        </div>
-      </section>
-
-      <section className="risk-lab-section ai-coach-section" aria-labelledby="risk-ai-coaches">
-        <div className="section-heading">
-          <p className="section-label">AI coaches</p>
-          <h2 id="risk-ai-coaches">Chat-shaped help for the parts where people get stuck.</h2>
-          <p className="try-lede">
-            ChatGPT does not expose these custom GPTs as embeddable widgets, so these stay as
-            portfolio-styled launch panels instead of iframes.
-          </p>
-        </div>
-        <div className="ai-coach-grid">
-          {aiCoaches.map((coach) => (
-            <AiCoachCard coach={coach} key={coach.title} />
-          ))}
-        </div>
-      </section>
-    </main>
-  );
-}
-
-function RiskToolPage({ tool }: { tool: RiskTool }) {
-  return (
-    <main className="portfolio-shell risk-lab-shell">
-      <header className="site-header case-header" aria-label={tool.title}>
-        <a className="brand-link" href="#/">
-          <span>Susan Shepard</span>
-        </a>
-        <a className="case-back" href="#/risk-tools">
-          <ArrowLeft size={16} /> Back to risk lab
-        </a>
-      </header>
-
       <section className="risk-tool-detail">
         <div className="risk-tool-detail-copy">
-          <p className="section-label">{tool.eyebrow}</p>
-          <h1>{tool.title}</h1>
-          <p>{tool.body}</p>
+          <p className="section-label">Risk lab · Interactive tool</p>
+          <h1>
+            Risk <em>Quantifier</em>
+          </h1>
+          <p>
+            Place your risks on a heat map, give each one a frequency and a loss range, then run
+            10,000 Monte Carlo iterations and watch the matrix become a distribution. Built to show
+            exactly how much information a qualitative risk matrix throws away.
+          </p>
           <div className="risk-tool-actions">
             <a
               className="primary-link"
-              href={tool.sourceUrl}
+              href={riskQuantifier.url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open original <ExternalLink size={16} />
+              Open full screen <ExternalLink size={16} />
             </a>
-            <a className="secondary-link" href="#/risk-tools">
-              Browse all tools
+            <a
+              className="secondary-link"
+              href={riskQuantifier.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub <Github size={16} />
             </a>
           </div>
         </div>
         <aside className="risk-tool-credit">
-          <span>Source</span>
+          <span>Built by</span>
           <p>
-            Embedded from Tony Martin-Vegue's public <cite>From Heatmaps to Histograms</cite> tools.
+            Susan Shepard. A learning tool — each risk is modelled independently, so read the output
+            as intuition rather than a production model.
           </p>
         </aside>
       </section>
 
-      <section className="risk-embed-shell" aria-label={`${tool.title} embedded tool`}>
+      <section className="risk-embed-shell" aria-label="Risk Quantifier interactive tool">
         <iframe
           className="risk-tool-frame"
-          src={tool.sourceUrl}
-          title={`${tool.title} interactive tool`}
+          src={riskQuantifier.url}
+          title="Risk Quantifier interactive tool"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
+      </section>
+
+      <section className="risk-lab-section" aria-labelledby="risk-quantifier-steps">
+        <div className="section-heading">
+          <p className="section-label">How it works</p>
+          <h2 id="risk-quantifier-steps">
+            From heat map to histogram, in <em>three</em> steps.
+          </h2>
+        </div>
+        <div className="risk-tool-grid">
+          {riskQuantifier.steps.map((step) => (
+            <RiskStepCard step={step} key={step.title} />
+          ))}
+        </div>
       </section>
     </main>
   );
@@ -2108,7 +2009,6 @@ const ALL_ROUTES = (() => {
   const set = new Set(CASE_ROUTES);
   INTERACTIVE_ROUTES.forEach((r) => set.add(r));
   set.add("risk-tools");
-  RISK_TOOL_ROUTES.forEach((r) => set.add(r));
   return set;
 })();
 
@@ -2127,12 +2027,8 @@ function App() {
   }, [route]);
 
   if (CASE_ROUTES.has(route)) return <CaseStudyView study={caseStudies[route]} />;
-  if (route === "risk-tools") return <RiskLabPage />;
-  if (route.startsWith("risk-tools/")) {
-    const slug = route.replace("risk-tools/", "");
-    const tool = riskTools.find((t) => t.slug === slug);
-    return tool ? <RiskToolPage tool={tool} /> : <RiskLabPage />;
-  }
+  // Old per-tool links (#/risk-tools/<slug>) now land on the single Risk Quantifier page.
+  if (route === "risk-tools" || route.startsWith("risk-tools/")) return <RiskLabPage />;
   if (route === "heatmap-vs-histogram") return <HeatmapVsHistogram />;
   if (route === "monte-carlo") return <MonteCarloPage />;
   return <MainPortfolio />;
