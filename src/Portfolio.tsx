@@ -1703,10 +1703,14 @@ function useFrameAutoHeight(
       // clamped to the frame's own viewport, so it can only ever report the
       // height we already set and the frame would never shrink back down.
       const margins = view.getComputedStyle(body);
+      // scrollHeight is a rounded-down integer, so a fractional content height
+      // leaves the frame a pixel short and the tool grows its own scrollbar.
       const height =
-        body.scrollHeight +
-        parseFloat(margins.marginTop || "0") +
-        parseFloat(margins.marginBottom || "0");
+        Math.ceil(
+          body.scrollHeight +
+            parseFloat(margins.marginTop || "0") +
+            parseFloat(margins.marginBottom || "0"),
+        ) + 1;
       // Guard against a blank or half-parsed document collapsing the frame.
       if (height > 400 && Math.abs(height - frame.offsetHeight) > 1) {
         frame.style.height = `${height}px`;
