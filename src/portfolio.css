@@ -165,7 +165,7 @@ select:focus-visible {
 
 .hero-section {
   display: grid;
-  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
   gap: clamp(28px, 5vw, 56px);
   align-items: start;
   padding-top: clamp(56px, 9vw, 120px);
@@ -179,8 +179,8 @@ select:focus-visible {
 .hero-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px;
+  gap: 18px;
+  padding: 26px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -209,11 +209,16 @@ select:focus-visible {
      crop cuts the top of the head off. */
   aspect-ratio: 4 / 5;
   width: 100%;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--accent-soft), var(--paper-2));
   display: grid;
   place-items: center;
+  /* A ring in the same pink the card sits on, then a soft pink halo beneath */
+  box-shadow:
+    0 0 0 6px var(--paper),
+    0 0 22px 4px rgba(199, 132, 141, 0.28),
+    0 14px 34px rgba(141, 88, 96, 0.16);
 }
 
 .hero-portrait img {
@@ -243,16 +248,17 @@ select:focus-visible {
 
 .hero-name {
   font-family: "Fraunces", Georgia, serif;
-  font-size: 1.35rem;
+  font-size: 1.6rem;
+  line-height: 1.15;
   font-weight: 700;
   color: var(--ink);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .hero-role {
   color: var(--accent);
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   font-weight: 600;
   margin: 0;
 }
@@ -277,7 +283,7 @@ select:focus-visible {
 
 .hero-stat-label {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -285,7 +291,7 @@ select:focus-visible {
 
 .hero-stat-value {
   font-family: "Fraunces", Georgia, serif;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   line-height: 1.1;
   font-weight: 700;
   color: var(--ink);
@@ -301,12 +307,12 @@ select:focus-visible {
 
 .hero-skill-tag {
   display: inline-block;
-  padding: 5px 12px;
+  padding: 6px 13px;
   background: var(--chip);
   border: 1px solid rgba(199, 132, 141, 0.24);
   border-radius: 999px;
   color: var(--accent);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
