@@ -2323,7 +2323,7 @@ ul li + li {
 
 .risk-tool-detail {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
   align-items: end;
   padding-top: clamp(42px, 7vw, 84px);
@@ -2350,28 +2350,6 @@ ul li + li {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 20px;
-}
-
-.risk-tool-credit {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel);
-}
-
-.risk-tool-credit span {
-  display: inline-block;
-  margin-bottom: 8px;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.risk-tool-credit p {
-  margin: 0;
-  font-size: 0.9rem;
 }
 
 /* Full bleed, no window chrome. The tool needs more than 1024px of its own

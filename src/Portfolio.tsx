@@ -89,8 +89,6 @@ const riskLabTools = [
     ),
     blurb:
       "Place your risks on a heat map, give each one a frequency and a loss range, then run 10,000 Monte Carlo iterations and watch the matrix become a distribution. Built to show exactly how much information a qualitative risk matrix throws away.",
-    credit:
-      "Susan Shepard. A learning tool — each risk is modelled independently, so read the output as intuition rather than a production model.",
     stepsHeading: (
       <>
         From heat map to histogram, in <em>three</em> steps.
@@ -109,8 +107,6 @@ const riskLabTools = [
     ),
     blurb:
       "Monte Carlo starts with something as ordinary as a coin flip: an event with a known probability, simulated over and over until the outcomes take a shape. This is the law of large numbers doing the work — the reason a simulation gives you a range you can defend instead of a single number you have to.",
-    credit:
-      "Susan Shepard. A learning build on a fair coin with independent flips — intuition for why simulation converges, not a risk model.",
     stepsHeading: (
       <>
         Why more trials means <em>less</em> noise.
@@ -1683,10 +1679,6 @@ function RiskLabPage() {
               </a>
             </div>
           </div>
-          <aside className="risk-tool-credit">
-            <span>Built by</span>
-            <p>{active.credit}</p>
-          </aside>
         </section>
 
         <section className="risk-embed-shell" aria-label={`${active.label} interactive tool`}>
