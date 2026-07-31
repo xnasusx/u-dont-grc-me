@@ -474,9 +474,9 @@ const roadmapSteps = [
 
 const writing = [
   {
-    eyebrow: "Boston · President",
+    eyebrow: "Boston · President & Founder",
     title: "GRC Engineering Club — Boston Chapter",
-    body: "President of the Boston chapter. Building the local practice around systems, automation, and modern controls work — meetups, mentorship, and community writing.",
+    body: "President and Founder of the Boston Chapter of the GRC Engineering Club. Building the local practice around systems, automation, and modern controls work — meetups, mentorship, and community writing.",
     href: links.grcEngineeringClub,
     cta: "Get #WickedCompliant",
   },
@@ -573,7 +573,7 @@ const skillGroups = [
       "Board reporting",
       "Program design",
       "Cross-functional partnership",
-      "Chapter president · Boston GRC Engineering Club",
+      "President & founder · Boston GRC Engineering Club",
       "Mentorship (ISACA · BBBS · BU)",
     ],
   },
@@ -660,7 +660,7 @@ const contactLinks = [
   { label: "Medium", meta: "medium.com/@xnasusx", href: links.medium, icon: BookOpen },
   {
     label: "GRC Engineering Club",
-    meta: "Boston chapter",
+    meta: "President & Founder · Boston Chapter",
     href: links.grcEngineeringClub,
     icon: Landmark,
   },
@@ -1162,8 +1162,8 @@ function MainPortfolio() {
                 <h3>Building the community</h3>
               </div>
               <p>
-                Founded and lead the GRC Engineering Club Boston chapter, and mentor through ISACA,
-                Big Brothers Big Sisters, and Boston University.
+                President and Founder of the Boston Chapter of the GRC Engineering Club, and mentor
+                through ISACA, Big Brothers Big Sisters, and Boston University.
               </p>
             </article>
           </aside>
@@ -1198,8 +1198,9 @@ function MainPortfolio() {
             <p>
               Today that means designing risk programs that answer in dollars, engineering the
               automation that keeps them honest, and mentoring the next generation of analysts to
-              think like engineers — president of the GRC Engineering Club's Boston chapter, mentor
-              through ISACA, Big Brothers Big Sisters, and Boston University.
+              think like engineers — President and Founder of the Boston Chapter of the GRC
+              Engineering Club, mentor through ISACA, Big Brothers Big Sisters, and Boston
+              University.
             </p>
           </div>
         </div>
@@ -1411,7 +1412,7 @@ function MainPortfolio() {
             live, in the browser, with your own numbers.
           </p>
           <a className="primary-link risk-lab-button" href="#/risk-tools">
-            learn to quantify my risks <ArrowUpRight size={18} />
+            learn to quantify risks <ArrowUpRight size={18} />
           </a>
         </div>
         <div className="risk-preview-grid">
@@ -1608,8 +1609,8 @@ function MainPortfolio() {
               <div className="service-divider" />
               <p className="service-eyebrow">// Community</p>
               <p>
-                President, GRC Engineering Club Boston chapter. Mentor through ISACA, Big Brothers
-                Big Sisters, and Boston University.
+                President and Founder of the Boston Chapter of the GRC Engineering Club. Mentor
+                through ISACA, Big Brothers Big Sisters, and Boston University.
               </p>
             </div>
           </div>
