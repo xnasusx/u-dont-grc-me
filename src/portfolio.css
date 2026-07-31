@@ -465,7 +465,8 @@ ul li + li {
 }
 
 .primary-link,
-.secondary-link {
+.secondary-link,
+.accent-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -498,6 +499,18 @@ ul li + li {
   border-color: var(--ink);
 }
 
+/* Filled in the same rose as the italic accent words in the headings */
+.accent-link {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.accent-link:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
 .hero-focus {
   display: flex;
   flex-wrap: wrap;
@@ -517,30 +530,46 @@ ul li + li {
   height: 30px;
   padding: 6px 14px;
   line-height: 1;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(199, 132, 141, 0.24);
   border-radius: 999px;
-  background: var(--paper);
-  color: var(--ink-2);
+  background: var(--chip);
+  color: var(--accent);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
+}
+
+.hero-focus li.amber {
+  background: var(--amber-soft);
+  border-color: rgba(154, 106, 36, 0.24);
+  color: var(--amber);
+}
+
+.hero-focus li.sage {
+  background: var(--sage-soft);
+  border-color: rgba(76, 115, 89, 0.24);
+  color: var(--sage);
 }
 
 /* -------- About section redesign -------- */
 
 .about-layout {
   display: grid;
-  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
-  gap: 32px;
+  /* Wider left column keeps the boxes as short rectangles instead of tall
+     narrow blocks, so the two columns finish at roughly the same height. */
+  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
 }
 
 .about-boxes {
   display: grid;
-  gap: 14px;
+  gap: 12px;
+  align-content: start;
 }
 
 .about-box {
-  padding: 18px 20px;
+  padding: 16px 18px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-left: 3px solid var(--accent);
@@ -576,30 +605,44 @@ ul li + li {
   color: var(--sage);
 }
 
-.about-box-num {
-  display: inline-block;
+/* Numeral sits beside the title rather than above it, saving a line per box */
+.about-box-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 8px;
-  padding: 6px 10px;
+}
+
+.about-box-num {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 30px;
+  padding: 5px 9px;
   background: var(--chip);
   border-radius: 6px;
   color: var(--accent);
   font-family: "Fraunces", Georgia, serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .about-box h3 {
   font-size: 1rem;
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--ink);
 }
 
 .about-box p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.87rem;
   line-height: 1.5;
   color: var(--ink-2);
+}
+
+.about-prose {
+  align-content: start;
 }
 
 .about-prose {
@@ -1386,6 +1429,8 @@ ul li + li {
   position: relative;
 }
 
+/* Flex column so the numeral, the centred title block, and the status pill all
+   line up across cards regardless of how many lines the description takes. */
 .roadmap-card {
   width: 100%;
   padding: 18px 14px;
@@ -1395,7 +1440,19 @@ ul li + li {
   text-align: center;
   z-index: 2;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.roadmap-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .roadmap-card:hover {
@@ -1405,7 +1462,7 @@ ul li + li {
 
 .roadmap-num {
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   padding: 4px 8px;
   background: var(--chip);
   border-radius: 4px;
@@ -1419,19 +1476,20 @@ ul li + li {
   font-family: "Fraunces", Georgia, serif;
   font-size: 0.95rem;
   font-weight: 700;
-  margin: 6px 0 6px;
+  margin: 0;
   color: var(--ink);
 }
 
 .roadmap-card p {
   font-size: 0.78rem;
   color: var(--muted);
-  margin: 0 0 8px;
+  margin: 0;
   line-height: 1.3;
 }
 
 .roadmap-status {
   display: inline-block;
+  margin-top: 10px;
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.65rem;
@@ -1698,25 +1756,41 @@ ul li + li {
 }
 
 .education-box {
-  padding: 24px;
+  padding: 24px 26px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 14px;
 }
 
-.education-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.education-entry {
   display: grid;
-  gap: 10px;
+  gap: 3px;
 }
 
-.education-list li {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 0.92rem;
-  line-height: 1.5;
+.education-entry strong {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.education-detail {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.education-school {
+  font-style: italic;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.education-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: var(--line);
 }
 
 /* Dark counterweight card — the visual anchor of the credentials block */

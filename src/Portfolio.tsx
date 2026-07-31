@@ -97,11 +97,11 @@ const aiCoaches = [
 ];
 
 const focusAreas = [
-  "FAIR cyber risk quantification",
-  "Compliance-as-code",
-  "AI-assisted GRC engineering",
-  "SEC cyber incident materiality",
-  "Multi-framework control mapping",
+  { label: "FAIR cyber risk quantification", tone: "rose" },
+  { label: "Compliance-as-code", tone: "amber" },
+  { label: "AI-assisted GRC engineering", tone: "sage" },
+  { label: "SEC cyber incident materiality", tone: "rose" },
+  { label: "Multi-framework control mapping", tone: "amber" },
 ];
 
 const objectives = [
@@ -214,7 +214,7 @@ const experience: Role[] = [
       "Cut findings triage time by 40% by replacing per-team judgment with one standardized rating rubric.",
       "Founded the annual Security Risk Assessment — an executive review that turned into an ongoing board-visibility cadence.",
       "Redesigned Customer Risk Assessment; response SLAs moved from weeks to days without adding headcount.",
-      "Directed SOC 2 and FedRAMP audit readiness: 100% evidence submission, zero findings.",
+      "Managed audit risk assessments and findings management end-to-end across SOC 2 and FedRAMP, from scoping through remediation closure.",
     ],
     tags: ["FAIR", "SEC materiality", "LLM integration", "OneTrust", "Jira API", "SOC 2", "FedRAMP"],
     current: true,
@@ -359,14 +359,14 @@ const writing = [
     cta: "Read on Medium",
   },
   {
-    eyebrow: "ISACA · Certification development",
-    title: "ISACA AI exam beta tester & contributor",
-    body: "Participating in advanced AI security and AI risk certification beta test groups and exam writing development. Helping shape how the industry certifies GRC engineering competency in the age of LLMs.",
+    eyebrow: "ISACA · ISC2 · Standards work",
+    title: "Shaping how the industry certifies AI competency",
+    body: "ISACA AI exam beta tester and member of the exam writing development group for advanced AI security and AI risk certifications. Co-author on ISC2 AI technical guidance. Together that work decides what the profession will consider table stakes for AI risk — and turns complex GRC concepts into reference material the global security community can actually use.",
   },
   {
-    eyebrow: "ISC2 · Technical guidance",
-    title: "AI technical guidance contributor",
-    body: "Co-author on ISC2 technical guidance work around AI security and compliance. Translating complex GRC concepts into accessible reference material for the global security community.",
+    eyebrow: "Mentorship · Internal & external",
+    title: "Building GRC engineers, one bench at a time",
+    body: "Externally, I mentor through ISACA, Big Brothers Big Sisters, and Boston University. Internally, I run the GRC development track for my own team — formal education paths, certification prep, cross-training across risk and compliance, and skills enhancement in GRC engineering, automation, and AI. That runs from one-on-one coaching all the way up to department-wide enablement sessions.",
   },
 ];
 
@@ -512,8 +512,16 @@ const credentials = [
 ];
 
 const education = [
-  "M.S. Computer Information Systems, Security concentration — Boston University",
-  "B.S. Information Technology, magna cum laude — UMass Lowell",
+  {
+    degree: "M.S. Computer Information Systems",
+    detail: "Security concentration",
+    school: "Boston University",
+  },
+  {
+    degree: "B.S. Information Technology",
+    detail: "Magna cum laude",
+    school: "University of Massachusetts Lowell",
+  },
 ];
 
 const contactLinks = [
@@ -965,13 +973,15 @@ function MainPortfolio() {
             >
               View my work <ArrowUpRight size={18} />
             </a>
-            <a className="secondary-link" href={links.riskTools}>
+            <a className="accent-link" href={links.riskTools}>
               Explore GRC <ArrowUpRight size={18} />
             </a>
           </div>
           <ul className="hero-focus" aria-label="Focus areas">
             {focusAreas.map((area) => (
-              <li key={area}>{area}</li>
+              <li className={area.tone} key={area.label}>
+                {area.label}
+              </li>
             ))}
           </ul>
         </div>
@@ -987,43 +997,43 @@ function MainPortfolio() {
         <div className="about-layout">
           <aside className="about-boxes">
             <article className="about-box">
-              <span className="about-box-num">01</span>
-              <h3>Quantifying what was invisible</h3>
+              <div className="about-box-head">
+                <span className="about-box-num">01</span>
+                <h3>Quantifying what was invisible</h3>
+              </div>
               <p>
-                Built the first FAIR-based quantification model at Rapid7, embedding it in an LLM
-                application to turn heat-map colors into defensible dollar ranges. Created the
-                Incident Severity Calculator that consolidated three parallel scoring habits into one
-                defensible materiality workflow.
+                Built Rapid7's first FAIR quantification model, embedded in an LLM application, so
+                heat-map colors became dollar ranges leadership could budget against.
               </p>
             </article>
             <article className="about-box">
-              <span className="about-box-num">02</span>
-              <h3>Engineering compliance systems</h3>
+              <div className="about-box-head">
+                <span className="about-box-num">02</span>
+                <h3>Engineering compliance systems</h3>
+              </div>
               <p>
-                Architected the Integrated IS Risk Management framework consolidating three siloed
-                functions. Designed and administered OneTrust from scratch with API integrations to
-                automate remediation. Built evidence automation pipelines that replace manual audit
-                checklists with pipeline-native collection.
+                Architected the Integrated IS Risk Management framework across three siloed
+                functions, and stood up OneTrust from scratch with API-automated remediation.
               </p>
             </article>
             <article className="about-box">
-              <span className="about-box-num">03</span>
-              <h3>Leading without authority</h3>
+              <div className="about-box-head">
+                <span className="about-box-num">03</span>
+                <h3>Leading without authority</h3>
+              </div>
               <p>
-                Redesigned Customer Risk Assessment cutting response SLAs from weeks to days. Founded
-                the annual Security Risk Assessment establishing board-visibility cadence.
-                Established ongoing partnerships with Authorizing Officials through transparent risk
-                signals, not static packages.
+                Cut Customer Risk Assessment SLAs from weeks to days, and founded the annual Security
+                Risk Assessment that became a standing board-visibility cadence.
               </p>
             </article>
             <article className="about-box">
-              <span className="about-box-num">04</span>
-              <h3>Building the community</h3>
+              <div className="about-box-head">
+                <span className="about-box-num">04</span>
+                <h3>Building the community</h3>
+              </div>
               <p>
-                Founded and lead the GRC Engineering Club Boston chapter. Active mentor through
-                ISACA, Big Brothers Big Sisters, and Boston University. Designing programs that help
-                analysts transition into GRC engineering roles and showing students security is a
-                real, viable career.
+                Founded and lead the GRC Engineering Club Boston chapter, and mentor through ISACA,
+                Big Brothers Big Sisters, and Boston University.
               </p>
             </article>
           </aside>
@@ -1036,15 +1046,26 @@ function MainPortfolio() {
               producing more of the same output.
             </p>
             <p>
+              That stance came from doing the work the slow way first. I've built a privacy program
+              from nothing, run vendor risk across portfolios of 900+ suppliers, sat through the
+              audits where the evidence lived in someone's inbox, and watched good teams burn a
+              quarter proving things a system should have been proving continuously. Every one of
+              those experiences pointed at the same root cause: the control data underneath the
+              program was never modeled properly, so everything downstream had to be rebuilt by hand
+              every cycle.
+            </p>
+            <p>
               Ten years and counting across enterprise security, healthcare and privacy, GDPR, vendor
               risk at scale, SEC materiality and disclosure, audit readiness across SOC 2 / FedRAMP /
               HITRUST / ISO / NIST, and now full-stack GRC platform design. Military background
               shaped my discipline around execution and my respect for process rigor. Boston-based.
             </p>
             <p>
-              President of the GRC Engineering Club Boston chapter. Currently at Rapid7 as Staff
-              Trust, Risk, and Compliance Analyst — where the fun is proving GRC is a{" "}
-              <em>revenue enabler</em>, not paperwork.
+              These days that means designing risk programs that answer in dollars, building the
+              automation that keeps them honest between audits, and teaching the next set of analysts
+              to think like engineers. President of the GRC Engineering Club Boston chapter.
+              Currently at Rapid7 as Staff Trust, Risk, and Compliance Analyst — where the fun is
+              proving GRC is a <em>revenue enabler</em>, not paperwork.
             </p>
           </div>
         </div>
@@ -1098,8 +1119,8 @@ function MainPortfolio() {
         <div className="section-heading">
           <p className="section-label">Experience</p>
           <h2>
-            Over a decade of GRC experience in a variety of industries such as enterprise SaaS,
-            <em> biotechnology, healthcare, and robotics</em>.
+            Over a decade of GRC experience in a variety of industries such as{" "}
+            <em>enterprise SaaS, biotechnology, healthcare, and robotics</em>.
           </h2>
         </div>
         <div className="exp-stack">
@@ -1184,8 +1205,10 @@ function MainPortfolio() {
               <div className="roadmap-step" key={step.num}>
                 <div className="roadmap-card">
                   <span className="roadmap-num">{step.num}</span>
-                  <h4>{step.title}</h4>
-                  <p>{step.desc}</p>
+                  <div className="roadmap-body">
+                    <h4>{step.title}</h4>
+                    <p>{step.desc}</p>
+                  </div>
                   <span className={`roadmap-status ${step.status.toLowerCase()}`}>
                     {step.status}
                   </span>
@@ -1422,13 +1445,18 @@ function MainPortfolio() {
           </div>
 
           <div className="cred-column">
+            <h3 className="cred-column-title">Education</h3>
             <div className="education-box">
-              <h3 className="cred-column-title">Education</h3>
-              <ul className="education-list">
-                {education.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
+              {education.map((entry, index) => (
+                <React.Fragment key={entry.degree}>
+                  {index > 0 && <div className="education-divider" />}
+                  <div className="education-entry">
+                    <strong>{entry.degree}</strong>
+                    <span className="education-detail">{entry.detail}</span>
+                    <em className="education-school">{entry.school}</em>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
             <div className="service-card">
               <p className="service-eyebrow">// Service</p>
