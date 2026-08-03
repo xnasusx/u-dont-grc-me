@@ -11,11 +11,40 @@ function writeHeaders() {
   };
 }
 
+/**
+ * Fill in collections a snapshot may predate.
+ *
+ * The hosted DynamoDB snapshot is exported explicitly, so it can lag the schema:
+ * it currently has no `fairScenarios`, `fairScenarioVersions`, `fairSimulationRuns`,
+ * or `mutationAuditLog`, all of which arrived with the FAIR persistence work. The
+ * app reads those arrays directly, so an un-normalised stale snapshot takes the
+ * whole page down with a TypeError rather than degrading. Defaulting here keeps
+ * every consumer safe regardless of how old the snapshot on the other end is.
+ */
+function normalizeSnapshot(snapshot: GovernanceSnapshot): GovernanceSnapshot {
+  return {
+    ...snapshot,
+    controls: snapshot.controls ?? [],
+    frameworks: snapshot.frameworks ?? [],
+    requirements: snapshot.requirements ?? [],
+    mappings: snapshot.mappings ?? [],
+    assets: snapshot.assets ?? [],
+    policies: snapshot.policies ?? [],
+    evidenceBlueprints: snapshot.evidenceBlueprints ?? [],
+    evidenceItems: snapshot.evidenceItems ?? [],
+    relationships: snapshot.relationships ?? [],
+    fairScenarios: snapshot.fairScenarios ?? [],
+    fairScenarioVersions: snapshot.fairScenarioVersions ?? [],
+    fairSimulationRuns: snapshot.fairSimulationRuns ?? [],
+    mutationAuditLog: snapshot.mutationAuditLog ?? [],
+  };
+}
+
 export async function loadGovernanceSnapshot(signal?: AbortSignal) {
   if (!API_BASE_URL) return null;
   const response = await fetch(`${API_BASE_URL}/api/governance`, { signal });
   if (!response.ok) throw new Error(`Governance API returned ${response.status}`);
-  return (await response.json()) as GovernanceSnapshot;
+  return normalizeSnapshot((await response.json()) as GovernanceSnapshot);
 }
 
 /**
