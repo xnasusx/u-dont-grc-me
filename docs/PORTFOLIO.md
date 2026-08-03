@@ -70,4 +70,9 @@ For the simpler URL Susan wants, create or use a GitHub repository named `portfo
 https://xnasusx.github.io/portfolio/
 ```
 
+When republishing, **copy the contents of `dist-portfolio/` over the `portfolio` repo — do not clear it
+first.** That repo carries a `README.md` and `LICENSE` of its own which are not part of the build
+output and would be lost. Stale hashed bundles under `assets/` can be deleted by hand when they
+accumulate; the fresh `index.html` only references the current pair.
+
 The existing `u-dont-grc-me` repo can still publish the product prototype at `https://xnasusx.github.io/u-dont-grc-me/`.
