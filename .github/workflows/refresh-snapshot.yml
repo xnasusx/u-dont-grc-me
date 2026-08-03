@@ -57,19 +57,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Regenerate snapshot from the seeded database
-        run: npm run export:snapshot
-
       - name: Fail if the committed snapshot is stale
         # The Lambda bundles this file, so a drifted copy in git would ship in
         # the next package:lambda even after DynamoDB is corrected.
-        run: |
-          if ! git diff --quiet -- server/governance-seed-snapshot.json; then
-            echo "::error::server/governance-seed-snapshot.json is out of date."
-            echo "Run 'npm run export:snapshot' and commit the result."
-            git diff --stat -- server/governance-seed-snapshot.json
-            exit 1
-          fi
+        #
+        # --check compares against a fresh export with created_at/updated_at
+        # blanked on both sides. Those are stamped by CURRENT_TIMESTAMP at seed
+        # time and move on every run, so a plain git diff never matches.
+        run: npm run export:snapshot -- --check
 
       - name: Assume the snapshot-push role
         uses: aws-actions/configure-aws-credentials@v4

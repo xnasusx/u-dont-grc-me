@@ -227,7 +227,14 @@ function nextFairVersionNumber(db, controlId) {
   return row.next;
 }
 
-function insertFairScenarioVersion(db, scenario, context = {}, reason = "Seeded baseline") {
+/**
+ * `versionId` lets the seed pass a deterministic id. Runtime edits leave it
+ * undefined and get a random one, but seeded baselines must be reproducible:
+ * server/governance-seed-snapshot.json is a committed artifact, and a random id
+ * per export churns the file on every run and changes record identity in the
+ * hosted DynamoDB snapshot for no reason.
+ */
+function insertFairScenarioVersion(db, scenario, context = {}, reason = "Seeded baseline", versionId = null) {
   db.prepare(`
     INSERT INTO fair_scenario_versions (
       version_id, control_id, version_number, scenario_name, probable_loss_min, probable_loss_most_likely,
@@ -238,7 +245,7 @@ function insertFairScenarioVersion(db, scenario, context = {}, reason = "Seeded 
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    `FAIR-V-${idSuffix()}`,
+    versionId ?? `FAIR-V-${idSuffix()}`,
     scenario.control_id,
     nextFairVersionNumber(db, scenario.control_id),
     scenario.scenario_name,
@@ -354,7 +361,13 @@ function seedFairScenarioVersions(db) {
   if (count > 0) return;
   const scenarios = getFairSettings(db);
   for (const scenario of scenarios) {
-    insertFairScenarioVersion(db, scenario, { actor: "System Seed", authMode: "seed", tenantId: "tenant-acme-us" }, "Seeded baseline");
+    insertFairScenarioVersion(
+      db,
+      scenario,
+      { actor: "System Seed", authMode: "seed", tenantId: "tenant-acme-us" },
+      "Seeded baseline",
+      `FAIR-V-SEED-${scenario.control_id}`,
+    );
   }
 }
 
