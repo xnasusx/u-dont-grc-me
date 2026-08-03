@@ -1,15 +1,4 @@
 {
-  "_comment": [
-    "Trust policy for the role GitHub Actions assumes to refresh the hosted governance snapshot.",
-    "Attach to a role named grc-snapshot-push. Replace <AWS_ACCOUNT_ID> before use.",
-    "Requires the GitHub OIDC provider to exist in the account first:",
-    "  aws iam create-open-id-connect-provider \\",
-    "    --url https://token.actions.githubusercontent.com \\",
-    "    --client-id-list sts.amazonaws.com",
-    "The sub condition pins this to the main branch of one repository. A workflow",
-    "run from any other branch, a fork, or a pull request gets a different sub and",
-    "cannot assume the role."
-  ],
   "Version": "2012-10-17",
   "Statement": [
     {

@@ -142,6 +142,11 @@ there are no AWS keys in the repository or in Actions secrets. The job also fail
 `server/governance-seed-snapshot.json` is stale in git, since the Lambda bundles that
 file.
 
+Both files in `infra/` carry an `<AWS_ACCOUNT_ID>` placeholder and contain no comments,
+because IAM rejects a policy document with any top-level key other than `Version`, `Id`,
+and `Statement`. Render them to a temporary copy rather than editing in place, so the
+account ID stays out of git.
+
 One-time setup, all in your own account:
 
 1. Register the GitHub OIDC provider, if the account does not already have one:

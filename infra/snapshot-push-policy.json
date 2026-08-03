@@ -1,11 +1,4 @@
 {
-  "_comment": [
-    "Permission policy for the grc-snapshot-push role. Replace <AWS_ACCOUNT_ID> before use.",
-    "Deliberately narrower than infra/governance-api-policy.json: this role only reads and",
-    "replaces one item in one table. No UpdateItem, no DeleteItem, no Scan, no Query, and",
-    "nothing outside DynamoDB. If this role leaked, the worst case is overwriting a",
-    "prototype snapshot that is regenerated from source anyway."
-  ],
   "Version": "2012-10-17",
   "Statement": [
     {
