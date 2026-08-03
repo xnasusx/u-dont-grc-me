@@ -2,6 +2,12 @@
 
 A control-centric GRC product prototype. The app treats controls as the primary source of truth and maps assets, frameworks, evidence, risks, integrations, and AI agent decisions around each control.
 
+**Live demo:** https://xnasusx.github.io/u-dont-grc-me/
+
+![The Command Center: median annualized loss exposure, control health, pending AI approvals, and evidence freshness across the top, with FAIR loss exposure broken out per control underneath](docs/images/command-center.png)
+
+Every number on that screen resolves back to a control. Loss exposure is a FAIR figure attached to a control, evidence freshness is measured against the control it proves, and framework coverage is a mapping from a requirement onto the same control. That is the whole thesis: build the control layer properly and audit evidence, risk, policy, and compliance compose off it instead of being maintained five separate times.
+
 ## Run locally
 
 ```powershell
@@ -26,9 +32,7 @@ npm run package:lambda
 
 ## Hosted Prototype
 
-**Live demo:** https://xnasusx.github.io/u-dont-grc-me/
-
-The GitHub Pages frontend is the public entry point. Behind it:
+The GitHub Pages frontend at https://xnasusx.github.io/u-dont-grc-me/ is the public entry point. Behind it:
 
 - An AWS CloudFront distribution mirrors the same build.
 - The CloudFront origin is a private S3 bucket with public access blocked; it is reachable only through the distribution.
@@ -56,7 +60,7 @@ GitHub Pages builds set `GITHUB_PAGES=true` and `VITE_API_BASE_URL` so Vite emit
 
 Two MIT-licensed GRC Engineering projects feed the Admin views. Both are synced by
 script into generated modules that are committed, so the hosted build needs no network
-access at runtime. See `THIRD-PARTY-NOTICES.md` for attribution.
+access at runtime. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for attribution.
 
 ### SaaS Hardening Library (how-to-harden)
 
@@ -108,6 +112,21 @@ an empty state until a scan lands.
 
 Only scan domains you are authorized to assess.
 
+## Documentation
+
+| Document | What it covers |
+| --- | --- |
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | Walking the app view by view |
+| [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) | Architecture, data model, and how to extend it |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Building and deploying to Pages, CloudFront, and Lambda |
+| [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | The plan of record for feature work |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Where the product is going |
+| [`docs/PORTFOLIO.md`](docs/PORTFOLIO.md) | Building and publishing the portfolio page in `portfolio/` |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to work in this repo |
+| [`SECURITY.md`](SECURITY.md) | Reporting a vulnerability |
+| [`CHANGELOG.md`](CHANGELOG.md) · [`RELEASE_NOTES.md`](RELEASE_NOTES.md) | What shipped, and when |
+| [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) | Attribution for vendored upstream content |
+
 ## Implementation Plan
 
 The GitHub source of truth for the implementation plan is `docs/IMPLEMENTATION_PLAN.md`. Future feature work should update that file and pass a PMO check against it before release.
@@ -143,3 +162,8 @@ The next production step is replacing remaining `src/store.ts` operations with a
 - Evidence API with object-locked storage references and version IDs.
 - Agent orchestration API with schema validation, allow-listed mutations, and audit logging.
 - FAIR risk service for simulations and risk scenario updates.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Vendored upstream content keeps its own licensing; see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
