@@ -1,5 +1,10 @@
 # Deployment Guide
 
+> **Placeholders.** `<AWS_ACCOUNT_ID>` and `<deploy-user>` stand in for real values throughout this
+> guide and in `infra/*.json`. Substitute your own when applying; account IDs and IAM principal names
+> are deliberately not committed. The Lambda function URL and CloudFront domain below are public
+> endpoints the shipped bundle already calls, so they are documented as-is.
+
 ## Local Build
 
 ```powershell

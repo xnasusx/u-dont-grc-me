@@ -26,23 +26,15 @@ npm run package:lambda
 
 ## Hosted Prototype
 
-Primary frontend on GitHub Pages:
+**Live demo:** https://xnasusx.github.io/u-dont-grc-me/
 
-https://xnasusx.github.io/u-dont-grc-me/
+The GitHub Pages frontend is the public entry point. Behind it:
 
-AWS CloudFront mirror:
+- An AWS CloudFront distribution mirrors the same build.
+- The CloudFront origin is a private S3 bucket with public access blocked; it is reachable only through the distribution.
+- A Lambda function URL serves the read-only Governance API, backed by DynamoDB for the Governance snapshot.
 
-https://d1oxsqx3ua8bb7.cloudfront.net
-
-CloudFront origin bucket is intentionally private/blocked:
-
-http://u-dont-grc-me-<AWS_ACCOUNT_ID>-us-east-1.s3-website-us-east-1.amazonaws.com
-
-Hosted Governance API:
-
-https://fvtqz3hs2ohvappyrcya2oats40sodrc.lambda-url.us-east-1.on.aws
-
-The hosted API is backed by DynamoDB for the Governance snapshot and is read-only from the public app until authenticated mutation workflows are added.
+The hosted API stays read-only from the public app until authenticated mutation workflows are added. Endpoint hostnames are supplied at build time through `VITE_API_BASE_URL` rather than committed here — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Build
 
