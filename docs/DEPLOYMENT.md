@@ -167,9 +167,26 @@ One-time setup, all in your own account:
      --policy-name grc-snapshot-push --policy-document file://infra/snapshot-push-policy.json
    ```
 
-   The trust policy pins `sub` to `repo:xnasusx/u-dont-grc-me:ref:refs/heads/main`, so no
-   other branch, fork, or pull request can assume it. The permission policy grants only
+   The trust policy pins `sub` to
+   `repo:xnasusx@14799095/u-dont-grc-me@1316830039:ref:refs/heads/main`, so no other
+   branch, fork, or pull request can assume it. The permission policy grants only
    `GetItem` and `PutItem` on the one table.
+
+   Note the `@<id>` segments. GitHub now issues **immutable** subject claims carrying the
+   numeric owner and repository IDs, so renaming or transferring the repo cannot silently
+   carry the AWS trust with it. Nearly every published example still shows the older
+   `repo:owner/name:ref:...` form, which fails with
+   `Not authorized to perform sts:AssumeRoleWithWebIdentity` and no indication of why. If
+   you fork this into a differently-named repo, read the real claim out of CloudTrail
+   rather than guessing:
+
+   ```bash
+   aws cloudtrail lookup-events \
+     --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRoleWithWebIdentity \
+     --max-results 1 --query 'Events[0].CloudTrailEvent' --output text
+   ```
+
+   The rejected `sub` appears in `userIdentity.userName`.
 
 3. Publish the role ARN as a **repository variable** named `AWS_SNAPSHOT_ROLE_ARN`
    (Settings > Secrets and variables > Actions > Variables). It is a variable rather than
