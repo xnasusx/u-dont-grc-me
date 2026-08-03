@@ -24,3 +24,6 @@ aws-credentials*
 credentials.json
 
 dist-portfolio/
+
+# Local agent/editor tooling
+.claude/
