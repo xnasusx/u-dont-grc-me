@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 02:39 ET
+Last updated: 2026-07-30 10:02 ET
 PMO status: GREEN
-Current phase: 0.6.1 GitHub Pages API alignment and CRQ source integration
+Current phase: 0.9 persisted FAIR simulation runs and approval queue
 Owner: Codex
 
 ## Objective
@@ -89,6 +89,16 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Product UI | Wire GitHub Pages to hosted API | DONE | Codex | `.github/workflows/pages.yml`, Lambda CORS | Pages build uses hosted Governance API |
 | Product UI | Integrate NotebookLM CRQ and FAIR requirements | DONE | Codex | `src/App.tsx`, `src/utils.ts`, `docs/IMPLEMENTATION_PLAN.md` | A-T-E scenario, FAIR-CAM, evidence nutrition label, 10,000 trials, five-number summary, approval gates |
 | Brand/IA | Replace logo with transparent-background PNG | DONE | Codex | `public/u-dont-grc-me-logo.png` | Black image background removed |
+| Backend | Add editable local control and FAIR APIs | DONE | Codex | `server/schema.sql`, `server/database.js`, `server/api.js`, `server/database.test.js` | `PATCH /api/controls/:id`, `GET /api/fair-settings`, `PUT /api/fair-settings/:controlId`; hosted writes still disabled |
+| Product UI | Add Governance drilldowns and control edit form | DONE | Codex | `src/App.tsx`, `src/governanceApi.ts`, `src/styles.css`, browser smoke | Control modal shows mapped framework, asset, evidence, and FAIR details; control metadata saves to SQLite |
+| Product UI | Add Admin FAIR database editor | DONE | Codex | `src/App.tsx`, `src/types.ts`, `src/utils.ts`, browser smoke | Admin can manage loss range, frequency, vulnerability, control strength, LM reduction, appetite, confidence, data quality, and source notes |
+| Documentation | Update implementation roadmap and PMO evidence | DONE | Codex | `u dont grc me roadmap.md`, `docs/IMPLEMENTATION_PLAN.md`, `PLANS.md` | Added v0.7 status/evidence and next work |
+| Backend | Add local write guardrails and mutation audit | DONE | Codex | `server/api.js`, `server/database.js`, `server/schema.sql`, `server/database.test.js` | Optional `GRC_WRITE_TOKEN`, tenant context, allowlisted writes, mutation audit log |
+| Backend | Add FAIR assumption version history | DONE | Codex | `fair_scenario_versions`, `getFairScenarioVersions`, Admin traceability smoke | Each FAIR update creates versioned assumptions with actor and reason |
+| Product UI | Surface FAIR lineage and mutation audit in Admin | DONE | Codex | `src/App.tsx`, `src/types.ts`, browser smoke `output/v0.8-traceability-smoke.png` | Admin shows version history and write ledger after saves |
+| Security | Move exposed tokens out of settings and rotate credentials | DONE | Susan/Codex | `.env` ignored, `.env.example`, GitHub OAuth reauth, AWS key rotated/deleted | PMO returned to green after cleanup |
+| Backend | Persist FAIR simulation run results | DONE | Codex | `fair_simulation_runs`, `createFairSimulationRun`, `decideFairSimulationRun`, tests | Saves backend-computed P10/P50/P90/expected loss, appetite breach probability, sensitivity driver, assumption version link, and approval state |
+| Product UI | Add board risk run approval queue | DONE | Codex | `src/App.tsx`, browser smoke `output/v0.9-simulation-run-smoke.png` | Risk lab can save board runs; Admin can approve or reject pending runs |
 
 ## Dependencies And Blockers
 
@@ -156,6 +166,20 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.6.1 GitHub Pages build | PASS | `GITHUB_PAGES=true VITE_API_BASE_URL=... npm run build` produced bundle `index-DVSq6y5o.js` |
 | 2026-07-30 | 0.6.1 browser smoke | PASS | Chrome verified local app, transparent logo asset, Risk CRQ sections, 10,000 trials, five-number summary, evidence nutrition label, and approval controls |
 | 2026-07-30 | 0.6.1 security scan | PASS with notes | No live-format secrets; documentation/dependency/demo matches only |
+| 2026-07-30 | 0.7.0 database tests | PASS | `npm test` returned 11 passing tests, including control edit and FAIR setting persistence |
+| 2026-07-30 | 0.7.0 TypeScript and production build | PASS | `npm run build` produced bundle `index-JxPopVaJ.js` |
+| 2026-07-30 | 0.7.0 browser smoke | PASS | Playwright/Chrome verified Governance API source, control drilldown modal, control save, Admin FAIR save, and Risk frequency fields; screenshot `output/v0.7-edit-drilldown-smoke.png` |
+| 2026-07-30 | 0.7.0 CORS/write smoke | PASS | Playwright/Chrome verified local writes after `server/api.js` CORS tightened to `GRC_ALLOWED_ORIGIN` default `http://127.0.0.1:5173` |
+| 2026-07-30 | 0.7.0 repo security scan | PASS with notes | Repo secret-pattern scans returned no matches; local API CORS wildcard was found and fixed |
+| 2026-07-30 | 0.7.0 AI tooling permission check | FAIL outside repo | Home Claude local settings include live-format GitHub bearer-token text in allowlisted commands and broad wildcard command allows; rotate/remove outside repo before production work |
+| 2026-07-30 | Token cleanup | PASS | Susan revoked/reauthed GitHub OAuth and rotated/deleted exposed AWS key; `.env` ignored and `.env.example` contains placeholders only |
+| 2026-07-30 | 0.8.0 database tests | PASS | `npm test` returned 13 passing tests, including FAIR version history, mutation audit, and tenant-scope rejection |
+| 2026-07-30 | 0.8.0 TypeScript and production build | PASS | `npm run build` produced bundle `index-C2vAKuTx.js` |
+| 2026-07-30 | 0.8.0 traceability browser smoke | PASS | Playwright/Chrome verified Admin FAIR save, Assumption Version History, and Mutation Audit Log; screenshot `output/v0.8-traceability-smoke.png` |
+| 2026-07-30 | 0.9.0 database tests | PASS | `npm test` returned 15 passing tests, including FAIR simulation run persistence and approval decisions |
+| 2026-07-30 | 0.9.0 TypeScript and production build | PASS | `npm run build` produced bundle `index-Ck0EN6n2.js` |
+| 2026-07-30 | 0.9.0 simulation run browser smoke | PASS | Playwright/Chrome verified Risk save board run, Admin pending queue, approval action, and screenshot `output/v0.9-simulation-run-smoke.png` |
+| 2026-07-30 | 0.9.0 repo secret-pattern scan | PASS | `rg` scan returned no live-format GitHub, AWS key, private key, or database URL matches outside ignored local/build/generated paths |
 
 ## Deliverable Verification
 
@@ -178,7 +202,13 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Review Google Doc implementation plan | Gaps identified and tracked | `docs/IMPLEMENTATION_PLAN.md` | PASS |
 | Build missing plan functionality into tool | Framework mapper, audit package, knowledge system, TPRM, remediation, RBAC/trust UX implemented as prototype surfaces | `src/App.tsx`, `src/data.ts`, `src/types.ts` | PASS |
 | Keep future source of truth on GitHub | Added implementation plan and PMO protocol | `docs/IMPLEMENTATION_PLAN.md`, this file | PASS |
+| Add more user testing functionality | Local edit flows, modal drilldowns, FAIR admin database, and database-backed calculation factors added | `src/App.tsx`, `src/governanceApi.ts`, `server/schema.sql`, `server/database.js`, browser smoke | PASS |
+| Everything drill down | Governance control inventory has modal drilldown with mappings, assets, evidence, and FAIR assumptions | `src/App.tsx`, `output/v0.7-edit-drilldown-smoke.png` | PARTIAL - deeper popups still needed for every admin/workbench card |
+| Manage FAIR dollar and percentage amounts in Admin | Admin FAIR database editor saves loss dollars, frequency, vulnerability, control strength, LM reduction, appetite, confidence, data quality, and notes | `src/App.tsx`, `server/schema.sql`, `server/database.test.js` | PASS for local testing; hosted writes pending |
+| Add authenticated write foundation | Local writes can require `GRC_WRITE_TOKEN`, carry tenant/actor context, and write audit events | `server/api.js`, `server/database.js`, `.env.example`, tests | PASS for local testing; production SSO still pending |
+| Add reproducible FAIR assumptions | FAIR settings now create version rows with actor/reason and appear in Admin lineage | `fair_scenario_versions`, `src/App.tsx`, browser smoke | PASS for local testing |
+| Persist board-facing FAIR runs | FAIR simulation outputs are saved with assumption version link, approval state, and admin decisions | `fair_simulation_runs`, `server/database.test.js`, `output/v0.9-simulation-run-smoke.png` | PASS for local testing; hosted approval workflow pending |
 
 ## Next Step
 
-Add authenticated hosted write workflows, tenant isolation, and audit logging before storing real GRC data or evidence outside the prototype.
+Move local write guardrails into hosted authenticated workflows, add durable auth/RBAC middleware, add validation/idempotency contracts for mutations, and extend drilldown/edit modals across evidence, mappings, vendors, remediation, and integrations.

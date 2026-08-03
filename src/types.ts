@@ -275,6 +275,7 @@ export interface GovernanceControl {
   policies: GovernancePolicy[];
   evidenceBlueprints: EvidenceBlueprint[];
   evidenceItems: GovernanceEvidenceItem[];
+  fairScenario: FairScenarioParameter | null;
   mappingCount: number;
   blueprintCount: number;
 }
@@ -387,6 +388,88 @@ export interface ProgramWorkbench {
   hardeningGuides: HardeningGuide[];
 }
 
+export interface FairScenarioParameter {
+  control_id: string;
+  scenario_name: string;
+  probable_loss_min: number;
+  probable_loss_most_likely: number;
+  probable_loss_max: number;
+  annual_event_frequency_min: number;
+  annual_event_frequency_most_likely: number;
+  annual_event_frequency_max: number;
+  vulnerability_percentage: number;
+  control_strength_percentage: number;
+  loss_magnitude_reduction_percentage: number;
+  appetite_threshold: number;
+  confidence_percentage: number;
+  data_quality: "High" | "Medium" | "Low";
+  source_notes: string;
+  updated_at: string;
+}
+
+export interface FairScenarioVersion {
+  version_id: string;
+  control_id: string;
+  version_number: number;
+  scenario_name: string;
+  probable_loss_min: number;
+  probable_loss_most_likely: number;
+  probable_loss_max: number;
+  annual_event_frequency_min: number;
+  annual_event_frequency_most_likely: number;
+  annual_event_frequency_max: number;
+  vulnerability_percentage: number;
+  control_strength_percentage: number;
+  loss_magnitude_reduction_percentage: number;
+  appetite_threshold: number;
+  confidence_percentage: number;
+  data_quality: "High" | "Medium" | "Low";
+  source_notes: string;
+  changed_by: string;
+  change_reason: string;
+  created_at: string;
+}
+
+export interface MutationAuditLogEntry {
+  id: string;
+  tenant_id: string;
+  actor: string;
+  auth_mode: string;
+  action: string;
+  target_type: string;
+  target_id: string;
+  outcome: "Allowed" | "Blocked";
+  reason: string;
+  created_at: string;
+}
+
+export interface FairSimulationRun {
+  run_id: string;
+  control_id: string;
+  assumption_version_id: string | null;
+  tenant_id: string;
+  run_label: string;
+  base_loss: number;
+  control_strength_percentage: number;
+  annual_event_frequency: number;
+  loss_magnitude_reduction_percentage: number;
+  volatility: number;
+  trial_count: number;
+  p10: number;
+  p50: number;
+  p90: number;
+  expected_loss: number;
+  appetite_threshold: number;
+  appetite_breach_probability: number;
+  sensitivity_driver: string;
+  approval_state: "Draft" | "Pending Approval" | "Approved" | "Rejected";
+  requested_by: string;
+  approved_by: string | null;
+  decision_reason: string;
+  created_at: string;
+  decided_at: string | null;
+}
+
 export interface GovernanceSnapshot {
   stats: {
     controls: number;
@@ -407,6 +490,10 @@ export interface GovernanceSnapshot {
   evidenceBlueprints: EvidenceBlueprint[];
   evidenceItems: GovernanceEvidenceItem[];
   relationships: GovernanceRelationship[];
+  fairScenarios: FairScenarioParameter[];
+  fairScenarioVersions: FairScenarioVersion[];
+  fairSimulationRuns: FairSimulationRun[];
+  mutationAuditLog: MutationAuditLogEntry[];
   programWorkbench: ProgramWorkbench;
 }
 
@@ -418,6 +505,118 @@ export interface AuditEvent {
   timestamp: string;
   outcome: "Allowed" | "Blocked" | "Pending";
   detail: string;
+}
+
+/**
+ * Hardening library sourced from grcengineering/how-to-harden (MIT).
+ * Generated into src/hardeningData.ts by `npm run sync:hardening`.
+ */
+export interface HardeningComplianceRef {
+  framework: string;
+  citation: string;
+}
+
+export interface HardeningAuditCheck {
+  id: string;
+  description: string;
+  query: string;
+  endpoint: string;
+  expected: string;
+}
+
+export interface HardeningRemediationStep {
+  kind: string;
+  description: string;
+  detail: string;
+}
+
+export interface HardeningControl {
+  id: string;
+  vendorSlug: string;
+  section: string;
+  title: string;
+  description: string;
+  profileLevel: number;
+  severity: string;
+  guideUrl: string;
+  tags: string[];
+  compliance: HardeningComplianceRef[];
+  auditChecks: HardeningAuditCheck[];
+  remediation: HardeningRemediationStep[];
+  artifacts: string[];
+  /** "pack" has machine-readable audit + remediation; "guide" is heading-level only. */
+  depth: "pack" | "guide";
+}
+
+export interface HardeningPlatform {
+  slug: string;
+  vendor: string;
+  title: string;
+  category: string;
+  tier: string;
+  description: string;
+  version: string;
+  maturity: string;
+  lastUpdated: string;
+  url: string;
+  controls: HardeningControl[];
+}
+
+export interface HardeningLibrary {
+  source: {
+    repo: string;
+    ref: string;
+    license: string;
+    url: string;
+    site: string;
+  };
+  guideCount: number;
+  controlCount: number;
+  /** Subset of controlCount backed by a full upstream control pack. */
+  packControlCount: number;
+  guides: HardeningPlatform[];
+}
+
+/**
+ * Nth-party vendor graph sourced from grcengineering/nthpartyfinder (MIT).
+ * Generated into src/nthPartyData.ts by `npm run sync:nthparty`.
+ */
+export interface NthPartyRelationship {
+  nth_party_domain: string;
+  nth_party_organization: string;
+  nth_party_layer: number;
+  nth_party_customer_domain: string;
+  nth_party_customer_organization: string;
+  nth_party_record: string;
+  nth_party_record_type: string;
+  root_customer_domain: string;
+  root_customer_organization: string;
+  evidence: string;
+}
+
+export interface NthPartySummary {
+  total_relationships: number;
+  max_depth: number;
+  unique_domains: number;
+  unique_organizations: number;
+}
+
+export interface NthPartyScan {
+  domain: string;
+  scannedAt: string;
+  summary: NthPartySummary;
+  relationships: NthPartyRelationship[];
+}
+
+export interface NthPartyGraph {
+  source: {
+    repo: string;
+    ref: string;
+    license: string;
+    url: string;
+    tool: string;
+  };
+  scans: NthPartyScan[];
 }
 
 export interface GrcState {

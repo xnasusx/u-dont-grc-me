@@ -13,6 +13,7 @@ import {
   CircleDollarSign,
   ClipboardCheck,
   Cloud,
+  Download,
   FileCheck2,
   FileSearch,
   FileText,
@@ -30,6 +31,7 @@ import {
   PlugZap,
   Route,
   RefreshCw,
+  RotateCcw,
   Save,
   Settings,
   ShieldAlert,
@@ -37,27 +39,34 @@ import {
   SlidersHorizontal,
   Sparkles,
   TableProperties,
+  Trash2,
   UserCheck,
   UsersRound,
   Workflow,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { agentWorkflows } from "./data";
-import { buildGovernanceFallback, loadGovernanceSnapshot } from "./governanceApi";
+import { nthPartyGraph } from "./nthPartyData";
+import { buildGovernanceFallback, createFairSimulationRun, decideFairSimulationRun, loadGovernanceSnapshot, saveFairScenario, saveGovernanceControl } from "./governanceApi";
 import { useGrcStore } from "./store";
 import type {
   Approval,
   AuditEvent,
   Control,
   EvidenceItem,
+  FairScenarioParameter,
+  FairScenarioVersion,
+  FairSimulationRun,
   FrameworkRequirement,
   GovernanceControl,
   GovernanceSnapshot,
   GraphEdge,
   GraphNode,
+  HardeningLibrary,
   Integration,
   KnowledgeAnswer,
+  MutationAuditLogEntry,
   PolicyArtifact,
   ProgramWorkbench,
   RbacGrant,
@@ -66,7 +75,7 @@ import type {
 } from "./types";
 import { aggregateAle, formatCurrency, healthScore, seededMonteCarlo, statusClass } from "./utils";
 
-type View = "command" | "governance" | "compliance" | "risk" | "admin";
+type View = "command" | "governance" | "compliance" | "risk" | "histogram" | "admin";
 type GovernanceTab = "inventory" | "program" | "mappings" | "evidence" | "policies" | "assets" | "graph";
 
 const views: { id: View; label: string; icon: typeof Activity }[] = [
@@ -74,10 +83,11 @@ const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "governance", label: "Governance", icon: Landmark },
   { id: "compliance", label: "Compliance", icon: FileCheck2 },
   { id: "risk", label: "Risk", icon: CircleDollarSign },
+  { id: "histogram", label: "Histogram Lab", icon: BarChart3 },
   { id: "admin", label: "Admin", icon: Settings },
 ];
 
-const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo.png`;
+const brandLogoUrl = `${import.meta.env.BASE_URL}u-dont-grc-me-logo-transparent.png`;
 
 const fairScenarioRequirements: Record<string, {
   asset: string;
@@ -121,6 +131,152 @@ const fairScenarioRequirements: Record<string, {
   },
 };
 
+type HeatRisk = {
+  heatCell: string;
+  name: string;
+  freqMin: number;
+  freqMode: number;
+  freqMax: number;
+  magMin: number;
+  magMode: number;
+  magMax: number;
+};
+
+const heatRiskLimit = 5;
+const heatRiskTrials = 10000;
+const heatLikelihoodLabels = ["Rare", "Unlikely", "Possible", "Likely", "Almost Certain"];
+const heatImpactLabels = ["Negligible", "Minor", "Moderate", "Major", "Severe"];
+const heatRiskColors = ["#c7848d", "#2f6fb7", "#2f7a35", "#795e86", "#966218"];
+const heatCellClasses = [
+  ["heat-low", "heat-low", "heat-watch", "heat-watch", "heat-raise"],
+  ["heat-low", "heat-watch", "heat-watch", "heat-raise", "heat-raise"],
+  ["heat-watch", "heat-watch", "heat-raise", "heat-raise", "heat-high"],
+  ["heat-watch", "heat-raise", "heat-raise", "heat-high", "heat-high"],
+  ["heat-raise", "heat-raise", "heat-high", "heat-high", "heat-critical"],
+];
+
+const frequencyDefaults = [
+  { freqMin: 0.05, freqMode: 0.1, freqMax: 0.3 },
+  { freqMin: 0.1, freqMode: 0.4, freqMax: 1 },
+  { freqMin: 0.5, freqMode: 1.5, freqMax: 3 },
+  { freqMin: 1, freqMode: 3, freqMax: 8 },
+  { freqMin: 3, freqMode: 8, freqMax: 20 },
+];
+
+const magnitudeDefaults = [
+  { magMin: 5000, magMode: 15000, magMax: 50000 },
+  { magMin: 25000, magMode: 100000, magMax: 300000 },
+  { magMin: 100000, magMode: 500000, magMax: 1500000 },
+  { magMin: 500000, magMode: 2000000, magMax: 7000000 },
+  { magMin: 2000000, magMode: 8000000, magMax: 25000000 },
+];
+
+function defaultHeatRisk(row: number, column: number): HeatRisk {
+  return {
+    heatCell: `${row}-${column}`,
+    name: "",
+    ...frequencyDefaults[row],
+    ...magnitudeDefaults[column],
+  };
+}
+
+function randomPert(min: number, mode: number, max: number) {
+  if (min >= max) return mode;
+  const range = max - min;
+  const alpha = 1 + (4 * (mode - min)) / range;
+  const beta = 1 + (4 * (max - mode)) / range;
+  let u = 0;
+  let v = 0;
+  let sum = 0;
+  let attempts = 0;
+
+  do {
+    u = Math.random();
+    v = Math.random();
+    sum = Math.pow(u, 1 / alpha) + Math.pow(v, 1 / beta);
+    attempts += 1;
+    if (attempts > 1000) return mode;
+  } while (sum > 1 || sum === 0);
+
+  return min + (Math.pow(u, 1 / alpha) / sum) * range;
+}
+
+function randomPoisson(lambda: number) {
+  if (lambda <= 0) return 0;
+  if (lambda < 30) {
+    const threshold = Math.exp(-lambda);
+    let count = 0;
+    let product = 1;
+    do {
+      count += 1;
+      product *= Math.random();
+    } while (product > threshold);
+    return count - 1;
+  }
+
+  const u1 = Math.random();
+  const u2 = Math.random();
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return Math.max(0, Math.round(lambda + Math.sqrt(lambda) * z));
+}
+
+function simulateHeatRisk(risk: HeatRisk, trials = heatRiskTrials) {
+  const samples: number[] = [];
+  for (let trial = 0; trial < trials; trial += 1) {
+    let annualLoss = 0;
+    const frequency = randomPert(risk.freqMin, risk.freqMode, risk.freqMax);
+    const events = randomPoisson(Math.max(0, frequency));
+    for (let event = 0; event < events; event += 1) {
+      annualLoss += randomPert(risk.magMin, risk.magMode, risk.magMax);
+    }
+    samples.push(annualLoss);
+  }
+  return samples.sort((a, b) => a - b);
+}
+
+function percentile(sortedSamples: number[], percentileRank: number) {
+  return sortedSamples[Math.min(Math.floor(sortedSamples.length * percentileRank), sortedSamples.length - 1)] ?? 0;
+}
+
+function formatRiskMoney(value: number) {
+  if (value === 0) return "$0";
+  if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+  return `$${value.toFixed(0)}`;
+}
+
+function summarizeHeatSimulation(samples: number[]) {
+  const p50 = percentile(samples, 0.5);
+  const p90 = percentile(samples, 0.9);
+  const mean = samples.reduce((sum, sample) => sum + sample, 0) / Math.max(1, samples.length);
+  const zeroYears = samples.filter((sample) => sample === 0).length;
+  const nonZeroSamples = samples.filter((sample) => sample > 0);
+  const minPositive = nonZeroSamples[0] ?? 0;
+  const max = nonZeroSamples.at(-1) ?? 0;
+  const binCount = 32;
+  const width = max > minPositive ? (max - minPositive) / binCount : 1;
+  const bins = Array.from({ length: binCount }, (_, index) => ({
+    lower: minPositive + index * width,
+    upper: minPositive + (index + 1) * width,
+    count: 0,
+  }));
+
+  for (const sample of nonZeroSamples) {
+    const binIndex = Math.min(binCount - 1, Math.floor((sample - minPositive) / width));
+    bins[binIndex].count += 1;
+  }
+
+  return {
+    p50,
+    p90,
+    mean,
+    zeroYears,
+    zeroPercent: Math.round((zeroYears / Math.max(1, samples.length)) * 100),
+    bins,
+    maxBin: Math.max(...bins.map((bin) => bin.count), 1),
+  };
+}
+
 function App() {
   const { state, approveMapping, connectIntegration, ingestEvidence, resetWorkspace } = useGrcStore();
   const [activeView, setActiveView] = useState<View>("command");
@@ -133,6 +289,7 @@ function App() {
 
   const selectedControl = state.controls.find((control) => control.id === selectedControlId) ?? state.controls[0];
   const governanceInventory = governanceSnapshot ?? buildGovernanceFallback(state);
+  const selectedFairScenario = governanceInventory.fairScenarios.find((scenario) => scenario.control_id === selectedControlId) ?? governanceInventory.fairScenarios[0] ?? null;
   const filteredControls = state.controls.filter((control) => {
     const frameworkMatches = frameworkFilter === "All frameworks" || control.requirements.some((req) => req.includes(frameworkFilter));
     const ownerMatches = ownerFilter === "All owners" || control.owner === ownerFilter;
@@ -142,16 +299,40 @@ function App() {
   const owners = Array.from(new Set(state.controls.map((control) => control.owner)));
   const ale = aggregateAle(filteredControls);
 
+  const refreshGovernance = useCallback(async (signal?: AbortSignal) => {
+    const snapshot = await loadGovernanceSnapshot(signal);
+    if (snapshot) {
+      setGovernanceSnapshot(snapshot);
+      setGovernanceSource("Governance API");
+    }
+    return snapshot;
+  }, []);
+
+  const updateGovernanceControl = useCallback(async (id: string, updates: Partial<GovernanceControl>) => {
+    await saveGovernanceControl(id, updates);
+    await refreshGovernance();
+  }, [refreshGovernance]);
+
+  const updateFairScenario = useCallback(async (controlId: string, updates: Partial<FairScenarioParameter>) => {
+    await saveFairScenario(controlId, updates);
+    await refreshGovernance();
+  }, [refreshGovernance]);
+
+  const saveFairRun = useCallback(async (controlId: string, payload: Partial<FairSimulationRun>) => {
+    const run = await createFairSimulationRun(controlId, payload);
+    await refreshGovernance();
+    return run;
+  }, [refreshGovernance]);
+
+  const decideFairRun = useCallback(async (runId: string, decision: "Approved" | "Rejected", reason: string) => {
+    await decideFairSimulationRun(runId, decision, reason);
+    await refreshGovernance();
+  }, [refreshGovernance]);
+
   useEffect(() => {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 850);
-    loadGovernanceSnapshot(controller.signal)
-      .then((snapshot) => {
-        if (snapshot) {
-          setGovernanceSnapshot(snapshot);
-          setGovernanceSource("Governance API");
-        }
-      })
+    refreshGovernance(controller.signal)
       .catch(() => {
         setGovernanceSource("Seeded fallback");
       })
@@ -197,6 +378,7 @@ function App() {
           frameworkFilter={frameworkFilter}
           ownerFilter={ownerFilter}
           persona={persona}
+          activeView={activeView}
           owners={owners}
           setFrameworkFilter={setFrameworkFilter}
           setOwnerFilter={setOwnerFilter}
@@ -205,7 +387,7 @@ function App() {
         />
 
         {activeView === "command" && (
-          <CommandCenterView controls={filteredControls} approvals={state.approvals} ale={ale} selectedControl={selectedControl} setActiveView={setActiveView} setSelectedControlId={setSelectedControlId} />
+          <CommandCenterView controls={filteredControls} approvals={state.approvals} ale={ale} selectedControl={selectedControl} fairScenario={selectedFairScenario} setActiveView={setActiveView} setSelectedControlId={setSelectedControlId} onCreateFairRun={saveFairRun} />
         )}
         {activeView === "governance" && (
           <GovernanceView
@@ -219,6 +401,7 @@ function App() {
             governanceSource={governanceSource}
             selectedControlId={selectedControlId}
             setSelectedControlId={setSelectedControlId}
+            onUpdateControl={updateGovernanceControl}
           />
         )}
         {activeView === "compliance" && (
@@ -231,7 +414,8 @@ function App() {
             onIngestEvidence={ingestEvidence}
           />
         )}
-        {activeView === "risk" && <RiskView controls={filteredControls} selectedControl={selectedControl} setSelectedControlId={setSelectedControlId} />}
+        {activeView === "risk" && <RiskView controls={filteredControls} selectedControl={selectedControl} fairScenario={selectedFairScenario} setSelectedControlId={setSelectedControlId} onCreateFairRun={saveFairRun} />}
+        {activeView === "histogram" && <HeatmapHistogramView />}
         {activeView === "admin" && (
           <AdminView
             auditEvents={state.auditEvents}
@@ -240,7 +424,14 @@ function App() {
             remediations={state.remediations}
             rbacGrants={state.rbacGrants}
             knowledgeAnswers={state.knowledgeAnswers}
+            fairScenarios={governanceInventory.fairScenarios}
+            fairScenarioVersions={governanceInventory.fairScenarioVersions ?? []}
+            fairSimulationRuns={governanceInventory.fairSimulationRuns ?? []}
+            mutationAuditLog={governanceInventory.mutationAuditLog ?? []}
+            controls={governanceInventory.controls}
             onConnect={connectIntegration}
+            onUpdateFairScenario={updateFairScenario}
+            onDecideFairRun={decideFairRun}
           />
         )}
       </main>
@@ -252,6 +443,7 @@ function GlobalFilters({
   frameworkFilter,
   ownerFilter,
   persona,
+  activeView,
   owners,
   setFrameworkFilter,
   setOwnerFilter,
@@ -261,6 +453,7 @@ function GlobalFilters({
   frameworkFilter: string;
   ownerFilter: string;
   persona: string;
+  activeView: View;
   owners: string[];
   setFrameworkFilter: (value: string) => void;
   setOwnerFilter: (value: string) => void;
@@ -271,7 +464,7 @@ function GlobalFilters({
     <header className="topbar">
       <div>
         <p className="eyebrow">u dont GRC me</p>
-        <h1>{viewTitle(persona)}</h1>
+        <h1>{viewTitle(persona, activeView)}</h1>
       </div>
       <div className="filter-row" aria-label="Global filters">
         <label>
@@ -309,7 +502,8 @@ function GlobalFilters({
   );
 }
 
-function viewTitle(persona: string) {
+function viewTitle(persona: string, activeView: View) {
+  if (activeView === "histogram") return "Heatmap Conversion Lab";
   if (persona === "Executive") return "Program Command Center";
   if (persona === "Control Owner") return "Owner Action Workspace";
   if (persona === "System Admin") return "GRC Operations Console";
@@ -321,15 +515,19 @@ function CommandCenterView({
   approvals,
   ale,
   selectedControl,
+  fairScenario,
   setActiveView,
   setSelectedControlId,
+  onCreateFairRun,
 }: {
   controls: Control[];
   approvals: Approval[];
   ale: { p10: number; p50: number; p90: number };
   selectedControl: Control;
+  fairScenario: FairScenarioParameter | null;
   setActiveView: (view: View) => void;
   setSelectedControlId: (id: string) => void;
+  onCreateFairRun: (controlId: string, payload: Partial<FairSimulationRun>) => Promise<FairSimulationRun>;
 }) {
   return (
     <section className="view-stack">
@@ -338,7 +536,7 @@ function CommandCenterView({
         <SavedViews />
         <ChartBuilder controls={controls} />
       </section>
-      <RiskLab selectedControl={selectedControl} />
+      <RiskLab selectedControl={selectedControl} fairScenario={fairScenario} onCreateFairRun={onCreateFairRun} />
     </section>
   );
 }
@@ -457,10 +655,12 @@ function ControlInventoryTab({
   inventory,
   selectedControlId,
   setSelectedControlId,
+  openControl,
 }: {
   inventory: GovernanceSnapshot;
   selectedControlId: string;
   setSelectedControlId: (id: string) => void;
+  openControl: (control: GovernanceControl) => void;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All statuses");
@@ -507,6 +707,7 @@ function ControlInventoryTab({
               <th>Mappings</th>
               <th>Evidence Health</th>
               <th>Cadence</th>
+              <th>Open</th>
             </tr>
           </thead>
           <tbody>
@@ -539,6 +740,11 @@ function ControlInventoryTab({
                     </div>
                   </td>
                   <td>{control.testing_cadence}</td>
+                  <td>
+                    <button className="icon-button" title={`Open ${control.name}`} onClick={() => openControl(control)}>
+                      <AppWindow size={16} />
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -549,8 +755,48 @@ function ControlInventoryTab({
   );
 }
 
-function ControlRecordPanel({ control }: { control: GovernanceControl }) {
+function ControlRecordPanel({
+  control,
+  onUpdateControl,
+  openControl,
+}: {
+  control: GovernanceControl;
+  onUpdateControl: (id: string, updates: Partial<GovernanceControl>) => Promise<void>;
+  openControl: (control: GovernanceControl) => void;
+}) {
+  const [form, setForm] = useState({
+    owner: control.owner,
+    implementation_status: control.implementation_status,
+    testing_cadence: control.testing_cadence,
+    evidence_freshness: control.evidence_freshness,
+    evidence_relevance: control.evidence_relevance,
+    evidence_completeness: control.evidence_completeness,
+  });
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const evidenceHealth = Math.round((control.evidence_freshness + control.evidence_relevance + control.evidence_completeness) / 3);
+
+  useEffect(() => {
+    setForm({
+      owner: control.owner,
+      implementation_status: control.implementation_status,
+      testing_cadence: control.testing_cadence,
+      evidence_freshness: control.evidence_freshness,
+      evidence_relevance: control.evidence_relevance,
+      evidence_completeness: control.evidence_completeness,
+    });
+    setSaveState("idle");
+  }, [control.id]);
+
+  const saveControl = async () => {
+    setSaveState("saving");
+    try {
+      await onUpdateControl(control.id, form);
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
+  };
+
   return (
     <section className="panel control-record-panel">
       <div className="control-title">
@@ -558,7 +804,12 @@ function ControlRecordPanel({ control }: { control: GovernanceControl }) {
           <p className="eyebrow">{control.id} / {control.family}</p>
           <h2>{control.name}</h2>
         </div>
-        <StatusPill status={control.implementation_status} />
+        <div className="action-row tight-actions">
+          <button className="icon-button" title="Open drilldown" onClick={() => openControl(control)}>
+            <AppWindow size={16} />
+          </button>
+          <StatusPill status={control.implementation_status} />
+        </div>
       </div>
       <p className="description">{control.description}</p>
       <div className="detail-grid">
@@ -583,7 +834,128 @@ function ControlRecordPanel({ control }: { control: GovernanceControl }) {
           <strong>{control.evidence_completeness}%</strong>
         </div>
       </div>
+      <div className="edit-grid">
+        <label className="field-label">
+          Owner
+          <input value={form.owner} onChange={(event) => setForm((current) => ({ ...current, owner: event.target.value }))} />
+        </label>
+        <label className="field-label">
+          Status
+          <select value={form.implementation_status} onChange={(event) => setForm((current) => ({ ...current, implementation_status: event.target.value }))}>
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Implemented</option>
+            <option>Degraded</option>
+            <option>Failed</option>
+            <option>Retired</option>
+          </select>
+        </label>
+        <label className="field-label">
+          Cadence
+          <input value={form.testing_cadence} onChange={(event) => setForm((current) => ({ ...current, testing_cadence: event.target.value }))} />
+        </label>
+        <label className="field-label">
+          Freshness
+          <input type="number" min="0" max="100" value={form.evidence_freshness} onChange={(event) => setForm((current) => ({ ...current, evidence_freshness: Number(event.target.value) }))} />
+        </label>
+        <label className="field-label">
+          Relevance
+          <input type="number" min="0" max="100" value={form.evidence_relevance} onChange={(event) => setForm((current) => ({ ...current, evidence_relevance: Number(event.target.value) }))} />
+        </label>
+        <label className="field-label">
+          Completeness
+          <input type="number" min="0" max="100" value={form.evidence_completeness} onChange={(event) => setForm((current) => ({ ...current, evidence_completeness: Number(event.target.value) }))} />
+        </label>
+      </div>
+      <div className="action-row">
+        <button className="primary-button" onClick={saveControl} disabled={saveState === "saving"}>
+          <Save size={17} /> {saveState === "saving" ? "Saving" : "Save control"}
+        </button>
+        <span className={`save-state ${saveState}`}>{saveState === "saved" ? "Saved to database" : saveState === "error" ? "Start the local API to save edits" : "Editable database record"}</span>
+      </div>
     </section>
+  );
+}
+
+function ControlDrilldownModal({ control, close }: { control: GovernanceControl; close: () => void }) {
+  const evidenceHealth = Math.round((control.evidence_freshness + control.evidence_relevance + control.evidence_completeness) / 3);
+  return (
+    <div className="modal-backdrop" role="presentation" onClick={close}>
+      <section className="modal-window" role="dialog" aria-modal="true" aria-label={`${control.name} drilldown`} onClick={(event) => event.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <p className="eyebrow">{control.id} / {control.family}</p>
+            <h2>{control.name}</h2>
+          </div>
+          <button className="icon-button" title="Close" onClick={close}>
+            <X size={18} />
+          </button>
+        </div>
+        <p className="description">{control.description}</p>
+        <div className="summary-strip">
+          <Detail label="Owner" value={control.owner} />
+          <Detail label="Status" value={control.implementation_status} />
+          <Detail label="Evidence health" value={`${evidenceHealth}%`} />
+          <Detail label="Mappings" value={String(control.mappingCount)} />
+        </div>
+        <div className="modal-grid">
+          <section>
+            <h3>Framework mappings</h3>
+            <div className="compact-list">
+              {control.mappings.map((mapping) => (
+                <div key={mapping.id}>
+                  <strong>{mapping.framework_name} {mapping.citation}</strong>
+                  <span>{mapping.coverage_percentage}% coverage / {mapping.mapping_confidence}% confidence / {mapping.state}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section>
+            <h3>Assets</h3>
+            <div className="compact-list">
+              {control.assets.map((asset) => (
+                <div key={asset.id}>
+                  <strong>{asset.name}</strong>
+                  <span>{asset.environment} / {asset.data_classification} / {asset.scope_status}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section>
+            <h3>Evidence</h3>
+            <div className="compact-list">
+              {control.evidenceItems.map((item) => (
+                <div key={item.id}>
+                  <strong>{item.name}</strong>
+                  <span>{item.verdict} / {item.hash} / {item.storage_uri}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section>
+            <h3>FAIR assumptions</h3>
+            {control.fairScenario ? (
+              <div className="compact-list">
+                <div>
+                  <strong>{control.fairScenario.scenario_name}</strong>
+                  <span>{formatCurrency(control.fairScenario.probable_loss_min)} to {formatCurrency(control.fairScenario.probable_loss_max)}</span>
+                </div>
+                <div>
+                  <strong>Frequency and strength</strong>
+                  <span>{control.fairScenario.annual_event_frequency_most_likely}/year / {control.fairScenario.control_strength_percentage}% strength / {control.fairScenario.vulnerability_percentage}% vulnerability</span>
+                </div>
+                <div>
+                  <strong>Source notes</strong>
+                  <span>{control.fairScenario.source_notes}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="description">No FAIR row has been mapped to this control yet.</p>
+            )}
+          </section>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1212,6 +1584,7 @@ function GovernanceView({
   governanceSource,
   selectedControlId,
   setSelectedControlId,
+  onUpdateControl,
 }: {
   controls: Control[];
   selectedControl: Control;
@@ -1223,8 +1596,10 @@ function GovernanceView({
   governanceSource: "Governance API" | "Seeded fallback";
   selectedControlId: string;
   setSelectedControlId: (id: string) => void;
+  onUpdateControl: (id: string, updates: Partial<GovernanceControl>) => Promise<void>;
 }) {
   const [activeTab, setActiveTab] = useState<GovernanceTab>("inventory");
+  const [drilldownControl, setDrilldownControl] = useState<GovernanceControl | null>(null);
   const selectedInventoryControl = governanceInventory.controls.find((control) => control.id === selectedControlId) ?? governanceInventory.controls[0];
 
   return (
@@ -1246,8 +1621,13 @@ function GovernanceView({
       <GovernanceTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === "inventory" && (
         <section className="governance-tab-layout">
-          <ControlInventoryTab inventory={governanceInventory} selectedControlId={selectedInventoryControl.id} setSelectedControlId={setSelectedControlId} />
-          <ControlRecordPanel control={selectedInventoryControl} />
+          <ControlInventoryTab
+            inventory={governanceInventory}
+            selectedControlId={selectedInventoryControl.id}
+            setSelectedControlId={setSelectedControlId}
+            openControl={setDrilldownControl}
+          />
+          <ControlRecordPanel control={selectedInventoryControl} onUpdateControl={onUpdateControl} openControl={setDrilldownControl} />
         </section>
       )}
       {activeTab === "program" && <ProgramWorkbenchTab workbench={governanceInventory.programWorkbench} />}
@@ -1266,6 +1646,7 @@ function GovernanceView({
       )}
       {activeTab === "assets" && <AssetsTab control={selectedInventoryControl} />}
       {activeTab === "graph" && <GovernanceGraphTab selectedControlId={selectedInventoryControl.id} graphNodes={graphNodes} graphEdges={graphEdges} inventory={governanceInventory} />}
+      {drilldownControl && <ControlDrilldownModal control={drilldownControl} close={() => setDrilldownControl(null)} />}
     </section>
   );
 }
@@ -1295,11 +1676,23 @@ function ComplianceView({
   );
 }
 
-function RiskView({ controls, selectedControl, setSelectedControlId }: { controls: Control[]; selectedControl: Control; setSelectedControlId: (id: string) => void }) {
+function RiskView({
+  controls,
+  selectedControl,
+  fairScenario,
+  setSelectedControlId,
+  onCreateFairRun,
+}: {
+  controls: Control[];
+  selectedControl: Control;
+  fairScenario: FairScenarioParameter | null;
+  setSelectedControlId: (id: string) => void;
+  onCreateFairRun: (controlId: string, payload: Partial<FairSimulationRun>) => Promise<FairSimulationRun>;
+}) {
   return (
     <section className="view-stack">
       <RiskRegister controls={controls} setSelectedControlId={setSelectedControlId} />
-      <RiskLab selectedControl={selectedControl} />
+      <RiskLab selectedControl={selectedControl} fairScenario={fairScenario} onCreateFairRun={onCreateFairRun} />
     </section>
   );
 }
@@ -1311,7 +1704,14 @@ function AdminView({
   remediations,
   rbacGrants,
   knowledgeAnswers,
+  fairScenarios,
+  fairScenarioVersions,
+  fairSimulationRuns,
+  mutationAuditLog,
+  controls,
   onConnect,
+  onUpdateFairScenario,
+  onDecideFairRun,
 }: {
   auditEvents: AuditEvent[];
   integrations: Integration[];
@@ -1319,19 +1719,409 @@ function AdminView({
   remediations: RemediationItem[];
   rbacGrants: RbacGrant[];
   knowledgeAnswers: KnowledgeAnswer[];
+  fairScenarios: FairScenarioParameter[];
+  fairScenarioVersions: FairScenarioVersion[];
+  fairSimulationRuns: FairSimulationRun[];
+  mutationAuditLog: MutationAuditLogEntry[];
+  controls: GovernanceControl[];
   onConnect: (id: string) => void;
+  onUpdateFairScenario: (controlId: string, updates: Partial<FairScenarioParameter>) => Promise<void>;
+  onDecideFairRun: (runId: string, decision: "Approved" | "Rejected", reason: string) => Promise<void>;
 }) {
   return (
     <section className="view-stack">
       <AdminSummary />
+      <FairDatabaseAdmin fairScenarios={fairScenarios} controls={controls} onUpdateFairScenario={onUpdateFairScenario} />
+      <FairTraceabilityView versions={fairScenarioVersions} auditLog={mutationAuditLog} simulationRuns={fairSimulationRuns} onDecideFairRun={onDecideFairRun} />
       <IntegrationsView integrations={integrations} onConnect={onConnect} />
       <KnowledgeSystemView answers={knowledgeAnswers} />
       <VendorRiskView vendors={vendors} />
+      <NthPartyView />
       <RemediationView remediations={remediations} />
+      <HardeningLibraryView />
       <TrustRbacView grants={rbacGrants} />
       <AgentsView auditEvents={auditEvents} />
     </section>
   );
+}
+
+function HeatmapHistogramView() {
+  const [risks, setRisks] = useState<HeatRisk[]>([]);
+  const [simulationResults, setSimulationResults] = useState<number[][] | null>(null);
+  const selectedCells = new Set(risks.map((risk) => risk.heatCell));
+  const selectedSummaries = useMemo(
+    () => simulationResults?.map((samples) => summarizeHeatSimulation(samples)) ?? null,
+    [simulationResults],
+  );
+
+  const clearResults = () => setSimulationResults(null);
+  const toggleCell = (row: number, column: number) => {
+    const heatCell = `${row}-${column}`;
+    setRisks((current) => {
+      const existingIndex = current.findIndex((risk) => risk.heatCell === heatCell);
+      if (existingIndex >= 0) return current.filter((_, index) => index !== existingIndex);
+      if (current.length >= heatRiskLimit) return current;
+      return [...current, defaultHeatRisk(row, column)];
+    });
+    clearResults();
+  };
+  const updateRisk = (index: number, field: keyof HeatRisk, value: string | number) => {
+    setRisks((current) => current.map((risk, riskIndex) => (riskIndex === index ? { ...risk, [field]: value } : risk)));
+    clearResults();
+  };
+  const removeRisk = (index: number) => {
+    setRisks((current) => current.filter((_, riskIndex) => riskIndex !== index));
+    clearResults();
+  };
+  const runSimulation = () => {
+    if (!risks.length) return;
+    setSimulationResults(risks.map((risk) => simulateHeatRisk(risk)));
+  };
+  const resetLab = () => {
+    setRisks([]);
+    setSimulationResults(null);
+  };
+  const downloadCsv = () => {
+    if (!simulationResults || !selectedSummaries) return;
+    const rows = [
+      ["risk", "heat_cell", "likelihood", "impact", "frequency_min", "frequency_most_likely", "frequency_max", "magnitude_min", "magnitude_most_likely", "magnitude_max", "mean", "p50", "p90", "zero_loss_years_percent"],
+      ...risks.map((risk, index) => {
+        const { row, column } = splitHeatCell(risk.heatCell);
+        const summary = selectedSummaries[index];
+        return [
+          risk.name || `Risk ${index + 1}`,
+          risk.heatCell,
+          heatLikelihoodLabels[row],
+          heatImpactLabels[column],
+          risk.freqMin,
+          risk.freqMode,
+          risk.freqMax,
+          risk.magMin,
+          risk.magMode,
+          risk.magMax,
+          Math.round(summary.mean),
+          Math.round(summary.p50),
+          Math.round(summary.p90),
+          summary.zeroPercent,
+        ];
+      }),
+    ];
+    const csv = rows.map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "heatmap-histogram-results.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <section className="view-stack heatlab">
+      <section className="heatlab-hero panel">
+        <div>
+          <p className="eyebrow">CRQ translation lab</p>
+          <h2>Heatmap to Histogram</h2>
+          <p>
+            Place risks on a 5x5 matrix, replace color labels with event frequency and loss magnitude ranges,
+            then run 10,000 annual-loss simulations.
+          </p>
+        </div>
+        <div className="heatlab-actions">
+          <button className="secondary-button" onClick={resetLab}>
+            <RotateCcw size={16} /> Reset
+          </button>
+          <button className="secondary-button" onClick={downloadCsv} disabled={!simulationResults}>
+            <Download size={16} /> Export CSV
+          </button>
+        </div>
+      </section>
+
+      <section className="heatlab-layout">
+        <section className="panel heatlab-matrix-panel">
+          <div className="section-heading compact">
+            <div>
+              <p className="eyebrow">Step 1</p>
+              <h2>Place up to five risks</h2>
+            </div>
+            <BadgeCheck size={19} />
+          </div>
+          <div className="heatmap-grid" aria-label="Likelihood and impact heat map">
+            <div />
+            {heatImpactLabels.map((label) => (
+              <div className="heatmap-axis impact-axis" key={label}>{label}</div>
+            ))}
+            {[...heatLikelihoodLabels].reverse().map((label, reversedIndex) => {
+              const row = heatLikelihoodLabels.length - 1 - reversedIndex;
+              return (
+                <Fragment key={label}>
+                  <div className="heatmap-axis likelihood-axis">{label}</div>
+                  {heatImpactLabels.map((_, column) => {
+                    const cell = `${row}-${column}`;
+                    const riskIndex = risks.findIndex((risk) => risk.heatCell === cell);
+                    const active = selectedCells.has(cell);
+                    const maxed = risks.length >= heatRiskLimit && !active;
+                    return (
+                      <button
+                        key={cell}
+                        className={`heatmap-cell ${heatCellClasses[row][column]}${active ? " active" : ""}`}
+                        onClick={() => toggleCell(row, column)}
+                        disabled={maxed}
+                        aria-label={`${heatLikelihoodLabels[row]} likelihood, ${heatImpactLabels[column]} impact`}
+                      >
+                        {active && (
+                          <span style={{ background: heatRiskColors[riskIndex] }}>
+                            {riskIndex + 1}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+          </div>
+          <div className="heatmap-footnotes">
+            <span>Likelihood increases upward</span>
+            <span>Impact increases rightward</span>
+          </div>
+          {risks.length >= heatRiskLimit && (
+            <p className="heatlab-note">Maximum of five active risks. Remove a numbered cell to add another.</p>
+          )}
+          {!risks.length && (
+            <div className="heatlab-empty">Click a cell to start translating color into numbers.</div>
+          )}
+        </section>
+
+        <section className="panel heatlab-form-panel">
+          <div className="section-heading compact">
+            <div>
+              <p className="eyebrow">Step 2</p>
+              <h2>Define the ranges behind the color</h2>
+            </div>
+            <SlidersHorizontal size={19} />
+          </div>
+          <p className="description">
+            Defaults come from matrix position. Adjust the low, most likely, and high estimates before running the model.
+          </p>
+          {risks.length ? (
+            <div className="heat-risk-list">
+              {risks.map((risk, index) => (
+                <HeatRiskEditor
+                  key={`${risk.heatCell}-${index}`}
+                  risk={risk}
+                  index={index}
+                  updateRisk={updateRisk}
+                  removeRisk={removeRisk}
+                />
+              ))}
+              <button className="primary-button heat-run-button" onClick={runSimulation}>
+                <Play size={17} /> Run {heatRiskTrials.toLocaleString()} simulations
+              </button>
+            </div>
+          ) : (
+            <div className="heatlab-empty tall">Selected risks will appear here with editable frequency and loss ranges.</div>
+          )}
+        </section>
+      </section>
+
+      {simulationResults && selectedSummaries && (
+        <section className="panel heatlab-results-panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Step 3</p>
+              <h2>What the heatmap was compressing</h2>
+            </div>
+            <BarChart3 size={19} />
+          </div>
+          <div className="heatlab-contrast">
+            <div>
+              <span>Heatmap output</span>
+              <strong>{risks.length} color-coded {risks.length === 1 ? "cell" : "cells"}</strong>
+              <p>No annual loss distribution, no expected value, no bad-year estimate.</p>
+            </div>
+            <div>
+              <span>Histogram output</span>
+              <strong>{risks.length} simulated {risks.length === 1 ? "distribution" : "distributions"}</strong>
+              <p>Percentiles, zero-loss years, expected value, and financial ranges.</p>
+            </div>
+          </div>
+          <div className="heat-results-grid">
+            {risks.map((risk, index) => (
+              <HeatRiskResultCard
+                key={`${risk.heatCell}-${index}`}
+                risk={risk}
+                index={index}
+                samples={simulationResults[index]}
+                summary={selectedSummaries[index]}
+              />
+            ))}
+          </div>
+          <div className="heatlab-disclaimer">
+            This is an educational model. Risks are simulated independently, defaults are illustrative, and production analysis still needs vetted data, assumption review, and correlation treatment.
+          </div>
+        </section>
+      )}
+    </section>
+  );
+}
+
+function HeatRiskEditor({
+  risk,
+  index,
+  updateRisk,
+  removeRisk,
+}: {
+  risk: HeatRisk;
+  index: number;
+  updateRisk: (index: number, field: keyof HeatRisk, value: string | number) => void;
+  removeRisk: (index: number) => void;
+}) {
+  const { row, column } = splitHeatCell(risk.heatCell);
+  const updateNumber = (field: keyof HeatRisk, value: string) => updateRisk(index, field, Number(value));
+
+  return (
+    <div className="heat-risk-editor" style={{ borderLeftColor: heatRiskColors[index] }}>
+      <div className="heat-risk-title">
+        <span style={{ background: heatRiskColors[index] }}>{index + 1}</span>
+        <label>
+          <span className="sr-only">Risk name</span>
+          <input value={risk.name} placeholder={`Risk ${index + 1}`} onChange={(event) => updateRisk(index, "name", event.target.value)} />
+        </label>
+        <small>{heatLikelihoodLabels[row]} / {heatImpactLabels[column]}</small>
+        <button className="icon-button" onClick={() => removeRisk(index)} title="Remove risk" aria-label="Remove risk">
+          <Trash2 size={16} />
+        </button>
+      </div>
+      <HeatTripleInput
+        label="Frequency (events per year)"
+        min={risk.freqMin}
+        mode={risk.freqMode}
+        max={risk.freqMax}
+        setMin={(value) => updateNumber("freqMin", value)}
+        setMode={(value) => updateNumber("freqMode", value)}
+        setMax={(value) => updateNumber("freqMax", value)}
+      />
+      <HeatTripleInput
+        label="Loss magnitude per event"
+        min={risk.magMin}
+        mode={risk.magMode}
+        max={risk.magMax}
+        setMin={(value) => updateNumber("magMin", value)}
+        setMode={(value) => updateNumber("magMode", value)}
+        setMax={(value) => updateNumber("magMax", value)}
+      />
+    </div>
+  );
+}
+
+function HeatTripleInput({
+  label,
+  min,
+  mode,
+  max,
+  setMin,
+  setMode,
+  setMax,
+}: {
+  label: string;
+  min: number;
+  mode: number;
+  max: number;
+  setMin: (value: string) => void;
+  setMode: (value: string) => void;
+  setMax: (value: string) => void;
+}) {
+  return (
+    <div className="heat-triple-input">
+      <span>{label}</span>
+      <label>
+        Min
+        <input type="number" value={min} onChange={(event) => setMin(event.target.value)} />
+      </label>
+      <label>
+        Most likely
+        <input type="number" value={mode} onChange={(event) => setMode(event.target.value)} />
+      </label>
+      <label>
+        Max
+        <input type="number" value={max} onChange={(event) => setMax(event.target.value)} />
+      </label>
+    </div>
+  );
+}
+
+function HeatRiskResultCard({
+  risk,
+  index,
+  samples,
+  summary,
+}: {
+  risk: HeatRisk;
+  index: number;
+  samples: number[];
+  summary: ReturnType<typeof summarizeHeatSimulation>;
+}) {
+  const { row, column } = splitHeatCell(risk.heatCell);
+  const name = risk.name || `Risk ${index + 1}`;
+
+  return (
+    <section className="heat-result-card" style={{ borderLeftColor: heatRiskColors[index] }}>
+      <div className="heat-result-heading">
+        <div>
+          <span style={{ background: heatRiskColors[index] }}>{index + 1}</span>
+          <div>
+            <strong>{name}</strong>
+            <small>{heatLikelihoodLabels[row]} / {heatImpactLabels[column]}</small>
+          </div>
+        </div>
+        <small>{summary.zeroPercent}% zero-loss years</small>
+      </div>
+      {summary.zeroYears > 0 && (
+        <p className="heat-zero-note">{summary.zeroPercent}% of simulated years produced no loss event, so the visible histogram focuses on non-zero outcomes.</p>
+      )}
+      <div className="heat-stat-row">
+        <Detail label="Median P50" value={summary.p50 === 0 ? "No loss" : formatRiskMoney(summary.p50)} />
+        <Detail label="Expected" value={formatRiskMoney(summary.mean)} />
+        <Detail label="Bad year P90" value={summary.p90 === 0 ? "No loss" : formatRiskMoney(summary.p90)} />
+      </div>
+      <HeatHistogram summary={summary} color={heatRiskColors[index]} />
+      <div className="chart-caption">
+        <span>{samples.length.toLocaleString()} annual trials</span>
+        <span>Max non-zero {formatRiskMoney(summary.bins.at(-1)?.upper ?? 0)}</span>
+      </div>
+    </section>
+  );
+}
+
+function HeatHistogram({ summary, color }: { summary: ReturnType<typeof summarizeHeatSimulation>; color: string }) {
+  const p90 = summary.p90;
+  const first = summary.bins[0]?.lower ?? 0;
+  const last = summary.bins.at(-1)?.upper ?? 1;
+  const p90Position = last > first ? Math.max(0, Math.min(100, ((p90 - first) / (last - first)) * 100)) : 0;
+
+  return (
+    <div className="heat-histogram-wrap">
+      <div className="heat-histogram" aria-label="Annual loss histogram">
+        {summary.bins.map((bin, index) => (
+          <div className="heat-histogram-bin" key={`${bin.lower}-${index}`}>
+            <span
+              style={{
+                height: `${Math.max(4, (bin.count / summary.maxBin) * 100)}%`,
+                background: color,
+              }}
+              title={`${bin.count} trials from ${formatRiskMoney(bin.lower)} to ${formatRiskMoney(bin.upper)}`}
+            />
+          </div>
+        ))}
+        {p90 > 0 && <i style={{ left: `${p90Position}%` }} title={`P90 ${formatRiskMoney(p90)}`} />}
+      </div>
+    </div>
+  );
+}
+
+function splitHeatCell(heatCell: string) {
+  const [row, column] = heatCell.split("-").map(Number);
+  return { row, column };
 }
 
 function Dashboard({
@@ -1731,11 +2521,23 @@ function AuditPackage({ requirements, evidenceItems }: { requirements: Framework
   );
 }
 
-function RiskLab({ selectedControl }: { selectedControl: Control }) {
-  const [baseLoss, setBaseLoss] = useState(selectedControl.fair.aleP90);
-  const [strength, setStrength] = useState(selectedControl.fair.strength);
+function RiskLab({
+  selectedControl,
+  fairScenario = null,
+  onCreateFairRun,
+}: {
+  selectedControl: Control;
+  fairScenario?: FairScenarioParameter | null;
+  onCreateFairRun: (controlId: string, payload: Partial<FairSimulationRun>) => Promise<FairSimulationRun>;
+}) {
+  const [baseLoss, setBaseLoss] = useState(fairScenario?.probable_loss_most_likely ?? selectedControl.fair.aleP90);
+  const [strength, setStrength] = useState(fairScenario?.control_strength_percentage ?? selectedControl.fair.strength);
   const [volatility, setVolatility] = useState(1.15);
-  const simulation = seededMonteCarlo(baseLoss, strength, volatility);
+  const [runSaveState, setRunSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const frequency = fairScenario?.annual_event_frequency_most_likely ?? 0.45;
+  const lossMagnitudeReduction = fairScenario?.loss_magnitude_reduction_percentage ?? Math.round(selectedControl.fair.plmReduction * 100);
+  const appetiteThreshold = fairScenario?.appetite_threshold ?? selectedControl.fair.aleP90;
+  const simulation = seededMonteCarlo(baseLoss, strength, volatility, frequency, lossMagnitudeReduction);
   const scenario = fairScenarioRequirements[selectedControl.id] ?? {
     asset: selectedControl.assets[0] ?? "Scoped asset",
     threat: "Relevant threat agent",
@@ -1743,6 +2545,31 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
     effect: "Confidentiality, integrity, or availability impact",
     decision: "Select the control investment this analysis supports",
     fairCam: "Decision Support",
+  };
+
+  useEffect(() => {
+    setBaseLoss(fairScenario?.probable_loss_most_likely ?? selectedControl.fair.aleP90);
+    setStrength(fairScenario?.control_strength_percentage ?? selectedControl.fair.strength);
+    setRunSaveState("idle");
+  }, [fairScenario, selectedControl]);
+
+  const saveBoardRun = async () => {
+    setRunSaveState("saving");
+    try {
+      await onCreateFairRun(selectedControl.id, {
+        run_label: `${selectedControl.name} board scenario`,
+        base_loss: baseLoss,
+        control_strength_percentage: strength,
+        annual_event_frequency: frequency,
+        loss_magnitude_reduction_percentage: lossMagnitudeReduction,
+        volatility,
+        appetite_threshold: appetiteThreshold,
+        approval_state: "Pending Approval",
+      });
+      setRunSaveState("saved");
+    } catch {
+      setRunSaveState("error");
+    }
   };
 
   return (
@@ -1767,6 +2594,18 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
             <Detail label="Effect" value={scenario.effect} />
             <Detail label="Decision" value={scenario.decision} />
             <Detail label="FAIR-CAM function" value={scenario.fairCam} />
+            <Detail label="Event frequency" value={`${frequency}/year`} />
+            <Detail label="LM reduction" value={`${lossMagnitudeReduction}%`} />
+            <Detail label="Appetite" value={formatCurrency(appetiteThreshold)} />
+            <Detail label="Data quality" value={fairScenario?.data_quality ?? "Demo"} />
+          </div>
+          <div className="action-row">
+            <button className="primary-button" onClick={saveBoardRun} disabled={runSaveState === "saving"}>
+              <ClipboardCheck size={17} /> {runSaveState === "saving" ? "Saving run" : "Save board run"}
+            </button>
+            <span className={`save-state ${runSaveState}`}>
+              {runSaveState === "saved" ? "Run saved for approval" : runSaveState === "error" ? "Start the local API to save runs" : "Persists this scenario to the admin queue"}
+            </span>
           </div>
         </section>
 
@@ -1785,7 +2624,7 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
           </div>
         </section>
       </section>
-      <CrqDecisionSupport selectedControl={selectedControl} simulation={simulation} />
+      <CrqDecisionSupport selectedControl={selectedControl} simulation={simulation} fairScenario={fairScenario} />
     </>
   );
 }
@@ -1793,9 +2632,11 @@ function RiskLab({ selectedControl }: { selectedControl: Control }) {
 function CrqDecisionSupport({
   selectedControl,
   simulation,
+  fairScenario,
 }: {
   selectedControl: Control;
   simulation: ReturnType<typeof seededMonteCarlo>;
+  fairScenario?: FairScenarioParameter | null;
 }) {
   const topBin = Math.max(...simulation.histogram.map((bin) => bin.count), 1);
   const fiveNumberSummary = [
@@ -1823,9 +2664,10 @@ function CrqDecisionSupport({
   ];
   const evidenceNutrition = [
     { label: "Unit", value: "USD/year and events/year" },
-    { label: "Citation", value: "Internal telemetry, external analog, or SME estimate" },
-    { label: "Collected", value: "Date-stamped before model approval" },
-    { label: "Quality", value: "Grade with bias and sample-size adjustment" },
+    { label: "Citation", value: fairScenario?.source_notes ?? "Internal telemetry, external analog, or SME estimate" },
+    { label: "Collected", value: fairScenario?.updated_at ?? "Date-stamped before model approval" },
+    { label: "Quality", value: fairScenario?.data_quality ?? "Grade with bias and sample-size adjustment" },
+    { label: "Confidence", value: fairScenario ? `${fairScenario.confidence_percentage}%` : "Pending calibration" },
   ];
   const approvalGates = [
     "Scope threat, asset, method, and effect before collecting data",
@@ -2053,6 +2895,315 @@ function VendorRiskView({ vendors }: { vendors: Vendor[] }) {
   );
 }
 
+function NthPartyView() {
+  const scans = nthPartyGraph.scans;
+  const [selectedDomain, setSelectedDomain] = useState(scans[0]?.domain ?? "");
+  const [layerFilter, setLayerFilter] = useState("all");
+
+  const scan = scans.find((entry) => entry.domain === selectedDomain) ?? scans[0];
+  const rows = useMemo(() => {
+    if (!scan) return [];
+    const filtered =
+      layerFilter === "all"
+        ? scan.relationships
+        : scan.relationships.filter((rel) => String(rel.nth_party_layer) === layerFilter);
+    return [...filtered].sort(
+      (a, b) =>
+        a.nth_party_layer - b.nth_party_layer ||
+        a.nth_party_organization.localeCompare(b.nth_party_organization),
+    );
+  }, [scan, layerFilter]);
+
+  const layers = useMemo(
+    () => [...new Set(scan?.relationships.map((rel) => rel.nth_party_layer) ?? [])].sort((a, b) => a - b),
+    [scan],
+  );
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Nth-party discovery</p>
+          <h2>Vendor Graph Beyond Tier 1</h2>
+        </div>
+        <Network size={19} />
+      </div>
+
+      {!scan ? (
+        <div className="empty-state">
+          <p>
+            No nth-party scans ingested yet. Vendor concentration below Tier 1 stays invisible until a
+            scan runs.
+          </p>
+          <p>
+            Add authorized domains to <code>data/nth-party/targets.json</code>, install the CLI
+            (<code>brew install nthpartyfinder</code> or <code>cargo install nthpartyfinder</code>), then run{" "}
+            <code>npm run sync:nthparty</code>. Scan output committed from any machine is ingested the
+            same way.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="filter-row" aria-label="Nth-party filters">
+            <label>
+              <span className="filter-label">Scanned domain</span>
+              <select value={scan.domain} onChange={(event) => setSelectedDomain(event.target.value)}>
+                {scans.map((entry) => (
+                  <option key={entry.domain} value={entry.domain}>{entry.domain}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="filter-label">Layer</span>
+              <select value={layerFilter} onChange={(event) => setLayerFilter(event.target.value)}>
+                <option value="all">All layers</option>
+                {layers.map((layer) => (
+                  <option key={layer} value={String(layer)}>Layer {layer}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="framework-chip-row">
+            <span>Relationships <strong>{scan.summary.total_relationships}</strong></span>
+            <span>Max depth <strong>{scan.summary.max_depth}</strong></span>
+            <span>Unique domains <strong>{scan.summary.unique_domains}</strong></span>
+            <span>Unique orgs <strong>{scan.summary.unique_organizations}</strong></span>
+          </div>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nth party</th>
+                  <th>Layer</th>
+                  <th>Reached via</th>
+                  <th>Discovery source</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((rel, index) => (
+                  <tr key={`${rel.nth_party_domain}-${rel.nth_party_record_type}-${index}`}>
+                    <td>
+                      <strong>{rel.nth_party_organization || rel.nth_party_domain}</strong>
+                      <span>{rel.nth_party_domain}</span>
+                    </td>
+                    <td>{rel.nth_party_layer}</td>
+                    <td>
+                      {rel.nth_party_customer_organization || rel.nth_party_customer_domain}
+                      <span>{rel.nth_party_customer_domain}</span>
+                    </td>
+                    <td><code>{rel.nth_party_record_type}</code></td>
+                    <td className="evidence-cell">{rel.evidence}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      <p className="source-note">
+        Discovery by{" "}
+        <a href={nthPartyGraph.source.url} target="_blank" rel="noreferrer noopener">
+          {nthPartyGraph.source.tool}
+        </a>{" "}
+        ({nthPartyGraph.source.license}) from public DNS, certificate transparency, trust-center
+        subprocessor, and web-traffic signals.
+      </p>
+    </section>
+  );
+}
+
+function HardeningLibraryView() {
+  // The generated library is ~1.7MB, so it is code-split out of the initial
+  // bundle and pulled in only when the Admin view renders.
+  const [hardeningLibrary, setHardeningLibrary] = useState<HardeningLibrary | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [profileFilter, setProfileFilter] = useState("all");
+  const [automationOnly, setAutomationOnly] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("./hardeningData")
+      .then((module) => {
+        if (!cancelled) setHardeningLibrary(module.hardeningLibrary);
+      })
+      .catch((error) => {
+        if (!cancelled) setLoadError(error instanceof Error ? error.message : String(error));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const guide =
+    hardeningLibrary?.guides.find((entry) => entry.slug === platform) ?? hardeningLibrary?.guides[0];
+
+  const controls = useMemo(() => {
+    if (!guide) return [];
+    return guide.controls.filter((control) => {
+      if (profileFilter !== "all" && String(control.profileLevel) !== profileFilter) return false;
+      if (automationOnly && control.artifacts.length === 0) return false;
+      return true;
+    });
+  }, [guide, profileFilter, automationOnly]);
+
+  const automatedCount = guide?.controls.filter((control) => control.artifacts.length > 0).length ?? 0;
+
+  if (!hardeningLibrary) {
+    return (
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Integration hardening</p>
+            <h2>SaaS Hardening Library</h2>
+          </div>
+          <ShieldCheck size={19} />
+        </div>
+        <div className="empty-state">
+          <p>{loadError ? `Could not load the hardening library: ${loadError}` : "Loading hardening library..."}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Integration hardening</p>
+          <h2>SaaS Hardening Library</h2>
+        </div>
+        <ShieldCheck size={19} />
+      </div>
+
+      <div className="framework-chip-row">
+        <span>Platforms <strong>{hardeningLibrary.guideCount}</strong></span>
+        <span>Controls <strong>{hardeningLibrary.controlCount}</strong></span>
+        <span>Full control packs <strong>{hardeningLibrary.packControlCount}</strong></span>
+      </div>
+
+      <div className="filter-row" aria-label="Hardening library filters">
+        <label>
+          <span className="filter-label">Platform</span>
+          <select value={guide?.slug ?? ""} onChange={(event) => setPlatform(event.target.value)}>
+            {hardeningLibrary.guides.map((entry) => (
+              <option key={entry.slug} value={entry.slug}>
+                {entry.vendor} ({entry.controls.length})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="filter-label">Profile level</span>
+          <select value={profileFilter} onChange={(event) => setProfileFilter(event.target.value)}>
+            <option value="all">All levels</option>
+            <option value="1">L1 Crawl</option>
+            <option value="2">L2 Walk</option>
+            <option value="3">L3 Run</option>
+          </select>
+        </label>
+        <label className="checkbox-filter">
+          <input
+            type="checkbox"
+            checked={automationOnly}
+            onChange={(event) => setAutomationOnly(event.target.checked)}
+          />
+          <span>Has automation only ({automatedCount})</span>
+        </label>
+      </div>
+
+      {guide ? (
+        <>
+          <p className="guide-meta">
+            {guide.description}{" "}
+            <a href={guide.url} target="_blank" rel="noreferrer noopener">Full guide</a>
+            {guide.category ? ` / ${guide.category}` : ""}
+            {guide.version ? ` / v${guide.version}` : ""}
+            {guide.maturity ? ` / ${guide.maturity}` : ""}
+          </p>
+
+          <div className="pipeline">
+            {controls.map((control) => (
+              <div className="hardening-row" key={control.id}>
+                <div className="hardening-head">
+                  <div>
+                    <strong>{control.section} {control.title}</strong>
+                    <span>
+                      L{control.profileLevel}
+                      {control.severity ? ` / ${control.severity}` : ""}
+                      {control.depth === "pack" ? " / control pack" : " / guide section"}
+                    </span>
+                  </div>
+                  <a href={control.guideUrl} target="_blank" rel="noreferrer noopener">Guide</a>
+                </div>
+
+                {control.description ? <p>{control.description}</p> : null}
+
+                {control.compliance.length > 0 ? (
+                  <div className="citation-row">
+                    {control.compliance.map((ref) => (
+                      <span key={`${ref.framework}-${ref.citation}`}>
+                        {ref.framework} <strong>{ref.citation}</strong>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                {control.artifacts.length > 0 ? (
+                  <div className="artifact-badges">
+                    {control.artifacts.map((kind) => (
+                      <span key={kind} className={`pill ${kind}`}>{kind}</span>
+                    ))}
+                  </div>
+                ) : null}
+
+                {control.auditChecks.length > 0 ? (
+                  <div className="hardening-detail">
+                    <p className="field-label">Evidence checks</p>
+                    {control.auditChecks.map((check) => (
+                      <div key={check.id} className="hardening-check">
+                        <span>{check.description}</span>
+                        <code>{check.endpoint || check.query}</code>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {control.remediation.length > 0 ? (
+                  <div className="hardening-detail">
+                    <p className="field-label">Remediation</p>
+                    {control.remediation.map((step, index) => (
+                      <div key={`${step.kind}-${index}`} className="hardening-check">
+                        <span>{step.kind}: {step.description}</span>
+                        {step.detail ? <code>{step.detail}</code> : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+            {controls.length === 0 ? <p className="guide-meta">No controls match these filters.</p> : null}
+          </div>
+        </>
+      ) : null}
+
+      <p className="source-note">
+        Content from{" "}
+        <a href={hardeningLibrary.source.url} target="_blank" rel="noreferrer noopener">
+          {hardeningLibrary.source.repo}
+        </a>{" "}
+        ({hardeningLibrary.source.license}), pinned at {hardeningLibrary.source.ref.slice(0, 7)}.
+        Controls marked <em>control pack</em> carry machine-readable evidence checks and remediation;
+        <em> guide section</em> entries carry framework citations only.
+      </p>
+    </section>
+  );
+}
+
 function RemediationView({ remediations }: { remediations: RemediationItem[] }) {
   return (
     <section className="panel">
@@ -2276,6 +3427,317 @@ ${selectedControl.indicators.map((indicator) => `- ${indicator.label}: ${indicat
       <section className="panel editor-panel">
         <textarea aria-label="Generated document draft" defaultValue={draft} />
       </section>
+    </section>
+  );
+}
+
+function FairTraceabilityView({
+  versions,
+  auditLog,
+  simulationRuns,
+  onDecideFairRun,
+}: {
+  versions: FairScenarioVersion[];
+  auditLog: MutationAuditLogEntry[];
+  simulationRuns: FairSimulationRun[];
+  onDecideFairRun: (runId: string, decision: "Approved" | "Rejected", reason: string) => Promise<void>;
+}) {
+  const latestVersions = versions.slice(0, 8);
+  const latestAudit = auditLog.slice(0, 8);
+  const latestRuns = simulationRuns.slice(0, 8);
+  const [decisionState, setDecisionState] = useState<Record<string, "idle" | "saving" | "saved" | "error">>({});
+
+  const decideRun = async (run: FairSimulationRun, decision: "Approved" | "Rejected") => {
+    setDecisionState((current) => ({ ...current, [run.run_id]: "saving" }));
+    try {
+      await onDecideFairRun(run.run_id, decision, `${decision} in admin approval queue`);
+      setDecisionState((current) => ({ ...current, [run.run_id]: "saved" }));
+    } catch {
+      setDecisionState((current) => ({ ...current, [run.run_id]: "error" }));
+    }
+  };
+
+  return (
+    <section className="view-stack">
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Board risk governance</p>
+            <h2>Simulation Approval Queue</h2>
+          </div>
+          <ClipboardCheck size={19} />
+        </div>
+        {latestRuns.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run</th>
+                  <th>Scenario output</th>
+                  <th>Assumption link</th>
+                  <th>Approval</th>
+                </tr>
+              </thead>
+              <tbody>
+                {latestRuns.map((run) => (
+                  <tr key={run.run_id}>
+                    <td>
+                      <strong>{run.run_label}</strong>
+                      <span>{run.control_id} / {run.requested_by} / {run.created_at}</span>
+                    </td>
+                    <td>
+                      <strong>{formatCurrency(run.p90)} P90</strong>
+                      <span>P50 {formatCurrency(run.p50)} / expected {formatCurrency(run.expected_loss)} / {run.appetite_breach_probability}% breach</span>
+                    </td>
+                    <td>
+                      <strong>{run.sensitivity_driver}</strong>
+                      <span>{run.assumption_version_id ?? "No version link"}</span>
+                    </td>
+                    <td>
+                      <StatusPill status={run.approval_state} />
+                      {run.approval_state === "Pending Approval" ? (
+                        <div className="row-actions">
+                          <button className="secondary-button compact-button" onClick={() => decideRun(run, "Approved")} disabled={decisionState[run.run_id] === "saving"}>
+                            <Check size={15} /> Approve
+                          </button>
+                          <button className="secondary-button compact-button" onClick={() => decideRun(run, "Rejected")} disabled={decisionState[run.run_id] === "saving"}>
+                            <X size={15} /> Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <span>{run.approved_by ? `${run.approved_by} / ${run.decision_reason}` : run.decision_reason || "No decision note"}</span>
+                      )}
+                      {decisionState[run.run_id] === "error" && <span className="save-state error">Decision failed</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="reasoning-box">
+            <ClipboardCheck size={18} />
+            <p>No board runs are waiting yet. Save a scenario from the risk lab to create an approval record.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="program-grid">
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">FAIR lineage</p>
+            <h2>Assumption Version History</h2>
+          </div>
+          <Route size={19} />
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Version</th>
+                <th>Likely loss</th>
+                <th>Frequency</th>
+                <th>Changed by</th>
+              </tr>
+            </thead>
+            <tbody>
+              {latestVersions.map((version) => (
+                <tr key={version.version_id}>
+                  <td>
+                    <strong>{version.scenario_name}</strong>
+                    <span>{version.control_id} / {version.change_reason}</span>
+                  </td>
+                  <td>v{version.version_number}</td>
+                  <td>{formatCurrency(version.probable_loss_most_likely)}</td>
+                  <td>{version.annual_event_frequency_most_likely}/year</td>
+                  <td>
+                    {version.changed_by}
+                    <span>{version.created_at}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Write guardrails</p>
+            <h2>Mutation Audit Log</h2>
+          </div>
+          <LockKeyhole size={19} />
+        </div>
+        <div className="pipeline">
+          {latestAudit.length ? latestAudit.map((entry) => (
+            <div className="edge-card" key={entry.id}>
+              <strong>{entry.action} / {entry.outcome}</strong>
+              <span>{entry.target_type} {entry.target_id} / {entry.actor} / {entry.auth_mode}</span>
+              <small>{entry.reason}</small>
+            </div>
+          )) : (
+            <div className="reasoning-box">
+              <LockKeyhole size={18} />
+              <p>No local mutations have been recorded yet. Save a control or FAIR assumption to create an audit event.</p>
+            </div>
+          )}
+        </div>
+      </section>
+      </section>
+    </section>
+  );
+}
+
+function FairDatabaseAdmin({
+  fairScenarios,
+  controls,
+  onUpdateFairScenario,
+}: {
+  fairScenarios: FairScenarioParameter[];
+  controls: GovernanceControl[];
+  onUpdateFairScenario: (controlId: string, updates: Partial<FairScenarioParameter>) => Promise<void>;
+}) {
+  const [selectedControlId, setSelectedControlId] = useState(fairScenarios[0]?.control_id ?? "");
+  const selected = fairScenarios.find((scenario) => scenario.control_id === selectedControlId) ?? fairScenarios[0];
+  const selectedControl = controls.find((control) => control.id === selected?.control_id);
+  const [form, setForm] = useState<Partial<FairScenarioParameter>>(selected ?? {});
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  useEffect(() => {
+    setForm(selected ?? {});
+    setSaveState("idle");
+  }, [selected.control_id]);
+
+  if (!selected) {
+    return (
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">FAIR database</p>
+            <h2>No Scenario Factors Found</h2>
+          </div>
+          <CircleDollarSign size={19} />
+        </div>
+      </section>
+    );
+  }
+
+  const setNumber = (field: keyof FairScenarioParameter, value: string) => setForm((current) => ({ ...current, [field]: Number(value) }));
+  const setText = (field: keyof FairScenarioParameter, value: string) => setForm((current) => ({ ...current, [field]: value }));
+  const save = async () => {
+    setSaveState("saving");
+    try {
+      await onUpdateFairScenario(selected.control_id, form);
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
+  };
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">FAIR database</p>
+          <h2>Calculation Factors</h2>
+        </div>
+        <CircleDollarSign size={19} />
+      </div>
+      <div className="fair-admin-layout">
+        <div className="fair-admin-list">
+          {fairScenarios.map((scenario) => {
+            const control = controls.find((item) => item.id === scenario.control_id);
+            return (
+              <button
+                key={scenario.control_id}
+                className={selected.control_id === scenario.control_id ? "saved-view selected" : "saved-view"}
+                onClick={() => setSelectedControlId(scenario.control_id)}
+              >
+                <strong>{scenario.scenario_name}</strong>
+                <span>{scenario.control_id} / {control?.implementation_status ?? "Unmapped"}</span>
+                <p>{formatCurrency(scenario.probable_loss_most_likely)} likely loss, {scenario.annual_event_frequency_most_likely}/year frequency, {scenario.control_strength_percentage}% strength</p>
+              </button>
+            );
+          })}
+        </div>
+        <div className="fair-editor">
+          <div className="summary-strip">
+            <Detail label="Control" value={selectedControl?.name ?? selected.control_id} />
+            <Detail label="Appetite" value={formatCurrency(Number(form.appetite_threshold ?? 0))} />
+            <Detail label="Data quality" value={String(form.data_quality ?? "Medium")} />
+          </div>
+          <div className="edit-grid">
+            <label className="field-label wide-field">
+              Scenario
+              <input value={String(form.scenario_name ?? "")} onChange={(event) => setText("scenario_name", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Loss min
+              <input type="number" min="0" step="10000" value={Number(form.probable_loss_min ?? 0)} onChange={(event) => setNumber("probable_loss_min", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Loss most likely
+              <input type="number" min="0" step="10000" value={Number(form.probable_loss_most_likely ?? 0)} onChange={(event) => setNumber("probable_loss_most_likely", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Loss max
+              <input type="number" min="0" step="10000" value={Number(form.probable_loss_max ?? 0)} onChange={(event) => setNumber("probable_loss_max", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Frequency min
+              <input type="number" min="0" step="0.01" value={Number(form.annual_event_frequency_min ?? 0)} onChange={(event) => setNumber("annual_event_frequency_min", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Frequency likely
+              <input type="number" min="0" step="0.01" value={Number(form.annual_event_frequency_most_likely ?? 0)} onChange={(event) => setNumber("annual_event_frequency_most_likely", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Frequency max
+              <input type="number" min="0" step="0.01" value={Number(form.annual_event_frequency_max ?? 0)} onChange={(event) => setNumber("annual_event_frequency_max", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Vulnerability %
+              <input type="number" min="0" max="100" value={Number(form.vulnerability_percentage ?? 0)} onChange={(event) => setNumber("vulnerability_percentage", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Control strength %
+              <input type="number" min="0" max="100" value={Number(form.control_strength_percentage ?? 0)} onChange={(event) => setNumber("control_strength_percentage", event.target.value)} />
+            </label>
+            <label className="field-label">
+              LM reduction %
+              <input type="number" min="0" max="100" value={Number(form.loss_magnitude_reduction_percentage ?? 0)} onChange={(event) => setNumber("loss_magnitude_reduction_percentage", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Appetite threshold
+              <input type="number" min="0" step="10000" value={Number(form.appetite_threshold ?? 0)} onChange={(event) => setNumber("appetite_threshold", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Confidence %
+              <input type="number" min="0" max="100" value={Number(form.confidence_percentage ?? 0)} onChange={(event) => setNumber("confidence_percentage", event.target.value)} />
+            </label>
+            <label className="field-label">
+              Data quality
+              <select value={String(form.data_quality ?? "Medium")} onChange={(event) => setText("data_quality", event.target.value)}>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </label>
+            <label className="field-label wide-field">
+              Source notes
+              <textarea rows={4} value={String(form.source_notes ?? "")} onChange={(event) => setText("source_notes", event.target.value)} />
+            </label>
+          </div>
+          <div className="action-row">
+            <button className="primary-button" onClick={save} disabled={saveState === "saving"}>
+              <Save size={17} /> {saveState === "saving" ? "Saving" : "Save FAIR factors"}
+            </button>
+            <span className={`save-state ${saveState}`}>{saveState === "saved" ? "Saved to database" : saveState === "error" ? "Start the local API to save FAIR factors" : "Used by the risk calculator"}</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

@@ -188,3 +188,86 @@ CREATE TABLE IF NOT EXISTS hardening_guides (
   implementation_state TEXT NOT NULL CHECK (implementation_state IN ('Backlog', 'In Progress', 'Ready', 'Blocked')),
   first_party_control TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS fair_scenario_parameters (
+  control_id TEXT PRIMARY KEY REFERENCES controls(id) ON DELETE CASCADE,
+  scenario_name TEXT NOT NULL,
+  probable_loss_min INTEGER NOT NULL CHECK (probable_loss_min >= 0),
+  probable_loss_most_likely INTEGER NOT NULL CHECK (probable_loss_most_likely >= probable_loss_min),
+  probable_loss_max INTEGER NOT NULL CHECK (probable_loss_max >= probable_loss_most_likely),
+  annual_event_frequency_min REAL NOT NULL CHECK (annual_event_frequency_min >= 0),
+  annual_event_frequency_most_likely REAL NOT NULL CHECK (annual_event_frequency_most_likely >= annual_event_frequency_min),
+  annual_event_frequency_max REAL NOT NULL CHECK (annual_event_frequency_max >= annual_event_frequency_most_likely),
+  vulnerability_percentage INTEGER NOT NULL CHECK (vulnerability_percentage BETWEEN 0 AND 100),
+  control_strength_percentage INTEGER NOT NULL CHECK (control_strength_percentage BETWEEN 0 AND 100),
+  loss_magnitude_reduction_percentage INTEGER NOT NULL CHECK (loss_magnitude_reduction_percentage BETWEEN 0 AND 100),
+  appetite_threshold INTEGER NOT NULL CHECK (appetite_threshold >= 0),
+  confidence_percentage INTEGER NOT NULL CHECK (confidence_percentage BETWEEN 0 AND 100),
+  data_quality TEXT NOT NULL CHECK (data_quality IN ('High', 'Medium', 'Low')),
+  source_notes TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fair_scenario_versions (
+  version_id TEXT PRIMARY KEY,
+  control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+  version_number INTEGER NOT NULL CHECK (version_number >= 1),
+  scenario_name TEXT NOT NULL,
+  probable_loss_min INTEGER NOT NULL CHECK (probable_loss_min >= 0),
+  probable_loss_most_likely INTEGER NOT NULL CHECK (probable_loss_most_likely >= probable_loss_min),
+  probable_loss_max INTEGER NOT NULL CHECK (probable_loss_max >= probable_loss_most_likely),
+  annual_event_frequency_min REAL NOT NULL CHECK (annual_event_frequency_min >= 0),
+  annual_event_frequency_most_likely REAL NOT NULL CHECK (annual_event_frequency_most_likely >= annual_event_frequency_min),
+  annual_event_frequency_max REAL NOT NULL CHECK (annual_event_frequency_max >= annual_event_frequency_most_likely),
+  vulnerability_percentage INTEGER NOT NULL CHECK (vulnerability_percentage BETWEEN 0 AND 100),
+  control_strength_percentage INTEGER NOT NULL CHECK (control_strength_percentage BETWEEN 0 AND 100),
+  loss_magnitude_reduction_percentage INTEGER NOT NULL CHECK (loss_magnitude_reduction_percentage BETWEEN 0 AND 100),
+  appetite_threshold INTEGER NOT NULL CHECK (appetite_threshold >= 0),
+  confidence_percentage INTEGER NOT NULL CHECK (confidence_percentage BETWEEN 0 AND 100),
+  data_quality TEXT NOT NULL CHECK (data_quality IN ('High', 'Medium', 'Low')),
+  source_notes TEXT NOT NULL,
+  changed_by TEXT NOT NULL,
+  change_reason TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (control_id, version_number)
+);
+
+CREATE TABLE IF NOT EXISTS fair_simulation_runs (
+  run_id TEXT PRIMARY KEY,
+  control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+  assumption_version_id TEXT REFERENCES fair_scenario_versions(version_id) ON DELETE SET NULL,
+  tenant_id TEXT NOT NULL,
+  run_label TEXT NOT NULL,
+  base_loss INTEGER NOT NULL CHECK (base_loss >= 0),
+  control_strength_percentage INTEGER NOT NULL CHECK (control_strength_percentage BETWEEN 0 AND 100),
+  annual_event_frequency REAL NOT NULL CHECK (annual_event_frequency >= 0),
+  loss_magnitude_reduction_percentage INTEGER NOT NULL CHECK (loss_magnitude_reduction_percentage BETWEEN 0 AND 100),
+  volatility REAL NOT NULL CHECK (volatility >= 0),
+  trial_count INTEGER NOT NULL CHECK (trial_count > 0),
+  p10 INTEGER NOT NULL CHECK (p10 >= 0),
+  p50 INTEGER NOT NULL CHECK (p50 >= 0),
+  p90 INTEGER NOT NULL CHECK (p90 >= 0),
+  expected_loss INTEGER NOT NULL CHECK (expected_loss >= 0),
+  appetite_threshold INTEGER NOT NULL CHECK (appetite_threshold >= 0),
+  appetite_breach_probability REAL NOT NULL CHECK (appetite_breach_probability BETWEEN 0 AND 100),
+  sensitivity_driver TEXT NOT NULL,
+  approval_state TEXT NOT NULL CHECK (approval_state IN ('Draft', 'Pending Approval', 'Approved', 'Rejected')),
+  requested_by TEXT NOT NULL,
+  approved_by TEXT,
+  decision_reason TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  decided_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS mutation_audit_log (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  actor TEXT NOT NULL,
+  auth_mode TEXT NOT NULL,
+  action TEXT NOT NULL,
+  target_type TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  outcome TEXT NOT NULL CHECK (outcome IN ('Allowed', 'Blocked')),
+  reason TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

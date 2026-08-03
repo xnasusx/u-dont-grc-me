@@ -1,11 +1,15 @@
 node_modules/
 dist/
 .lambda-package/
-data/
+# Ignore local state in data/ (grc.db) but keep nth-party scan inputs/outputs,
+# which are meant to be committed and ingested by `npm run sync:nthparty`.
+data/*
+!data/nth-party/
 .playwright-cli/
 output/
 test-results/
 *.tsbuildinfo
+desktop.ini
 vite.config.js
 vite.config.d.ts
 .env

@@ -58,7 +58,63 @@ GitHub Pages builds set `GITHUB_PAGES=true` and `VITE_API_BASE_URL` so Vite emit
 - Governance: API-backed control inventory, module tabs, control detail, framework mapping matrix, evidence health, blueprint library, policy traceability, asset scope, graph data model rules, and control-adjacent graph view.
 - Compliance: audit readiness, audit package assembly, AI approval queue, evidence review simulator, immutable-reference metadata, and `PROVED_BY` graph edges.
 - Risk: risk register, control-linked FAIR scenarios, 10,000-trial Monte Carlo calculator, histogram, five-number summary, expected value, loss exceedance view, evidence nutrition labels, calibration anchors, data-vetting checklist, SME elicitation, and human approval controls.
-- Admin: integrations, knowledge system, third-party risk, remediation playbooks, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
+- Admin: integrations, knowledge system, third-party risk, nth-party discovery, remediation playbooks, SaaS hardening library, RBAC/trust controls, agent operations, service accounts, allow-lists, deny-lists, and graph mutation audit events.
+
+## Upstream open source content
+
+Two MIT-licensed GRC Engineering projects feed the Admin views. Both are synced by
+script into generated modules that are committed, so the hosted build needs no network
+access at runtime. See `THIRD-PARTY-NOTICES.md` for attribution.
+
+### SaaS Hardening Library (how-to-harden)
+
+```powershell
+npm run sync:hardening
+```
+
+Pulls [how-to-harden](https://github.com/grcengineering/how-to-harden) at a pinned commit
+and generates `src/hardeningData.ts` (121 platforms, 1,334 controls). Two upstream tiers
+are joined and labelled distinctly in the UI:
+
+- **Control packs** (`packs/<vendor>/controls/*.yaml`) - full definitions with SOC 2 /
+  NIST 800-53 / ISO 27001 / PCI DSS citations, machine-readable audit checks, and
+  API/Terraform remediation. Upstream currently ships these for GitHub and Okta only.
+- **Guide sections** (`docs/_guides/*.md`) - heading, profile level, and framework
+  citations for the remaining platforms.
+
+Artifact availability per control (terraform / api / cli / siem / db / sdk / config) is
+derived from the upstream pack tree, so a control with a Terraform pack can be treated as
+`Fully Automated` rather than `Manual`. Pack bodies are not vendored.
+
+The generated module is ~1.7MB, so it is dynamically imported and code-split out of the
+initial bundle; it loads only when the Admin view renders.
+
+Bump `REF` in `scripts/sync-hardening-packs.mjs` (or set `HOW_TO_HARDEN_REF`) to track a
+newer upstream commit.
+
+### Nth-Party Discovery (nthpartyfinder)
+
+```powershell
+npm run sync:nthparty
+```
+
+Ingests [nthpartyfinder](https://github.com/grcengineering/nthpartyfinder) scan output into
+`src/nthPartyData.ts`, surfacing 3rd/4th/Nth-party vendor relationships discovered from
+public DNS, certificate transparency, trust-center subprocessor pages, and web traffic.
+
+List authorized domains in `data/nth-party/targets.json`:
+
+```json
+{ "targets": [{ "domain": "example.com", "depth": 1, "timeoutSeconds": 1800 }] }
+```
+
+If the `nthpartyfinder` binary is on PATH (`brew install nthpartyfinder`,
+`cargo install nthpartyfinder`, or the Docker image) the script scans each target and
+writes `data/nth-party/<domain>.scan.json`. Otherwise it ingests whatever `*.scan.json`
+files are already there, so scans run elsewhere can simply be committed. The panel shows
+an empty state until a scan lands.
+
+Only scan domains you are authorized to assess.
 
 ## Implementation Plan
 
