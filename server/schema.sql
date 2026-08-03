@@ -271,3 +271,29 @@ CREATE TABLE IF NOT EXISTS mutation_audit_log (
   reason TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Secure Controls Framework reference catalog, ingested from GRCEngClub/scf-api
+-- by `npm run sync:scf`. Read-only reference data: SCF titles and descriptions
+-- are stored verbatim under CC BY-ND and are never edited through the app.
+CREATE TABLE IF NOT EXISTS scf_controls (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  family_code TEXT NOT NULL,
+  family_name TEXT NOT NULL,
+  weight INTEGER NOT NULL DEFAULT 0,
+  cadence TEXT NOT NULL DEFAULT '',
+  nist_csf_function TEXT NOT NULL DEFAULT ''
+);
+
+-- One row per (framework citation -> SCF control) edge asserted by an SCF crosswalk.
+CREATE TABLE IF NOT EXISTS scf_framework_map (
+  framework_id TEXT NOT NULL REFERENCES frameworks(id) ON DELETE CASCADE,
+  citation TEXT NOT NULL,
+  scf_control_id TEXT NOT NULL REFERENCES scf_controls(id) ON DELETE CASCADE,
+  crosswalk_id TEXT NOT NULL,
+  PRIMARY KEY (framework_id, citation, scf_control_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_scf_framework_map_citation
+  ON scf_framework_map (framework_id, citation);

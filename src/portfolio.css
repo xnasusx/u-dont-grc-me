@@ -470,7 +470,59 @@ ul li + li {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 32px;
+  margin-bottom: 12px;
+}
+
+/* Raise the asterisk without letting <sup> stretch the button's line box */
+.hero-asterisk {
+  font-size: 0.85em;
+  line-height: 0;
+  vertical-align: super;
+  margin-left: 1px;
+}
+
+/* Secondary contact row — same links as the GitHub profile header, sized down
+   so they read as a footer to the primary actions rather than competing. */
+.hero-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.hero-contact-link:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: rgba(58, 51, 54, 0.04);
+}
+
+.hero-footnote {
+  margin: 14px 0 32px;
+  color: var(--ink-2);
+  font-size: 0.82rem;
+}
+
+.hero-footnote a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hero-footnote a:hover {
+  color: var(--ink);
 }
 
 .primary-link,
@@ -2838,8 +2890,13 @@ ul li + li {
   }
 
   .hero-actions .primary-link,
-  .hero-actions .secondary-link {
+  .hero-actions .secondary-link,
+  .hero-actions .accent-link {
     width: 100%;
+    justify-content: center;
+  }
+
+  .hero-contact-actions {
     justify-content: center;
   }
 

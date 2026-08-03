@@ -1,4 +1,4 @@
-import type { FairScenarioParameter, FairSimulationRun, GovernanceControl, GovernanceMapping, GovernanceSnapshot, GrcState } from "./types";
+import type { FairScenarioParameter, FairSimulationRun, GovernanceControl, GovernanceMapping, GovernanceSnapshot, GrcState, ScfCoverage } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "http://127.0.0.1:8787" : "");
 const API_WRITE_TOKEN = import.meta.env.VITE_GRC_WRITE_TOKEN ?? "";
@@ -16,6 +16,28 @@ export async function loadGovernanceSnapshot(signal?: AbortSignal) {
   const response = await fetch(`${API_BASE_URL}/api/governance`, { signal });
   if (!response.ok) throw new Error(`Governance API returned ${response.status}`);
   return (await response.json()) as GovernanceSnapshot;
+}
+
+/**
+ * SCF coverage prefers the live API so local database edits show up immediately,
+ * and falls back to the static snapshot written by `npm run export:scf-coverage`.
+ * The hosted Lambda does not serve this route, so on GitHub Pages the fallback
+ * is the normal path rather than an error case.
+ */
+export async function loadScfCoverage(signal?: AbortSignal) {
+  if (API_BASE_URL) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/scf/coverage`, { signal });
+      if (response.ok) return (await response.json()) as ScfCoverage;
+    } catch (error) {
+      if (signal?.aborted) throw error;
+    }
+  }
+
+  const staticUrl = `${import.meta.env.BASE_URL}scf/coverage.json`;
+  const fallback = await fetch(staticUrl, { signal });
+  if (!fallback.ok) throw new Error(`SCF coverage snapshot returned ${fallback.status}`);
+  return (await fallback.json()) as ScfCoverage;
 }
 
 export async function saveGovernanceControl(id: string, updates: Partial<GovernanceControl>) {

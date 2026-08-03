@@ -15,7 +15,10 @@
     "dev:portfolio": "vite --config vite.portfolio.config.ts --host 127.0.0.1",
     "preview": "vite preview --host 127.0.0.1",
     "sync:hardening": "node scripts/sync-hardening-packs.mjs",
-    "sync:nthparty": "node scripts/sync-nth-party.mjs"
+    "sync:nthparty": "node scripts/sync-nth-party.mjs",
+    "sync:scf": "node scripts/sync-scf.mjs",
+    "export:oscal": "node scripts/export-oscal.js",
+    "export:scf-coverage": "node scripts/export-scf-coverage.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1098.0",

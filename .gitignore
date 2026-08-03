@@ -1,10 +1,11 @@
 node_modules/
 dist/
 .lambda-package/
-# Ignore local state in data/ (grc.db) but keep nth-party scan inputs/outputs,
-# which are meant to be committed and ingested by `npm run sync:nthparty`.
+# Ignore local state in data/ (grc.db) but keep the synced reference inputs,
+# which are meant to be committed and ingested by the sync scripts.
 data/*
 !data/nth-party/
+!data/scf/
 .playwright-cli/
 output/
 test-results/

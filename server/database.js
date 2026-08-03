@@ -358,10 +358,68 @@ function seedFairScenarioVersions(db) {
   }
 }
 
+/**
+ * Load the SCF reference catalog produced by `npm run sync:scf`.
+ *
+ * The catalog is optional: a clone that has not run the sync yet still boots,
+ * just without SCF coverage. Rows are replaced wholesale on every call so a
+ * re-synced catalog lands without a migration.
+ */
+export function seedScfCatalog(db, catalogPath = join(__dirname, "..", "data", "scf", "catalog.json")) {
+  let catalog;
+  try {
+    catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
+  } catch {
+    return { controls: 0, edges: 0 };
+  }
+
+  const controlRows = (catalog.controls ?? []).map((control) => [
+    control.id,
+    control.title ?? "",
+    control.description ?? "",
+    control.familyCode ?? "",
+    control.familyName ?? "",
+    Number(control.weight) || 0,
+    control.cadence ?? "",
+    control.nistCsfFunction ?? "",
+  ]);
+
+  const knownFrameworks = new Set(
+    all(db, "SELECT id FROM frameworks").map((row) => row.id),
+  );
+  const knownControls = new Set(controlRows.map((row) => row[0]));
+
+  const edgeRows = [];
+  for (const framework of catalog.frameworks ?? []) {
+    // Skip crosswalks for frameworks this workspace does not model; the foreign
+    // key would reject them anyway.
+    if (!knownFrameworks.has(framework.frameworkId)) continue;
+    for (const citation of framework.citations ?? []) {
+      for (const scfControlId of citation.scfControlIds ?? []) {
+        if (!knownControls.has(scfControlId)) continue;
+        edgeRows.push([
+          framework.frameworkId,
+          citation.citation,
+          scfControlId,
+          citation.crosswalkId ?? (framework.crosswalkIds ?? []).join(","),
+        ]);
+      }
+    }
+  }
+
+  db.exec("DELETE FROM scf_framework_map");
+  db.exec("DELETE FROM scf_controls");
+  insertMany(db, "INSERT INTO scf_controls VALUES (?, ?, ?, ?, ?, ?, ?, ?)", controlRows);
+  insertMany(db, "INSERT OR IGNORE INTO scf_framework_map VALUES (?, ?, ?, ?)", edgeRows);
+
+  return { controls: controlRows.length, edges: edgeRows.length };
+}
+
 export function seedDatabase(db) {
   const count = db.prepare("SELECT COUNT(*) AS count FROM controls").get().count;
   if (count > 0) {
     seedProgramWorkbench(db);
+    seedScfCatalog(db);
     return;
   }
 
@@ -377,6 +435,7 @@ export function seedDatabase(db) {
   insertMany(db, "INSERT INTO evidence_items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", evidenceItems);
   insertMany(db, "INSERT INTO control_relationships VALUES (?, ?, ?, ?, ?, ?, ?, ?)", relationships);
   seedProgramWorkbench(db);
+  seedScfCatalog(db);
 }
 
 function all(db, sql, params = []) {
@@ -462,6 +521,114 @@ export function getGovernanceSnapshot(db) {
     mutationAuditLog: getMutationAuditLog(db),
     programWorkbench: getProgramWorkbench(db),
   };
+}
+
+/**
+ * Compare our own control coverage against what SCF says a citation requires.
+ *
+ * Citation styles differ between our seed data and SCF's crosswalks, so each
+ * requirement is resolved in two passes:
+ *   1. exact match after dropping the ISO "A." Annex prefix (A.8.8 -> 8.8)
+ *   2. prefix match for regulations we cite more coarsely than SCF does
+ *      (164.312(a) -> 164.312(a)(1), 164.312(a)(2)(i), ...)
+ * A requirement that resolves exactly never falls through to the prefix pass,
+ * so 8.8 cannot silently absorb 8.8.1.
+ */
+export function getScfCoverage(db) {
+  const rows = all(db, `
+    WITH normalized AS (
+      SELECT
+        r.id AS requirement_id,
+        r.framework_id,
+        r.citation,
+        r.title AS requirement_title,
+        f.name AS framework_name,
+        CASE WHEN r.citation LIKE 'A.%' THEN SUBSTR(r.citation, 3) ELSE r.citation END AS lookup
+      FROM requirements r
+      JOIN frameworks f ON f.id = r.framework_id
+    ),
+    exact AS (
+      SELECT n.requirement_id, m.scf_control_id, 'exact' AS match_type
+      FROM normalized n
+      JOIN scf_framework_map m
+        ON m.framework_id = n.framework_id AND m.citation = n.lookup
+    ),
+    prefixed AS (
+      SELECT n.requirement_id, m.scf_control_id, 'prefix' AS match_type
+      FROM normalized n
+      JOIN scf_framework_map m
+        ON m.framework_id = n.framework_id AND m.citation LIKE n.lookup || '%'
+      WHERE n.requirement_id NOT IN (SELECT requirement_id FROM exact)
+    ),
+    resolved AS (
+      SELECT * FROM exact UNION ALL SELECT * FROM prefixed
+    )
+    SELECT
+      n.requirement_id,
+      n.framework_id,
+      n.framework_name,
+      n.citation,
+      n.requirement_title,
+      COALESCE(res.match_type, 'none') AS match_type,
+      res.scf_control_id,
+      s.title AS scf_title,
+      s.family_name AS scf_family_name,
+      s.weight AS scf_weight,
+      (
+        SELECT COUNT(*) FROM control_requirement_mappings crm
+        WHERE crm.requirement_id = n.requirement_id AND crm.state = 'Active'
+      ) AS active_mapping_count
+    FROM normalized n
+    LEFT JOIN resolved res ON res.requirement_id = n.requirement_id
+    LEFT JOIN scf_controls s ON s.id = res.scf_control_id
+    ORDER BY n.framework_name, n.citation, res.scf_control_id
+  `);
+
+  const byRequirement = new Map();
+  for (const row of rows) {
+    let entry = byRequirement.get(row.requirement_id);
+    if (!entry) {
+      entry = {
+        requirementId: row.requirement_id,
+        frameworkId: row.framework_id,
+        frameworkName: row.framework_name,
+        citation: row.citation,
+        requirementTitle: row.requirement_title,
+        matchType: row.match_type,
+        activeMappingCount: row.active_mapping_count,
+        scfControls: [],
+      };
+      byRequirement.set(row.requirement_id, entry);
+    }
+    if (row.scf_control_id) {
+      entry.scfControls.push({
+        id: row.scf_control_id,
+        title: row.scf_title,
+        familyName: row.scf_family_name,
+        weight: row.scf_weight,
+      });
+    }
+  }
+
+  const requirements = [...byRequirement.values()];
+  const catalog = db.prepare("SELECT COUNT(*) AS count FROM scf_controls").get();
+
+  return {
+    attribution:
+      "Secure Controls Framework (SCF) content licensed CC BY-ND by the Secure Controls Framework Council. Titles and descriptions are reproduced verbatim from GRCEngClub/scf-api.",
+    catalogControlCount: catalog.count,
+    requirements,
+    summary: {
+      requirements: requirements.length,
+      resolved: requirements.filter((entry) => entry.matchType !== "none").length,
+      unresolved: requirements.filter((entry) => entry.matchType === "none").length,
+      suggestedControls: requirements.reduce((sum, entry) => sum + entry.scfControls.length, 0),
+    },
+  };
+}
+
+export function getScfControl(db, id) {
+  return db.prepare("SELECT * FROM scf_controls WHERE id = ?").get(id) ?? null;
 }
 
 export function getProgramWorkbench(db) {

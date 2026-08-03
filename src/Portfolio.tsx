@@ -1097,16 +1097,59 @@ function MainPortfolio() {
           <div className="hero-actions">
             <a
               className="primary-link"
-              href={links.product}
+              href={links.github}
               target="_blank"
               rel="noopener noreferrer"
             >
-              View my work <ArrowUpRight size={18} />
+              <Github size={18} /> View my GitHub <ArrowUpRight size={18} />
             </a>
             <a className="accent-link" href={links.riskTools}>
               Explore GRC <ArrowUpRight size={18} />
             </a>
+            <a className="secondary-link" href={links.resumePdf}>
+              <FileText size={16} />
+              {/* Wrapped so the flex `gap` sits before the label, not before the asterisk */}
+              <span>
+                Download resume (PDF)
+                <sup className="hero-asterisk" aria-hidden="true">
+                  *
+                </sup>
+              </span>
+            </a>
           </div>
+          <div className="hero-contact-actions" aria-label="Contact links">
+            <a
+              className="hero-contact-link"
+              href={links.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Linkedin size={15} /> LinkedIn
+            </a>
+            <a
+              className="hero-contact-link"
+              href={links.medium}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <BookOpen size={15} /> Medium
+            </a>
+            <a className="hero-contact-link" href={links.mailto}>
+              <Mail size={15} /> Email
+            </a>
+            <a
+              className="hero-contact-link"
+              href={links.calendly}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ArrowUpRight size={15} /> Book a call
+            </a>
+          </div>
+          <p className="hero-footnote">
+            <span aria-hidden="true">*</span> Machine-readable resume files are{" "}
+            <a href="#contact">linked below</a> in JSON and Markdown.
+          </p>
           <ul className="hero-focus" aria-label="Focus areas">
             {focusAreas.map((area) => (
               <li className={area.tone} key={area.label}>

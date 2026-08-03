@@ -9,6 +9,8 @@ import {
   getControl,
   getFairSettings,
   getGovernanceSnapshot,
+  getScfControl,
+  getScfCoverage,
   initializeDatabase,
   seedDatabase,
   updateControl,
@@ -88,6 +90,16 @@ function route(request, response) {
   }
   if (request.method === "GET" && url.pathname === "/api/fair-settings") {
     return sendJson(response, 200, getFairSettings(db));
+  }
+  if (request.method === "GET" && url.pathname === "/api/scf/coverage") {
+    return sendJson(response, 200, getScfCoverage(db));
+  }
+  const scfControlMatch = url.pathname.match(/^\/api\/scf\/controls\/([^/]+)$/);
+  if (request.method === "GET" && scfControlMatch) {
+    const control = getScfControl(db, decodeURIComponent(scfControlMatch[1]));
+    return control
+      ? sendJson(response, 200, control)
+      : sendJson(response, 404, { error: "SCF control not found" });
   }
   const controlMatch = url.pathname.match(/^\/api\/controls\/([^/]+)$/);
   if (request.method === "GET" && controlMatch) {

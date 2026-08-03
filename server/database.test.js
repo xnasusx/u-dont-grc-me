@@ -12,6 +12,8 @@ import {
   getGovernanceSnapshot,
   getMutationAuditLog,
   getProgramWorkbench,
+  getScfControl,
+  getScfCoverage,
   initializeDatabase,
   seedDatabase,
   updateControl,
@@ -208,4 +210,62 @@ test("control writes create mutation audit records", () => {
   assert.equal(audit.outcome, "Allowed");
   assert.equal(audit.actor, "Unit Test");
   assert.equal(audit.auth_mode, "bearer-token");
+});
+
+test("SCF catalog seeds and crosswalks resolve to our requirements", () => {
+  const db = seededMemoryDb();
+  const coverage = getScfCoverage(db);
+
+  assert.ok(coverage.catalogControlCount > 0, "SCF catalog should be seeded");
+  assert.equal(coverage.summary.requirements, coverage.requirements.length);
+  assert.equal(
+    coverage.summary.resolved + coverage.summary.unresolved,
+    coverage.summary.requirements,
+  );
+  assert.match(coverage.attribution, /CC BY-ND/);
+
+  // Every resolved requirement must carry at least one SCF control, and every
+  // referenced control must exist in the catalog.
+  for (const entry of coverage.requirements) {
+    if (entry.matchType === "none") {
+      assert.equal(entry.scfControls.length, 0);
+      continue;
+    }
+    assert.ok(entry.scfControls.length > 0, `${entry.citation} resolved with no SCF controls`);
+    for (const control of entry.scfControls) {
+      assert.ok(getScfControl(db, control.id), `${control.id} missing from scf_controls`);
+    }
+  }
+});
+
+test("ISO Annex A citations match SCF exactly rather than by prefix", () => {
+  const db = seededMemoryDb();
+  const coverage = getScfCoverage(db);
+
+  // A.8.8 normalises to 8.8 and must resolve exactly, so it cannot absorb 8.8.x.
+  const annexA = coverage.requirements.find((entry) => entry.citation === "A.8.8");
+  assert.ok(annexA, "expected the seeded ISO 27001 A.8.8 requirement");
+  assert.equal(annexA.matchType, "exact");
+  assert.ok(annexA.scfControls.length > 0);
+});
+
+test("coarse HIPAA citations widen to SCF subsections by prefix", () => {
+  const db = seededMemoryDb();
+  const coverage = getScfCoverage(db);
+
+  // We cite 164.312(a); SCF cites 164.312(a)(1), (a)(2)(i), and so on.
+  const hipaa = coverage.requirements.find((entry) => entry.citation === "164.312(a)");
+  assert.ok(hipaa, "expected the seeded HIPAA 164.312(a) requirement");
+  assert.equal(hipaa.matchType, "prefix");
+  assert.ok(hipaa.scfControls.length > 0);
+});
+
+test("re-seeding replaces the SCF catalog instead of duplicating edges", () => {
+  const db = seededMemoryDb();
+  const before = getScfCoverage(db);
+  seedDatabase(db);
+  const after = getScfCoverage(db);
+
+  assert.equal(after.catalogControlCount, before.catalogControlCount);
+  assert.equal(after.summary.suggestedControls, before.summary.suggestedControls);
 });

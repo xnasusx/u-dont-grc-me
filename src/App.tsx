@@ -22,6 +22,7 @@ import {
   GitBranch,
   Landmark,
   LayoutDashboard,
+  Library,
   ListChecks,
   KeyRound,
   LockKeyhole,
@@ -48,7 +49,7 @@ import {
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { agentWorkflows } from "./data";
 import { nthPartyGraph } from "./nthPartyData";
-import { buildGovernanceFallback, createFairSimulationRun, decideFairSimulationRun, loadGovernanceSnapshot, saveFairScenario, saveGovernanceControl } from "./governanceApi";
+import { buildGovernanceFallback, createFairSimulationRun, decideFairSimulationRun, loadGovernanceSnapshot, loadScfCoverage, saveFairScenario, saveGovernanceControl } from "./governanceApi";
 import { useGrcStore } from "./store";
 import type {
   Approval,
@@ -71,12 +72,13 @@ import type {
   ProgramWorkbench,
   RbacGrant,
   RemediationItem,
+  ScfCoverage,
   Vendor,
 } from "./types";
 import { aggregateAle, formatCurrency, healthScore, seededMonteCarlo, statusClass } from "./utils";
 
 type View = "command" | "governance" | "compliance" | "risk" | "histogram" | "admin";
-type GovernanceTab = "inventory" | "program" | "mappings" | "evidence" | "policies" | "assets" | "graph";
+type GovernanceTab = "inventory" | "program" | "mappings" | "scf" | "evidence" | "policies" | "assets" | "graph";
 
 const views: { id: View; label: string; icon: typeof Activity }[] = [
   { id: "command", label: "Command Center", icon: LayoutDashboard },
@@ -630,6 +632,7 @@ function GovernanceTabs({ activeTab, setActiveTab }: { activeTab: GovernanceTab;
     { id: "inventory", label: "Control Inventory", icon: TableProperties },
     { id: "program", label: "Program Workbench", icon: ClipboardCheck },
     { id: "mappings", label: "Mappings", icon: GitBranch },
+    { id: "scf", label: "SCF Coverage", icon: Library },
     { id: "evidence", label: "Evidence Health", icon: Gauge },
     { id: "policies", label: "Policies", icon: FileText },
     { id: "assets", label: "Assets", icon: Boxes },
@@ -956,6 +959,155 @@ function ControlDrilldownModal({ control, close }: { control: GovernanceControl;
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * Compares our own mapping coverage against the Secure Controls Framework.
+ *
+ * The useful signal is the gap: SCF asserts N controls satisfy a citation, and
+ * we can see how many of ours actually claim it. A requirement with SCF
+ * suggestions and zero active mappings is unclaimed coverage.
+ *
+ * SCF titles are CC BY-ND and rendered verbatim - do not paraphrase them here.
+ */
+function ScfCoverageTab() {
+  const [coverage, setCoverage] = useState<ScfCoverage | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadScfCoverage(controller.signal)
+      .then((result) => setCoverage(result))
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setLoadError(error instanceof Error ? error.message : String(error));
+      });
+    return () => controller.abort();
+  }, []);
+
+  if (loadError) {
+    return (
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Secure Controls Framework</p>
+            <h2>SCF Coverage</h2>
+          </div>
+          <Library size={19} />
+        </div>
+        <p className="description">Could not load SCF coverage: {loadError}</p>
+      </section>
+    );
+  }
+
+  if (!coverage) {
+    return (
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Secure Controls Framework</p>
+            <h2>SCF Coverage</h2>
+          </div>
+          <Library size={19} />
+        </div>
+        <p className="description">
+          Loading the SCF catalog. Run <code>npm run sync:scf</code> and start the local API if this
+          does not resolve.
+        </p>
+      </section>
+    );
+  }
+
+  const unclaimed = coverage.requirements.filter(
+    (entry) => entry.scfControls.length > 0 && entry.activeMappingCount === 0,
+  );
+
+  return (
+    <section className="panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Secure Controls Framework</p>
+          <h2>SCF Coverage</h2>
+        </div>
+        <Library size={19} />
+      </div>
+      <div className="framework-chip-row">
+        <span>Catalog <strong>{coverage.catalogControlCount}</strong></span>
+        <span>Requirements resolved <strong>{coverage.summary.resolved}/{coverage.summary.requirements}</strong></span>
+        <span>Suggested controls <strong>{coverage.summary.suggestedControls}</strong></span>
+        <span>Unclaimed <strong>{unclaimed.length}</strong></span>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Framework</th>
+              <th>Citation</th>
+              <th>Match</th>
+              <th>SCF controls</th>
+              <th>Our active mappings</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coverage.requirements.map((entry) => {
+              const isOpen = expanded === entry.requirementId;
+              return (
+                <Fragment key={entry.requirementId}>
+                  <tr>
+                    <td><strong>{entry.frameworkName}</strong></td>
+                    <td>
+                      {entry.citation}
+                      <span>{entry.requirementTitle}</span>
+                    </td>
+                    <td>{entry.matchType}</td>
+                    <td>
+                      {entry.scfControls.length > 0 ? (
+                        <button
+                          type="button"
+                          className="link-button"
+                          aria-expanded={isOpen}
+                          onClick={() => setExpanded(isOpen ? null : entry.requirementId)}
+                        >
+                          {entry.scfControls.length} {isOpen ? "hide" : "show"}
+                        </button>
+                      ) : (
+                        "0"
+                      )}
+                    </td>
+                    <td>{entry.activeMappingCount}</td>
+                    <td>
+                      {entry.scfControls.length > 0 && entry.activeMappingCount === 0
+                        ? "Unclaimed coverage"
+                        : entry.matchType === "none"
+                          ? "No SCF crosswalk"
+                          : "Covered"}
+                    </td>
+                  </tr>
+                  {isOpen && (
+                    <tr>
+                      <td colSpan={6}>
+                        <ul className="scf-control-list">
+                          {entry.scfControls.map((control) => (
+                            <li key={control.id}>
+                              <strong>{control.id}</strong> {control.title}
+                              <span>{control.familyName} · weight {control.weight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="description">{coverage.attribution}</p>
+    </section>
   );
 }
 
@@ -1637,6 +1789,7 @@ function GovernanceView({
           <DataModelRules />
         </section>
       )}
+      {activeTab === "scf" && <ScfCoverageTab />}
       {activeTab === "evidence" && <EvidenceHealthTab control={selectedInventoryControl} />}
       {activeTab === "policies" && (
         <section className="governance-tab-layout">

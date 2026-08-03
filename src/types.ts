@@ -508,6 +508,45 @@ export interface AuditEvent {
 }
 
 /**
+ * Secure Controls Framework reference data, ingested from GRCEngClub/scf-api by
+ * `npm run sync:scf` and served from `GET /api/scf/coverage`.
+ *
+ * SCF content is CC BY-ND: `title` is upstream text reproduced verbatim and must
+ * not be rewritten or paraphrased in the UI.
+ */
+export interface ScfControlRef {
+  id: string;
+  title: string;
+  familyName: string;
+  weight: number;
+}
+
+export interface ScfRequirementCoverage {
+  requirementId: string;
+  frameworkId: string;
+  frameworkName: string;
+  citation: string;
+  requirementTitle: string;
+  /** How the citation resolved against SCF: exact, prefix-widened, or not at all. */
+  matchType: "exact" | "prefix" | "none";
+  /** Active mappings from our own controls to this requirement. */
+  activeMappingCount: number;
+  scfControls: ScfControlRef[];
+}
+
+export interface ScfCoverage {
+  attribution: string;
+  catalogControlCount: number;
+  requirements: ScfRequirementCoverage[];
+  summary: {
+    requirements: number;
+    resolved: number;
+    unresolved: number;
+    suggestedControls: number;
+  };
+}
+
+/**
  * Hardening library sourced from grcengineering/how-to-harden (MIT).
  * Generated into src/hardeningData.ts by `npm run sync:hardening`.
  */

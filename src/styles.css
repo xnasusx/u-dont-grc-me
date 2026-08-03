@@ -491,6 +491,47 @@ td span {
   margin-left: 5px;
 }
 
+/* SCF Coverage tab: expandable list of the SCF controls behind one citation. */
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--rose);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-button:hover {
+  opacity: 0.75;
+}
+
+.scf-control-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.scf-control-list li {
+  border-left: 2px solid var(--line);
+  padding-left: 10px;
+  font-size: 0.86rem;
+}
+
+.scf-control-list li strong {
+  color: var(--rose);
+  margin-right: 6px;
+}
+
+.scf-control-list li span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
 .blueprint-row {
   border: 1px solid var(--line);
   border-radius: 8px;

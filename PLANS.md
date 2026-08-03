@@ -1,8 +1,8 @@
 # u dont GRC me Plan
 
-Last updated: 2026-07-30 10:02 ET
+Last updated: 2026-08-03 ET
 PMO status: GREEN
-Current phase: 0.9 persisted FAIR simulation runs and approval queue
+Current phase: 0.10 SCF crosswalk coverage and machine-readable artifacts
 Owner: Codex
 
 ## Objective
@@ -99,6 +99,11 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | Security | Move exposed tokens out of settings and rotate credentials | DONE | Susan/Codex | `.env` ignored, `.env.example`, GitHub OAuth reauth, AWS key rotated/deleted | PMO returned to green after cleanup |
 | Backend | Persist FAIR simulation run results | DONE | Codex | `fair_simulation_runs`, `createFairSimulationRun`, `decideFairSimulationRun`, tests | Saves backend-computed P10/P50/P90/expected loss, appetite breach probability, sensitivity driver, assumption version link, and approval state |
 | Product UI | Add board risk run approval queue | DONE | Codex | `src/App.tsx`, browser smoke `output/v0.9-simulation-run-smoke.png` | Risk lab can save board runs; Admin can approve or reject pending runs |
+| Backend | Ingest SCF catalog and crosswalks | DONE | Claude | `scripts/sync-scf.mjs`, `data/scf/catalog.json`, `scf_controls`, `scf_framework_map` | 732 controls and 1,562 citations across 8 crosswalks; CC BY-ND text stored verbatim |
+| Backend | Add SCF coverage comparison API | DONE | Claude | `getScfCoverage`, `GET /api/scf/coverage`, `GET /api/scf/controls/:id`, 4 new tests | Two-pass citation resolution: exact after dropping ISO `A.` prefix, then prefix widening |
+| Product UI | Add Governance SCF Coverage tab | DONE | Claude | `src/App.tsx`, `src/types.ts`, `src/styles.css`, browser smoke on local and Pages builds | 12/12 requirements resolve, 125 suggested controls, 3 unclaimed; attribution rendered in panel |
+| Platform | Publish machine-readable artifacts | DONE | Claude | `scripts/export-oscal.js`, `scripts/export-scf-coverage.js`, `public/llms.txt` | OSCAL 1.1.2 component-definition with deterministic v5 UUIDs; static SCF fallback for hosted build |
+| Platform | Bump deprecated GitHub Actions | DONE | Claude | `.github/workflows/ci.yml`, `.github/workflows/pages.yml` | checkout/setup-node v7, configure-pages v6, upload-pages-artifact/deploy-pages v5 |
 
 ## Dependencies And Blockers
 
@@ -180,6 +185,11 @@ Transform the existing control-centric GRC prototype into a branded, research-in
 | 2026-07-30 | 0.9.0 TypeScript and production build | PASS | `npm run build` produced bundle `index-Ck0EN6n2.js` |
 | 2026-07-30 | 0.9.0 simulation run browser smoke | PASS | Playwright/Chrome verified Risk save board run, Admin pending queue, approval action, and screenshot `output/v0.9-simulation-run-smoke.png` |
 | 2026-07-30 | 0.9.0 repo secret-pattern scan | PASS | `rg` scan returned no live-format GitHub, AWS key, private key, or database URL matches outside ignored local/build/generated paths |
+| 2026-08-03 | 0.10.0 database tests | PASS | `npm test` returned 19 passing tests, including SCF catalog seeding, exact/prefix citation resolution, and idempotent re-seed |
+| 2026-08-03 | 0.10.0 TypeScript and production build | PASS | `npm run build` clean; artifacts `dist/llms.txt`, `dist/oscal/component-definition.json`, `dist/scf/coverage.json` present |
+| 2026-08-03 | 0.10.0 OSCAL determinism | PASS | Two consecutive `npm run export:oscal` runs produced identical file hashes; 12 components, 16 implemented-requirements |
+| 2026-08-03 | 0.10.0 SCF browser smoke (local API) | PASS | Chrome verified Governance > SCF Coverage against `dev:full`: catalog 732, 12/12 resolved, 125 suggested, expandable SCF control lists, no console errors |
+| 2026-08-03 | 0.10.0 SCF browser smoke (Pages build) | PASS | Chrome verified the same panel against a `GITHUB_PAGES=true` preview with the API unreachable, confirming the static `scf/coverage.json` fallback path |
 
 ## Deliverable Verification
 
