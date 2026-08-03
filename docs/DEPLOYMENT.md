@@ -168,7 +168,7 @@ One-time setup, all in your own account:
    ```
 
    The trust policy pins `sub` to
-   `repo:xnasusx@14799095/u-dont-grc-me@1316830039:ref:refs/heads/main`, so no other
+   `repo:xnasusx@14799095/u-dont-grc-me@1322003211:ref:refs/heads/main`, so no other
    branch, fork, or pull request can assume it. The permission policy grants only
    `GetItem` and `PutItem` on the one table.
 
