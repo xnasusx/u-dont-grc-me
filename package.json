@@ -18,7 +18,8 @@
     "sync:nthparty": "node scripts/sync-nth-party.mjs",
     "sync:scf": "node scripts/sync-scf.mjs",
     "export:oscal": "node scripts/export-oscal.js",
-    "export:scf-coverage": "node scripts/export-scf-coverage.js"
+    "export:scf-coverage": "node scripts/export-scf-coverage.js",
+    "push:snapshot": "node scripts/push-governance-snapshot.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1098.0",

@@ -117,6 +117,64 @@ The hosted API is intentionally small and low-cost:
 
 The resource policy requires both `lambda:InvokeFunctionUrl` and `lambda:InvokeFunction` for public Function URL access, matching AWS's post-October-2025 Function URL authorization behavior.
 
+### Snapshot drift
+
+`server/lambda.js` seeds DynamoDB with
+`ConditionExpression: attribute_not_exists(pk) AND attribute_not_exists(sk)`, so it
+writes the bundled snapshot **only when the table has no item**. Once the row exists it
+is returned unchanged forever, and redeploying the function with a newer bundle does not
+update it.
+
+That is how the hosted snapshot fell behind the schema far enough to blank the deployed
+site: it predated the FAIR persistence work and had no `fairScenarios`, which
+`src/App.tsx` reads directly. The client now normalizes missing collections
+(`normalizeSnapshot` in `src/governanceApi.ts`), so drift degrades to empty panels
+rather than a crash, but the data still has to be pushed deliberately.
+
+`npm run push:snapshot` overwrites the item unconditionally. Add `-- --dry-run` to
+compare local and remote without writing.
+
+### Automated snapshot refresh (GitHub OIDC)
+
+`.github/workflows/refresh-snapshot.yml` regenerates and pushes the snapshot whenever
+anything that shapes it changes on `main`. It uses short-lived OIDC role assumption, so
+there are no AWS keys in the repository or in Actions secrets. The job also fails if
+`server/governance-seed-snapshot.json` is stale in git, since the Lambda bundles that
+file.
+
+One-time setup, all in your own account:
+
+1. Register the GitHub OIDC provider, if the account does not already have one:
+
+   ```bash
+   aws iam create-open-id-connect-provider \
+     --url https://token.actions.githubusercontent.com \
+     --client-id-list sts.amazonaws.com
+   ```
+
+2. Create the role, substituting your account ID into both policy files:
+
+   ```bash
+   aws iam create-role --role-name grc-snapshot-push \
+     --assume-role-policy-document file://infra/snapshot-push-trust-policy.json
+
+   aws iam put-role-policy --role-name grc-snapshot-push \
+     --policy-name grc-snapshot-push --policy-document file://infra/snapshot-push-policy.json
+   ```
+
+   The trust policy pins `sub` to `repo:xnasusx/u-dont-grc-me:ref:refs/heads/main`, so no
+   other branch, fork, or pull request can assume it. The permission policy grants only
+   `GetItem` and `PutItem` on the one table.
+
+3. Publish the role ARN as a **repository variable** named `AWS_SNAPSHOT_ROLE_ARN`
+   (Settings > Secrets and variables > Actions > Variables). It is a variable rather than
+   a secret because a role ARN is not sensitive on its own and is useless without a
+   matching trust policy. The workflow skips itself until the variable exists.
+
+4. Verify with a no-write run: Actions > Refresh hosted governance snapshot > Run
+   workflow, with **Compare local and remote without writing** ticked. It prints both
+   collection counts so you can confirm the drift before correcting it.
+
 ## GitHub Pages Frontend
 
 GitHub Pages is configured as the primary static frontend through `.github/workflows/pages.yml`.

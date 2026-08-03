@@ -1,0 +1,84 @@
+name: Refresh hosted governance snapshot
+
+# Keeps the DynamoDB snapshot in step with the schema.
+#
+# server/lambda.js only seeds the table when no item exists, so once the row is
+# there it is returned forever and never catches up on its own. Drift is what
+# blanked the deployed site, so this regenerates the snapshot from the seeded
+# database and overwrites the row whenever anything that shapes it changes.
+#
+# Authentication is short-lived OIDC role assumption. There are no AWS keys in
+# this repository or in Actions secrets.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "server/database.js"
+      - "server/schema.sql"
+      - "server/governance-seed-snapshot.json"
+      - "scripts/export-governance-snapshot.js"
+      - "scripts/push-governance-snapshot.mjs"
+      - ".github/workflows/refresh-snapshot.yml"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Compare local and remote without writing"
+        type: boolean
+        default: false
+
+# The role is assumed with the GitHub OIDC token, which needs id-token: write.
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: refresh-snapshot
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # Set AWS_SNAPSHOT_ROLE_ARN as a repository variable (not a secret - a role
+    # ARN is not sensitive, and it is useless without the trust policy match).
+    # The job is skipped until it exists, so the workflow can land before the
+    # IAM role does.
+    if: vars.AWS_SNAPSHOT_ROLE_ARN != ''
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate snapshot from the seeded database
+        run: npm run export:snapshot
+
+      - name: Fail if the committed snapshot is stale
+        # The Lambda bundles this file, so a drifted copy in git would ship in
+        # the next package:lambda even after DynamoDB is corrected.
+        run: |
+          if ! git diff --quiet -- server/governance-seed-snapshot.json; then
+            echo "::error::server/governance-seed-snapshot.json is out of date."
+            echo "Run 'npm run export:snapshot' and commit the result."
+            git diff --stat -- server/governance-seed-snapshot.json
+            exit 1
+          fi
+
+      - name: Assume the snapshot-push role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_SNAPSHOT_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: refresh-governance-snapshot
+
+      - name: Push snapshot to DynamoDB
+        run: npm run push:snapshot -- ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          GOVERNANCE_TABLE_NAME: u-dont-grc-me-governance
