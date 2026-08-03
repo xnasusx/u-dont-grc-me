@@ -1,6 +1,15 @@
-import type { GovernanceMapping, GovernanceSnapshot, GrcState } from "./types";
+import type { FairScenarioParameter, FairSimulationRun, GovernanceControl, GovernanceMapping, GovernanceSnapshot, GrcState } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "http://127.0.0.1:8787" : "");
+const API_WRITE_TOKEN = import.meta.env.VITE_GRC_WRITE_TOKEN ?? "";
+
+function writeHeaders() {
+  return {
+    "content-type": "application/json",
+    "x-grc-actor": "Browser Admin",
+    ...(API_WRITE_TOKEN ? { authorization: `Bearer ${API_WRITE_TOKEN}` } : {}),
+  };
+}
 
 export async function loadGovernanceSnapshot(signal?: AbortSignal) {
   if (!API_BASE_URL) return null;
@@ -9,12 +18,87 @@ export async function loadGovernanceSnapshot(signal?: AbortSignal) {
   return (await response.json()) as GovernanceSnapshot;
 }
 
+export async function saveGovernanceControl(id: string, updates: Partial<GovernanceControl>) {
+  if (!API_BASE_URL) throw new Error("Governance API is not configured for writes.");
+  const response = await fetch(`${API_BASE_URL}/api/controls/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: writeHeaders(),
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ error: `Control update failed with ${response.status}` }));
+    throw new Error(payload.error ?? `Control update failed with ${response.status}`);
+  }
+  return (await response.json()) as GovernanceControl;
+}
+
+export async function saveFairScenario(controlId: string, updates: Partial<FairScenarioParameter>) {
+  if (!API_BASE_URL) throw new Error("Governance API is not configured for FAIR writes.");
+  const response = await fetch(`${API_BASE_URL}/api/fair-settings/${encodeURIComponent(controlId)}`, {
+    method: "PUT",
+    headers: writeHeaders(),
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ error: `FAIR update failed with ${response.status}` }));
+    throw new Error(payload.error ?? `FAIR update failed with ${response.status}`);
+  }
+  return (await response.json()) as FairScenarioParameter;
+}
+
+export async function createFairSimulationRun(controlId: string, payload: Partial<FairSimulationRun>) {
+  if (!API_BASE_URL) throw new Error("Governance API is not configured for FAIR simulation writes.");
+  const response = await fetch(`${API_BASE_URL}/api/fair-simulation-runs/${encodeURIComponent(controlId)}`, {
+    method: "POST",
+    headers: writeHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => ({ error: `FAIR simulation save failed with ${response.status}` }));
+    throw new Error(errorPayload.error ?? `FAIR simulation save failed with ${response.status}`);
+  }
+  return (await response.json()) as FairSimulationRun;
+}
+
+export async function decideFairSimulationRun(runId: string, decision: "Approved" | "Rejected", reason: string) {
+  if (!API_BASE_URL) throw new Error("Governance API is not configured for FAIR simulation decisions.");
+  const response = await fetch(`${API_BASE_URL}/api/fair-simulation-runs/${encodeURIComponent(runId)}/decision`, {
+    method: "PATCH",
+    headers: writeHeaders(),
+    body: JSON.stringify({ decision, reason }),
+  });
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => ({ error: `FAIR simulation decision failed with ${response.status}` }));
+    throw new Error(errorPayload.error ?? `FAIR simulation decision failed with ${response.status}`);
+  }
+  return (await response.json()) as FairSimulationRun;
+}
+
 export function buildGovernanceFallback(state: GrcState): GovernanceSnapshot {
   const frameworks = [
     { id: "SOC2", name: "SOC 2", version: "Type II 2026", category: "Assurance", requirement_count: 300 },
     { id: "ISO27001", name: "ISO 27001", version: "2022", category: "Security Management", requirement_count: 260 },
     { id: "NISTCSF", name: "NIST CSF", version: "2.0", category: "Cybersecurity", requirement_count: 220 },
   ];
+
+  const fairScenarios: FairScenarioParameter[] = state.controls.map((control) => ({
+    control_id: control.id,
+    scenario_name: control.riskScenarios[0] ?? `${control.name} risk scenario`,
+    probable_loss_min: control.fair.aleP10,
+    probable_loss_most_likely: control.fair.aleP50,
+    probable_loss_max: control.fair.aleP90,
+    annual_event_frequency_min: 0.1,
+    annual_event_frequency_most_likely: 0.5,
+    annual_event_frequency_max: 1.4,
+    vulnerability_percentage: Math.max(5, 100 - control.fair.strength),
+    control_strength_percentage: control.fair.strength,
+    loss_magnitude_reduction_percentage: Math.round(control.fair.plmReduction * 100),
+    appetite_threshold: Math.round(control.fair.aleP90 * 0.62),
+    confidence_percentage: 68,
+    data_quality: "Medium",
+    source_notes: "Seeded browser fallback. Start the local API to edit persisted FAIR settings.",
+    updated_at: control.lastAgentReview,
+  }));
 
   const controls = state.controls.map((control) => {
     const mappings: GovernanceMapping[] = control.requirements.map((requirement, index) => ({
@@ -75,6 +159,7 @@ export function buildGovernanceFallback(state: GrcState): GovernanceSnapshot {
         owner_approval_state: "Approved" as const,
       })),
       evidenceItems: [],
+      fairScenario: fairScenarios.find((scenario) => scenario.control_id === control.id) ?? null,
       mappingCount: mappings.length,
       blueprintCount: control.evidence.length,
     };
@@ -102,6 +187,31 @@ export function buildGovernanceFallback(state: GrcState): GovernanceSnapshot {
     evidenceBlueprints: controls.flatMap((control) => control.evidenceBlueprints),
     evidenceItems: [],
     relationships: [],
+    fairScenarios,
+    fairScenarioVersions: fairScenarios.map((scenario, index) => ({
+      version_id: `fallback-fair-v-${index + 1}`,
+      control_id: scenario.control_id,
+      version_number: 1,
+      scenario_name: scenario.scenario_name,
+      probable_loss_min: scenario.probable_loss_min,
+      probable_loss_most_likely: scenario.probable_loss_most_likely,
+      probable_loss_max: scenario.probable_loss_max,
+      annual_event_frequency_min: scenario.annual_event_frequency_min,
+      annual_event_frequency_most_likely: scenario.annual_event_frequency_most_likely,
+      annual_event_frequency_max: scenario.annual_event_frequency_max,
+      vulnerability_percentage: scenario.vulnerability_percentage,
+      control_strength_percentage: scenario.control_strength_percentage,
+      loss_magnitude_reduction_percentage: scenario.loss_magnitude_reduction_percentage,
+      appetite_threshold: scenario.appetite_threshold,
+      confidence_percentage: scenario.confidence_percentage,
+      data_quality: scenario.data_quality,
+      source_notes: scenario.source_notes,
+      changed_by: "Seeded fallback",
+      change_reason: "Browser fallback baseline",
+      created_at: scenario.updated_at,
+    })),
+    fairSimulationRuns: [],
+    mutationAuditLog: [],
     programWorkbench: {
       projects: [
         {

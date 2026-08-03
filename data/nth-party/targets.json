@@ -1,0 +1,4 @@
+{
+  "_comment": "Domains to scan with nthpartyfinder. Only list domains you are authorized to assess. Scan output lands beside this file as <domain>.scan.json and is ingested by `npm run sync:nthparty`.",
+  "targets": []
+}

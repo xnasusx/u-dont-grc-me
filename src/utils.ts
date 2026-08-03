@@ -26,7 +26,7 @@ export function aggregateAle(controls: Control[]) {
   );
 }
 
-export function seededMonteCarlo(base: number, strength: number, volatility: number) {
+export function seededMonteCarlo(base: number, strength: number, volatility: number, annualFrequency = 0.45, lossMagnitudeReduction = 0) {
   const samples: number[] = [];
   let seed = Math.round(base / 1000 + strength * 17 + volatility * 31);
   const random = () => {
@@ -36,8 +36,8 @@ export function seededMonteCarlo(base: number, strength: number, volatility: num
 
   const trialCount = 10000;
   for (let i = 0; i < trialCount; i += 1) {
-    const frequency = 0.45 + random() * volatility;
-    const magnitude = base * (0.55 + random() * 1.9);
+    const frequency = annualFrequency * (0.55 + random() * volatility);
+    const magnitude = base * (0.55 + random() * 1.9) * (1 - lossMagnitudeReduction / 100);
     const controlEffect = Math.max(0.12, 1 - strength / 120);
     samples.push(frequency * magnitude * controlEffect);
   }

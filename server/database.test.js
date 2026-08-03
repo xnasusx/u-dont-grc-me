@@ -1,6 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createControl, createDatabase, getControl, getGovernanceSnapshot, getProgramWorkbench, initializeDatabase, seedDatabase } from "./database.js";
+import {
+  createControl,
+  createDatabase,
+  createFairSimulationRun,
+  decideFairSimulationRun,
+  getControl,
+  getFairScenarioVersions,
+  getFairSimulationRuns,
+  getFairSettings,
+  getGovernanceSnapshot,
+  getMutationAuditLog,
+  getProgramWorkbench,
+  initializeDatabase,
+  seedDatabase,
+  updateControl,
+  updateFairSetting,
+} from "./database.js";
 
 function seededMemoryDb() {
   const db = createDatabase(":memory:");
@@ -90,4 +106,106 @@ test("governance snapshot includes program workbench data", () => {
   assert.ok(snapshot.programWorkbench);
   assert.equal(snapshot.programWorkbench.projects[0].tenant_id, "tenant-acme-us");
   assert.equal(snapshot.programWorkbench.hardeningGuides[0].control_id.startsWith("CTRL-"), true);
+  assert.ok(snapshot.fairScenarioVersions.length >= snapshot.fairScenarios.length);
+  assert.ok(Array.isArray(snapshot.fairSimulationRuns));
+  assert.ok(Array.isArray(snapshot.mutationAuditLog));
+});
+
+test("controls can be edited through an allowlisted update", () => {
+  const db = seededMemoryDb();
+  const updated = updateControl(db, "CTRL-PAM-001", {
+    owner: "identity-risk@company.com",
+    implementation_status: "Degraded",
+    evidence_freshness: 72,
+    ignored_field: "nope",
+  });
+
+  assert.equal(updated.owner, "identity-risk@company.com");
+  assert.equal(updated.implementation_status, "Degraded");
+  assert.equal(updated.evidence_freshness, 72);
+  assert.equal(getControl(db, "CTRL-PAM-001").owner, "identity-risk@company.com");
+});
+
+test("FAIR settings are database-backed and editable", () => {
+  const db = seededMemoryDb();
+  const settings = getFairSettings(db);
+  assert.ok(settings.length >= 6);
+  const beforeVersions = getFairScenarioVersions(db, "CTRL-VULN-004").length;
+
+  const updated = updateFairSetting(db, "CTRL-VULN-004", {
+    probable_loss_most_likely: 2100000,
+    vulnerability_percentage: 52,
+    appetite_threshold: 3000000,
+    source_notes: "Updated by local admin test.",
+    change_reason: "Test calibration update",
+  }, { actor: "Unit Test", authMode: "bearer-token", tenantId: "tenant-acme-us" });
+
+  assert.equal(updated.probable_loss_most_likely, 2100000);
+  assert.equal(updated.vulnerability_percentage, 52);
+  assert.equal(updated.appetite_threshold, 3000000);
+  assert.match(getGovernanceSnapshot(db).fairScenarios.find((item) => item.control_id === "CTRL-VULN-004").source_notes, /local admin test/);
+  const afterVersions = getFairScenarioVersions(db, "CTRL-VULN-004");
+  assert.equal(afterVersions.length, beforeVersions + 1);
+  assert.equal(afterVersions[0].changed_by, "Unit Test");
+  assert.equal(afterVersions[0].change_reason, "Test calibration update");
+  assert.equal(getMutationAuditLog(db)[0].action, "UPDATE_FAIR_SETTING");
+});
+
+test("tenant-scoped mutations reject cross-tenant writes", () => {
+  const db = seededMemoryDb();
+
+  assert.throws(
+    () => updateControl(db, "CTRL-PAM-001", { owner: "wrong-tenant@example.com" }, { actor: "Unit Test", authMode: "bearer-token", tenantId: "tenant-other" }),
+    /outside the active tenant scope/,
+  );
+});
+
+test("FAIR simulation runs are persisted against assumption versions", () => {
+  const db = seededMemoryDb();
+  const run = createFairSimulationRun(db, "CTRL-VULN-004", {
+    base_loss: 2100000,
+    control_strength_percentage: 64,
+    annual_event_frequency: 0.82,
+    loss_magnitude_reduction_percentage: 18,
+    appetite_threshold: 600000,
+    volatility: 1.4,
+    run_label: "Critical vuln board run",
+  }, { actor: "Risk Owner", authMode: "bearer-token", tenantId: "tenant-acme-us" });
+
+  assert.match(run.run_id, /^FAIR-RUN-/);
+  assert.equal(run.control_id, "CTRL-VULN-004");
+  assert.equal(run.approval_state, "Pending Approval");
+  assert.equal(run.trial_count, 10000);
+  assert.ok(run.assumption_version_id);
+  assert.ok(run.p90 >= run.p50);
+  assert.ok(run.appetite_breach_probability >= 0);
+  assert.equal(getFairSimulationRuns(db, "CTRL-VULN-004")[0].run_label, "Critical vuln board run");
+  assert.equal(getGovernanceSnapshot(db).fairSimulationRuns[0].run_id, run.run_id);
+  assert.equal(getMutationAuditLog(db)[0].action, "CREATE_FAIR_SIMULATION_RUN");
+});
+
+test("FAIR simulation run decisions update approval state and audit log", () => {
+  const db = seededMemoryDb();
+  const run = createFairSimulationRun(db, "CTRL-PAM-001", {}, { actor: "Risk Analyst", authMode: "bearer-token", tenantId: "tenant-acme-us" });
+  const decided = decideFairSimulationRun(db, run.run_id, {
+    decision: "Approved",
+    reason: "Board packet ready",
+  }, { actor: "CISO", authMode: "bearer-token", tenantId: "tenant-acme-us" });
+
+  assert.equal(decided.approval_state, "Approved");
+  assert.equal(decided.approved_by, "CISO");
+  assert.equal(decided.decision_reason, "Board packet ready");
+  assert.ok(decided.decided_at);
+  assert.equal(getMutationAuditLog(db)[0].action, "DECIDE_FAIR_SIMULATION_RUN");
+});
+
+test("control writes create mutation audit records", () => {
+  const db = seededMemoryDb();
+  updateControl(db, "CTRL-PAM-001", { owner: "identity-risk@company.com" }, { actor: "Unit Test", authMode: "bearer-token", tenantId: "tenant-acme-us" });
+
+  const audit = getMutationAuditLog(db)[0];
+  assert.equal(audit.action, "UPDATE_CONTROL");
+  assert.equal(audit.outcome, "Allowed");
+  assert.equal(audit.actor, "Unit Test");
+  assert.equal(audit.auth_mode, "bearer-token");
 });

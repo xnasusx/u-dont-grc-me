@@ -167,6 +167,15 @@ const hardeningGuides = [
   ["HG-NTH-PARTY", "Vendor Trust Portal", "CTRL-TPRM-002", "GRC Engineering nth-party discovery", "Track subprocessor and fourth-party signals against Tier 1 vendor records.", "P1", "Backlog", "Nth-party dependency visibility"],
 ];
 
+const fairScenarioParameters = [
+  ["CTRL-PAM-001", "Unauthorized admin access to production", 100000, 480000, 1400000, 0.12, 0.45, 0.9, 22, 91, 18, 1000000, 86, "High", "Internal privileged session logs, MFA exception counts, and admin access review outcomes."],
+  ["CTRL-IAM-002", "Dormant workforce identity misused", 60000, 240000, 780000, 0.08, 0.28, 0.7, 18, 88, 16, 650000, 82, "High", "HR JML records, Okta deprovisioning timestamps, and quarterly access-review exceptions."],
+  ["CTRL-VULN-004", "Exploit of public workload", 500000, 1700000, 5200000, 0.3, 1.15, 2.4, 46, 63, 9, 2500000, 69, "Medium", "Security Hub critical findings, SLA misses, internet exposure, and external exploit activity analogs."],
+  ["CTRL-EVID-007", "Evidence tampering undermines audit attestation", 80000, 260000, 840000, 0.06, 0.22, 0.55, 16, 89, 31, 750000, 84, "High", "S3 Object Lock configuration checks, evidence hash verification, and audit package retrieval tests."],
+  ["CTRL-TPRM-002", "Vendor breach exposes customer data", 250000, 950000, 3100000, 0.18, 0.75, 1.7, 39, 72, 14, 1800000, 63, "Medium", "Vendor assessment age, bridge-letter status, external rating movement, and data processing scope."],
+  ["CTRL-ENDPOINT-010", "Endpoint security gap enables malware spread", 180000, 820000, 2600000, 0.24, 0.9, 1.8, 41, 74, 12, 1500000, 66, "Medium", "Endpoint health exports, stale agent counts, and incident response containment assumptions."],
+];
+
 export function createDatabase(dbPath = join(__dirname, "..", "data", "grc.db")) {
   return new DatabaseSync(dbPath);
 }
@@ -180,8 +189,146 @@ function insertMany(db, sql, rows) {
   for (const row of rows) statement.run(...row);
 }
 
+function idSuffix() {
+  return Math.floor(Math.random() * 900000) + 100000;
+}
+
+function actorFromContext(context = {}) {
+  return context.actor ?? "local-api";
+}
+
+function auditContext(context = {}) {
+  return {
+    actor: actorFromContext(context),
+    authMode: context.authMode ?? "internal",
+    tenantId: context.tenantId ?? "tenant-acme-us",
+  };
+}
+
+function appendMutationAudit(db, context, { action, targetType, targetId, outcome, reason }) {
+  const audit = auditContext(context);
+  db.prepare(`
+    INSERT INTO mutation_audit_log (id, tenant_id, actor, auth_mode, action, target_type, target_id, outcome, reason)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(`MUT-${idSuffix()}`, audit.tenantId, audit.actor, audit.authMode, action, targetType, targetId, outcome, reason);
+}
+
+function assertTenantScope(entity, context, label) {
+  if (!context?.tenantId || !entity?.tenant_id) return;
+  if (entity.tenant_id !== context.tenantId) {
+    const error = new Error(`${label} is outside the active tenant scope`);
+    error.statusCode = 403;
+    throw error;
+  }
+}
+
+function nextFairVersionNumber(db, controlId) {
+  const row = db.prepare("SELECT COALESCE(MAX(version_number), 0) + 1 AS next FROM fair_scenario_versions WHERE control_id = ?").get(controlId);
+  return row.next;
+}
+
+function insertFairScenarioVersion(db, scenario, context = {}, reason = "Seeded baseline") {
+  db.prepare(`
+    INSERT INTO fair_scenario_versions (
+      version_id, control_id, version_number, scenario_name, probable_loss_min, probable_loss_most_likely,
+      probable_loss_max, annual_event_frequency_min, annual_event_frequency_most_likely,
+      annual_event_frequency_max, vulnerability_percentage, control_strength_percentage,
+      loss_magnitude_reduction_percentage, appetite_threshold, confidence_percentage, data_quality,
+      source_notes, changed_by, change_reason
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    `FAIR-V-${idSuffix()}`,
+    scenario.control_id,
+    nextFairVersionNumber(db, scenario.control_id),
+    scenario.scenario_name,
+    scenario.probable_loss_min,
+    scenario.probable_loss_most_likely,
+    scenario.probable_loss_max,
+    scenario.annual_event_frequency_min,
+    scenario.annual_event_frequency_most_likely,
+    scenario.annual_event_frequency_max,
+    scenario.vulnerability_percentage,
+    scenario.control_strength_percentage,
+    scenario.loss_magnitude_reduction_percentage,
+    scenario.appetite_threshold,
+    scenario.confidence_percentage,
+    scenario.data_quality,
+    scenario.source_notes,
+    actorFromContext(context),
+    reason,
+  );
+}
+
+function percentile(samples, rank) {
+  return Math.round(samples[Math.floor(samples.length * rank)] ?? 0);
+}
+
+function runFairSimulation({ baseLoss, controlStrength, volatility, annualFrequency, lossMagnitudeReduction, appetiteThreshold }) {
+  const samples = [];
+  let seed = Math.round(baseLoss / 1000 + controlStrength * 17 + volatility * 31);
+  const random = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+
+  const trialCount = 10000;
+  for (let i = 0; i < trialCount; i += 1) {
+    const frequency = annualFrequency * (0.55 + random() * volatility);
+    const magnitude = baseLoss * (0.55 + random() * 1.9) * (1 - lossMagnitudeReduction / 100);
+    const controlEffect = Math.max(0.12, 1 - controlStrength / 120);
+    samples.push(frequency * magnitude * controlEffect);
+  }
+
+  samples.sort((a, b) => a - b);
+  const expectedLoss = samples.reduce((sum, sample) => sum + sample, 0) / samples.length;
+  const breachCount = samples.filter((sample) => sample > appetiteThreshold).length;
+  const p90 = percentile(samples, 0.9);
+  const sensitivityDriver = p90 > appetiteThreshold && controlStrength < 75
+    ? "Control strength"
+    : volatility > 1.35
+      ? "Data uncertainty"
+      : annualFrequency > 0.75
+        ? "Event frequency"
+        : lossMagnitudeReduction < 20
+          ? "Loss magnitude"
+          : "Residual tail exposure";
+
+  return {
+    trialCount,
+    p10: percentile(samples, 0.1),
+    p50: percentile(samples, 0.5),
+    p90,
+    expectedLoss: Math.round(expectedLoss),
+    appetiteBreachProbability: Math.round((breachCount / samples.length) * 1000) / 10,
+    sensitivityDriver,
+  };
+}
+
+function numericInput(input, field, fallback) {
+  const value = input[field] ?? fallback;
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    const error = new Error(`${field} must be a finite number`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return numeric;
+}
+
+function percentageInput(input, field, fallback) {
+  const value = Math.round(numericInput(input, field, fallback));
+  if (value < 0 || value > 100) {
+    const error = new Error(`${field} must be between 0 and 100`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return value;
+}
+
 function seedProgramWorkbench(db) {
   const count = db.prepare("SELECT COUNT(*) AS count FROM program_projects").get().count;
+  seedFairScenarioParameters(db);
   if (count > 0) return;
 
   insertMany(db, "INSERT INTO program_projects VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", programProjects);
@@ -190,6 +337,25 @@ function seedProgramWorkbench(db) {
   insertMany(db, "INSERT INTO account_reviews VALUES (?, ?, ?, ?, ?, ?, ?, ?)", accountReviews);
   insertMany(db, "INSERT INTO vendor_questionnaires VALUES (?, ?, ?, ?, ?, ?, ?, ?)", vendorQuestionnaires);
   insertMany(db, "INSERT INTO hardening_guides VALUES (?, ?, ?, ?, ?, ?, ?, ?)", hardeningGuides);
+}
+
+function seedFairScenarioParameters(db) {
+  const count = db.prepare("SELECT COUNT(*) AS count FROM fair_scenario_parameters").get().count;
+  if (count > 0) {
+    seedFairScenarioVersions(db);
+    return;
+  }
+  insertMany(db, "INSERT INTO fair_scenario_parameters VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)", fairScenarioParameters);
+  seedFairScenarioVersions(db);
+}
+
+function seedFairScenarioVersions(db) {
+  const count = db.prepare("SELECT COUNT(*) AS count FROM fair_scenario_versions").get().count;
+  if (count > 0) return;
+  const scenarios = getFairSettings(db);
+  for (const scenario of scenarios) {
+    insertFairScenarioVersion(db, scenario, { actor: "System Seed", authMode: "seed", tenantId: "tenant-acme-us" }, "Seeded baseline");
+  }
 }
 
 export function seedDatabase(db) {
@@ -246,6 +412,7 @@ export function getGovernanceSnapshot(db) {
   `);
   const blueprintRows = all(db, "SELECT * FROM evidence_blueprints ORDER BY source_system, name");
   const evidenceRows = all(db, "SELECT * FROM evidence_items ORDER BY collected_at DESC");
+  const fairRows = getFairSettings(db);
 
   const controlsWithRelations = controlRows.map((control) => {
     const mappingsForControl = mappingRows.filter((mapping) => mapping.control_id === control.id);
@@ -258,6 +425,7 @@ export function getGovernanceSnapshot(db) {
       policies: policyRows.filter((policy) => policy.control_id === control.id),
       evidenceBlueprints: blueprintsForControl,
       evidenceItems: evidenceRows.filter((item) => item.control_id === control.id),
+      fairScenario: fairRows.find((scenario) => scenario.control_id === control.id) ?? null,
       mappingCount: mappingsForControl.length,
       blueprintCount: blueprintsForControl.length,
     };
@@ -288,6 +456,10 @@ export function getGovernanceSnapshot(db) {
     evidenceBlueprints: blueprintRows,
     evidenceItems: evidenceRows,
     relationships: all(db, "SELECT * FROM control_relationships ORDER BY relationship_type, from_control_id"),
+    fairScenarios: fairRows,
+    fairScenarioVersions: getFairScenarioVersions(db),
+    fairSimulationRuns: getFairSimulationRuns(db),
+    mutationAuditLog: getMutationAuditLog(db),
     programWorkbench: getProgramWorkbench(db),
   };
 }
@@ -308,14 +480,311 @@ export function getControl(db, id) {
   return snapshot.controls.find((control) => control.id === id) ?? null;
 }
 
-export function createControl(db, input) {
+export function updateControl(db, id, input, context = {}) {
+  const existing = getControl(db, id);
+  if (!existing) {
+    appendMutationAudit(db, context, {
+      action: "UPDATE_CONTROL",
+      targetType: "Control",
+      targetId: id,
+      outcome: "Blocked",
+      reason: "Control not found",
+    });
+    const error = new Error("Control not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  assertTenantScope(existing, context, "Control");
+
+  const allowedFields = [
+    "name",
+    "family",
+    "description",
+    "owner",
+    "team",
+    "control_type",
+    "automation_level",
+    "implementation_status",
+    "criticality",
+    "testing_cadence",
+    "evidence_freshness",
+    "evidence_relevance",
+    "evidence_completeness",
+  ];
+  const entries = Object.entries(input).filter(([field]) => allowedFields.includes(field));
+  if (!entries.length) {
+    appendMutationAudit(db, context, {
+      action: "UPDATE_CONTROL",
+      targetType: "Control",
+      targetId: id,
+      outcome: "Blocked",
+      reason: "No editable control fields supplied",
+    });
+    const error = new Error("No editable control fields supplied");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const setClause = entries.map(([field]) => `${field} = ?`).join(", ");
+  db.prepare(`UPDATE controls SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(...entries.map(([, value]) => value), id);
+  appendMutationAudit(db, context, {
+    action: "UPDATE_CONTROL",
+    targetType: "Control",
+    targetId: id,
+    outcome: "Allowed",
+    reason: `Updated fields: ${entries.map(([field]) => field).join(", ")}`,
+  });
+  return getControl(db, id);
+}
+
+export function getFairSettings(db) {
+  return all(db, "SELECT * FROM fair_scenario_parameters ORDER BY scenario_name");
+}
+
+export function getFairScenarioVersions(db, controlId = null) {
+  const params = controlId ? [controlId] : [];
+  const where = controlId ? "WHERE control_id = ?" : "";
+  return all(db, `SELECT * FROM fair_scenario_versions ${where} ORDER BY created_at DESC, version_number DESC, rowid DESC`, params);
+}
+
+export function getMutationAuditLog(db) {
+  return all(db, "SELECT * FROM mutation_audit_log ORDER BY created_at DESC, rowid DESC LIMIT 25");
+}
+
+export function getFairSimulationRuns(db, controlId = null) {
+  const params = controlId ? [controlId] : [];
+  const where = controlId ? "WHERE control_id = ?" : "";
+  return all(db, `SELECT * FROM fair_simulation_runs ${where} ORDER BY created_at DESC, rowid DESC LIMIT 25`, params);
+}
+
+export function createFairSimulationRun(db, controlId, input = {}, context = {}) {
+  const control = db.prepare("SELECT * FROM controls WHERE id = ?").get(controlId);
+  if (!control) {
+    appendMutationAudit(db, context, {
+      action: "CREATE_FAIR_SIMULATION_RUN",
+      targetType: "FairSimulationRun",
+      targetId: controlId,
+      outcome: "Blocked",
+      reason: "Control not found",
+    });
+    const error = new Error("Control not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  assertTenantScope(control, context, "Control");
+
+  const scenario = db.prepare("SELECT * FROM fair_scenario_parameters WHERE control_id = ?").get(controlId);
+  if (!scenario) {
+    appendMutationAudit(db, context, {
+      action: "CREATE_FAIR_SIMULATION_RUN",
+      targetType: "FairSimulationRun",
+      targetId: controlId,
+      outcome: "Blocked",
+      reason: "FAIR scenario not found",
+    });
+    const error = new Error("FAIR scenario not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const latestVersion = db.prepare("SELECT version_id FROM fair_scenario_versions WHERE control_id = ? ORDER BY version_number DESC LIMIT 1").get(controlId);
+  const approvalStates = ["Draft", "Pending Approval", "Approved", "Rejected"];
+  const approvalState = approvalStates.includes(input.approval_state) ? input.approval_state : "Pending Approval";
+  const runLabel = String(input.run_label ?? `${scenario.scenario_name} board run`).trim();
+  if (!runLabel) {
+    const error = new Error("run_label is required");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const baseLoss = Math.round(numericInput(input, "base_loss", scenario.probable_loss_most_likely));
+  const controlStrength = percentageInput(input, "control_strength_percentage", scenario.control_strength_percentage);
+  const annualFrequency = numericInput(input, "annual_event_frequency", scenario.annual_event_frequency_most_likely);
+  const lossMagnitudeReduction = percentageInput(input, "loss_magnitude_reduction_percentage", scenario.loss_magnitude_reduction_percentage);
+  const volatility = numericInput(input, "volatility", 1.15);
+  const appetiteThreshold = Math.round(numericInput(input, "appetite_threshold", scenario.appetite_threshold));
+  if (baseLoss < 0 || annualFrequency < 0 || volatility < 0 || appetiteThreshold < 0) {
+    const error = new Error("FAIR simulation inputs must be non-negative");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const simulation = runFairSimulation({
+    baseLoss,
+    controlStrength,
+    volatility,
+    annualFrequency,
+    lossMagnitudeReduction,
+    appetiteThreshold,
+  });
+  const runId = `FAIR-RUN-${idSuffix()}`;
+  const actor = actorFromContext(context);
+
+  db.prepare(`
+    INSERT INTO fair_simulation_runs (
+      run_id, control_id, assumption_version_id, tenant_id, run_label, base_loss,
+      control_strength_percentage, annual_event_frequency, loss_magnitude_reduction_percentage,
+      volatility, trial_count, p10, p50, p90, expected_loss, appetite_threshold,
+      appetite_breach_probability, sensitivity_driver, approval_state, requested_by
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    runId,
+    controlId,
+    latestVersion?.version_id ?? null,
+    control.tenant_id,
+    runLabel,
+    baseLoss,
+    controlStrength,
+    annualFrequency,
+    lossMagnitudeReduction,
+    volatility,
+    simulation.trialCount,
+    simulation.p10,
+    simulation.p50,
+    simulation.p90,
+    simulation.expectedLoss,
+    appetiteThreshold,
+    simulation.appetiteBreachProbability,
+    simulation.sensitivityDriver,
+    approvalState,
+    actor,
+  );
+
+  appendMutationAudit(db, context, {
+    action: "CREATE_FAIR_SIMULATION_RUN",
+    targetType: "FairSimulationRun",
+    targetId: runId,
+    outcome: "Allowed",
+    reason: `Saved ${runLabel} with ${approvalState} state`,
+  });
+  return db.prepare("SELECT * FROM fair_simulation_runs WHERE run_id = ?").get(runId);
+}
+
+export function decideFairSimulationRun(db, runId, input = {}, context = {}) {
+  const existing = db.prepare("SELECT * FROM fair_simulation_runs WHERE run_id = ?").get(runId);
+  if (!existing) {
+    appendMutationAudit(db, context, {
+      action: "DECIDE_FAIR_SIMULATION_RUN",
+      targetType: "FairSimulationRun",
+      targetId: runId,
+      outcome: "Blocked",
+      reason: "FAIR simulation run not found",
+    });
+    const error = new Error("FAIR simulation run not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  assertTenantScope(existing, context, "FAIR simulation run");
+
+  const approvalState = input.approval_state ?? input.decision;
+  if (!["Approved", "Rejected"].includes(approvalState)) {
+    appendMutationAudit(db, context, {
+      action: "DECIDE_FAIR_SIMULATION_RUN",
+      targetType: "FairSimulationRun",
+      targetId: runId,
+      outcome: "Blocked",
+      reason: "Decision must be Approved or Rejected",
+    });
+    const error = new Error("Decision must be Approved or Rejected");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const decisionReason = String(input.decision_reason ?? input.reason ?? `${approvalState} by ${actorFromContext(context)}`).trim();
+  db.prepare(`
+    UPDATE fair_simulation_runs
+    SET approval_state = ?, approved_by = ?, decision_reason = ?, decided_at = CURRENT_TIMESTAMP
+    WHERE run_id = ?
+  `).run(approvalState, actorFromContext(context), decisionReason, runId);
+
+  appendMutationAudit(db, context, {
+    action: "DECIDE_FAIR_SIMULATION_RUN",
+    targetType: "FairSimulationRun",
+    targetId: runId,
+    outcome: "Allowed",
+    reason: `${approvalState}: ${decisionReason}`,
+  });
+  return db.prepare("SELECT * FROM fair_simulation_runs WHERE run_id = ?").get(runId);
+}
+
+export function updateFairSetting(db, controlId, input, context = {}) {
+  const existing = db.prepare("SELECT control_id FROM fair_scenario_parameters WHERE control_id = ?").get(controlId);
+  if (!existing) {
+    appendMutationAudit(db, context, {
+      action: "UPDATE_FAIR_SETTING",
+      targetType: "FairScenario",
+      targetId: controlId,
+      outcome: "Blocked",
+      reason: "FAIR scenario not found",
+    });
+    const error = new Error("FAIR scenario not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  const control = db.prepare("SELECT * FROM controls WHERE id = ?").get(controlId);
+  assertTenantScope(control, context, "FAIR scenario");
+
+  const allowedFields = [
+    "scenario_name",
+    "probable_loss_min",
+    "probable_loss_most_likely",
+    "probable_loss_max",
+    "annual_event_frequency_min",
+    "annual_event_frequency_most_likely",
+    "annual_event_frequency_max",
+    "vulnerability_percentage",
+    "control_strength_percentage",
+    "loss_magnitude_reduction_percentage",
+    "appetite_threshold",
+    "confidence_percentage",
+    "data_quality",
+    "source_notes",
+  ];
+  const entries = Object.entries(input).filter(([field]) => allowedFields.includes(field));
+  if (!entries.length) {
+    appendMutationAudit(db, context, {
+      action: "UPDATE_FAIR_SETTING",
+      targetType: "FairScenario",
+      targetId: controlId,
+      outcome: "Blocked",
+      reason: "No editable FAIR fields supplied",
+    });
+    const error = new Error("No editable FAIR fields supplied");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const setClause = entries.map(([field]) => `${field} = ?`).join(", ");
+  db.prepare(`UPDATE fair_scenario_parameters SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE control_id = ?`).run(...entries.map(([, value]) => value), controlId);
+  const updated = db.prepare("SELECT * FROM fair_scenario_parameters WHERE control_id = ?").get(controlId);
+  insertFairScenarioVersion(db, updated, context, input.change_reason ?? "Admin updated FAIR assumptions");
+  appendMutationAudit(db, context, {
+    action: "UPDATE_FAIR_SETTING",
+    targetType: "FairScenario",
+    targetId: controlId,
+    outcome: "Allowed",
+    reason: `Updated fields: ${entries.map(([field]) => field).join(", ")}`,
+  });
+  return updated;
+}
+
+export function createControl(db, input, context = {}) {
   const required = ["id", "tenant_id", "name", "family", "description", "owner", "team", "control_type", "automation_level", "implementation_status", "criticality", "testing_cadence"];
   const missing = required.filter((field) => !input[field]);
   if (missing.length) {
+    appendMutationAudit(db, context, {
+      action: "CREATE_CONTROL",
+      targetType: "Control",
+      targetId: input.id ?? "unknown",
+      outcome: "Blocked",
+      reason: `Missing required fields: ${missing.join(", ")}`,
+    });
     const error = new Error(`Missing required fields: ${missing.join(", ")}`);
     error.statusCode = 400;
     throw error;
   }
+  assertTenantScope(input, context, "Control");
 
   const statement = db.prepare(`
     INSERT INTO controls (
@@ -342,5 +811,12 @@ export function createControl(db, input) {
     input.evidence_relevance ?? 0,
     input.evidence_completeness ?? 0,
   );
+  appendMutationAudit(db, context, {
+    action: "CREATE_CONTROL",
+    targetType: "Control",
+    targetId: input.id,
+    outcome: "Allowed",
+    reason: "Created control metadata record",
+  });
   return getControl(db, input.id);
 }

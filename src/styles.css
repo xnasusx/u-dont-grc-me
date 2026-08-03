@@ -75,13 +75,12 @@ textarea:focus-visible {
 }
 
 .brand-logo {
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
   object-fit: contain;
   object-position: center;
-  border-radius: 8px;
   background: transparent;
-  border: 1px solid rgba(240, 222, 224, 0.28);
 }
 
 .brand-mark,
@@ -409,6 +408,37 @@ td span {
 .control-record-panel .detail strong {
   font-size: 0.88rem;
   line-height: 1.25;
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.wide-field {
+  grid-column: 1 / -1;
+}
+
+.tight-actions {
+  align-items: center;
+  margin-top: 0;
+}
+
+.save-state {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.save-state.saved {
+  color: var(--green);
+}
+
+.save-state.error {
+  color: var(--red);
 }
 
 .evidence-health-card {
@@ -783,6 +813,7 @@ td span {
 .pill.degraded,
 .pill.in-progress,
 .pill.pending,
+.pill.pending-approval,
 .pill.blocked,
 .pill.watching,
 .pill.needs-attention,
@@ -1219,6 +1250,13 @@ mark {
   white-space: nowrap;
 }
 
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .primary-button {
   background: var(--teal);
   color: #ffffff;
@@ -1251,10 +1289,16 @@ mark {
 }
 
 .field-label input,
-.field-label textarea {
+.field-label textarea,
+.field-label select {
   width: 100%;
   padding: 10px;
   color: var(--ink);
+}
+
+.field-label select {
+  border: 1px solid var(--line);
+  min-width: 0;
 }
 
 .field-label textarea,
@@ -1349,6 +1393,70 @@ code {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.fair-admin-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.fair-admin-list,
+.fair-editor,
+.compact-list {
+  display: grid;
+  gap: 10px;
+}
+
+.compact-list div {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 10px;
+  background: #fffafa;
+}
+
+.compact-list span {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(58, 51, 54, 0.48);
+}
+
+.modal-window {
+  width: min(1040px, 100%);
+  max-height: min(820px, calc(100vh - 44px));
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(58, 51, 54, 0.34);
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .coverage-cell {
@@ -1450,6 +1558,408 @@ code {
   padding: 16px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.heatlab {
+  --heat-ink: #282726;
+  --heat-muted: #756f69;
+  --heat-paper: #fbf7f0;
+  --heat-panel: #fffdf8;
+  --heat-rule: #d9cec0;
+  --heat-charcoal: #34302b;
+  --heat-gold: #b7802f;
+  --heat-green: #61855d;
+  --heat-orange: #bb6d3d;
+  --heat-red: #a1433d;
+  --heat-critical: #742f32;
+  color: var(--heat-ink);
+}
+
+.heatlab .panel {
+  background: var(--heat-panel);
+  border-color: var(--heat-rule);
+}
+
+.heatlab-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  background:
+    linear-gradient(110deg, rgba(255, 253, 248, 0.96), rgba(252, 239, 213, 0.84)),
+    repeating-linear-gradient(90deg, rgba(52, 48, 43, 0.08) 0 1px, transparent 1px 34px);
+}
+
+.heatlab-hero h2 {
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  margin-bottom: 8px;
+  color: var(--heat-charcoal);
+}
+
+.heatlab-hero p {
+  max-width: 760px;
+  color: var(--heat-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.heatlab-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.heatlab-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.heatlab-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.heatlab-matrix-panel,
+.heatlab-form-panel {
+  min-height: 100%;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 88px repeat(5, minmax(58px, 1fr));
+  grid-auto-rows: 58px;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.heatmap-axis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--heat-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.likelihood-axis {
+  justify-content: flex-end;
+  padding-right: 9px;
+}
+
+.impact-axis {
+  align-items: flex-end;
+  padding-bottom: 5px;
+}
+
+.heatmap-cell {
+  min-width: 58px;
+  min-height: 58px;
+  border: 2px solid rgba(255, 255, 255, 0.36);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  opacity: 0.58;
+  transition: transform 140ms ease, opacity 140ms ease, border-color 140ms ease;
+}
+
+.heatmap-cell:hover:not(:disabled),
+.heatmap-cell.active {
+  opacity: 1;
+  transform: translateY(-1px);
+  border-color: var(--heat-charcoal);
+}
+
+.heatmap-cell:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+.heatmap-cell span,
+.heat-risk-title > span,
+.heat-result-heading span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72);
+}
+
+.heat-low {
+  background: var(--heat-green);
+}
+
+.heat-watch {
+  background: var(--heat-gold);
+}
+
+.heat-raise {
+  background: var(--heat-orange);
+}
+
+.heat-high {
+  background: var(--heat-red);
+}
+
+.heat-critical {
+  background: var(--heat-critical);
+}
+
+.heatmap-footnotes {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 0 92px;
+  color: var(--heat-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.heatlab-empty,
+.heatlab-note,
+.heatlab-disclaimer {
+  border: 1px dashed var(--heat-rule);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 16px;
+  color: var(--heat-muted);
+  background: var(--heat-paper);
+  text-align: center;
+}
+
+.heatlab-note {
+  border-style: solid;
+  color: var(--heat-gold);
+  font-weight: 800;
+}
+
+.heatlab-empty.tall {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+}
+
+.heat-risk-list {
+  display: grid;
+  gap: 12px;
+}
+
+.heat-risk-editor,
+.heat-result-card {
+  border: 1px solid var(--heat-rule);
+  border-left: 5px solid var(--heat-gold);
+  border-radius: 8px;
+  background: #fffaf1;
+  padding: 14px;
+}
+
+.heat-risk-title,
+.heat-result-heading,
+.heat-result-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heat-risk-title {
+  margin-bottom: 12px;
+}
+
+.heat-risk-title label {
+  flex: 1;
+  min-width: 0;
+}
+
+.heat-risk-title input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--heat-rule);
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 0;
+  color: var(--heat-charcoal);
+  font-weight: 900;
+}
+
+.heat-risk-title small,
+.heat-result-heading small {
+  color: var(--heat-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.heat-risk-title .icon-button {
+  color: var(--heat-red);
+}
+
+.heat-triple-input {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.heat-triple-input > span {
+  grid-column: 1 / -1;
+  color: var(--heat-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.heat-triple-input label {
+  display: grid;
+  gap: 4px;
+  color: var(--heat-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.heat-triple-input input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border-color: var(--heat-rule);
+  color: var(--heat-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.heat-run-button {
+  width: 100%;
+  background: var(--heat-charcoal);
+}
+
+.heatlab-results-panel {
+  background: #fffaf1;
+}
+
+.heatlab-contrast {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.heatlab-contrast div {
+  border: 1px solid var(--heat-rule);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--heat-panel);
+}
+
+.heatlab-contrast span {
+  display: block;
+  color: var(--heat-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.heatlab-contrast strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.1rem;
+}
+
+.heatlab-contrast p,
+.heat-zero-note {
+  color: var(--heat-muted);
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+
+.heat-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.heat-result-heading {
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.heat-result-heading strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.heat-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.heat-stat-row .detail {
+  background: var(--heat-panel);
+}
+
+.heat-histogram-wrap {
+  border: 1px solid var(--heat-rule);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(251, 247, 240, 0.92)),
+    repeating-linear-gradient(90deg, rgba(52, 48, 43, 0.06) 0 1px, transparent 1px 28px);
+  padding: 12px;
+}
+
+.heat-histogram {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(32, minmax(0, 1fr));
+  align-items: end;
+  gap: 2px;
+  height: 154px;
+}
+
+.heat-histogram-bin {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.heat-histogram-bin span {
+  display: block;
+  width: 100%;
+  min-height: 4px;
+  border-radius: 3px 3px 0 0;
+  opacity: 0.82;
+}
+
+.heat-histogram i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--heat-charcoal);
+  box-shadow: 0 0 0 3px rgba(255, 253, 248, 0.72);
+}
+
+.heatlab-disclaimer {
+  margin-top: 18px;
+  text-align: left;
+}
+
 @media (max-width: 1180px) {
   .metric-grid,
   .agent-grid,
@@ -1461,6 +1971,8 @@ code {
   .graph-shell,
   .evidence-grid,
   .governance-tab-layout,
+  .heatlab-layout,
+  .heat-results-grid,
   .inventory-toolbar,
   .crq-grid,
   .knowledge-layout,
@@ -1491,6 +2003,8 @@ code {
   }
 
   .topbar,
+  .heatlab-hero,
+  .heatlab-contrast,
   .controls-layout,
   .approvals-layout,
   .split-panels,
@@ -1514,6 +2028,7 @@ code {
   .metric-grid,
   .percentile-grid,
   .detail-grid,
+  .heat-stat-row,
   .scenario-scope,
   .nutrition-grid,
   .five-number-grid,
@@ -1536,4 +2051,193 @@ code {
   .risk-bar-row {
     grid-template-columns: 1fr;
   }
+
+  .heatmap-grid {
+    grid-template-columns: 68px repeat(5, minmax(48px, 1fr));
+    grid-auto-rows: 50px;
+  }
+
+  .heatmap-cell {
+    min-width: 48px;
+    min-height: 50px;
+  }
+
+  .heatmap-footnotes {
+    margin-left: 72px;
+  }
+
+  .heat-triple-input {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hardening library + nth-party views (upstream: how-to-harden, nthpartyfinder) */
+.filter-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.checkbox-filter {
+  cursor: pointer;
+}
+
+.checkbox-filter input {
+  accent-color: var(--rose);
+}
+
+.checkbox-filter span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.guide-meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.source-note {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.source-note a,
+.guide-meta a,
+.hardening-head a {
+  color: var(--teal);
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: #fbfdfc;
+}
+
+.empty-state p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.empty-state p:last-child {
+  margin-bottom: 0;
+}
+
+.empty-state code,
+.hardening-check code,
+.evidence-cell code {
+  background: var(--powder);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+
+/* The global `code` rule is display:block; keep inline mentions inline. */
+.empty-state code {
+  display: inline;
+}
+
+.hardening-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.hardening-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hardening-head strong {
+  display: block;
+  line-height: 1.4;
+}
+
+.hardening-head span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hardening-row > p {
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.citation-row,
+.artifact-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.citation-row span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: #fbfdfc;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.citation-row strong {
+  color: var(--ink);
+  margin-left: 4px;
+}
+
+.artifact-badges .pill {
+  text-transform: lowercase;
+  font-size: 0.75rem;
+}
+
+.hardening-detail {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.hardening-detail .field-label {
+  margin-bottom: 8px;
+}
+
+.hardening-check {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 9px;
+}
+
+.hardening-check:last-child {
+  margin-bottom: 0;
+}
+
+.hardening-check span {
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.hardening-check code {
+  justify-self: start;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.evidence-cell {
+  max-width: 320px;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
 }

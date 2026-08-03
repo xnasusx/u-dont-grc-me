@@ -14,6 +14,22 @@ Implementation Plan for an AI-Native Governance, Risk, and Compliance Platform
 | **Core Thesis**<br>Traditional GRC platforms often begin with audit checklists, documents, or isolated risk registers. This product should begin with the control graph. Every material answer the tool gives should be explainable by traversing from a control to the assets, evidence, framework requirements, owners, risk scenarios, vendors, and AI decisions connected to it. |
 | --- |
 
+# **0. Implementation Tracking**
+
+Last updated: 2026-07-30 10:02 ET
+
+| **Area** | **Current status** | **Evidence** | **Problems / next work** |
+| --- | --- | --- | --- |
+| Control drilldowns | Complete for local testing | Governance inventory rows open modal drilldowns with mappings, assets, evidence, and FAIR assumptions in `src/App.tsx`; browser smoke screenshot `output/v0.7-edit-drilldown-smoke.png` | Add deeper drilldowns for every admin/workbench card and graph edge editing in the next UI slice |
+| Control metadata editing | Complete for local testing | `PATCH /api/controls/:id`, `updateControl`, allowlisted editable fields, tests in `server/database.test.js`, Governance side-panel save UI | Production writes remain blocked until auth, tenant scoping, validation middleware, and audit logging are implemented |
+| FAIR admin database | Complete for local testing | `fair_scenario_parameters` table in `server/schema.sql`, seed rows in `server/database.js`, Admin FAIR database editor in `src/App.tsx`, update tests | Add versioned assumption sets, approval history, sensitivity drivers, and hosted write workflow |
+| FAIR calculations | Complete with prototype limitations | Risk lab now reads annual event frequency, control strength, loss magnitude reduction, appetite threshold, data quality, source notes, and confidence from the FAIR database when available; saved board runs are recomputed and persisted by the backend | Move simulation to a hosted service before production board use; add idempotency and schema validation |
+| Local write guardrails | Complete for local testing | Optional `GRC_WRITE_TOKEN`, tenant/actor request context, allowlisted mutations, and mutation audit log in `server/api.js`, `server/database.js`, and `server/schema.sql` | Replace with production SSO/RBAC and hosted durable audit logging before real data |
+| FAIR assumption lineage | Complete for local testing | `fair_scenario_versions` stores versioned assumptions; Admin shows Assumption Version History and Mutation Audit Log; smoke evidence `output/v0.8-traceability-smoke.png` | Add side-by-side assumption diffing and hosted approval enforcement |
+| FAIR simulation runs and approvals | Complete for local testing | `fair_simulation_runs` stores backend-computed P10/P50/P90/expected loss, appetite breach probability, sensitivity driver, assumption version link, requested-by metadata, and approval state; Risk save and Admin approve verified in `output/v0.9-simulation-run-smoke.png` | Move approval workflow to hosted authenticated API; add idempotency, run comparison, appetite breach notifications, and trend analytics |
+| Pop-up windows | Complete with errors avoided in smoke | Control modal verified by Playwright/Chrome with no runtime page errors | Add keyboard trap/focus return and modals for evidence, mappings, vendors, remediation, integrations, and approvals |
+| Roadmap evidence tracking | In progress | This section plus `docs/IMPLEMENTATION_PLAN.md` and `PLANS.md` updates | Continue updating status/evidence with every implementation slice |
+
 # **1. Product Intent and Market Baseline**
 
 The platform should compete in the same expectation space as modern compliance automation, integrated risk management, and third-party risk products, while differentiating through a control-centric graph model and auditable AI workflows. Current market signals show that buyers expect centralized controls and ownership, continuous monitoring, reusable evidence, framework cross-mapping, risk dashboards, remediation workflows, and reporting for executives and auditors.
