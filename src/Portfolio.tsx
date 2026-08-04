@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BookOpen,
+  Bot,
   Dices,
   ExternalLink,
   FileText,
@@ -12,6 +13,8 @@ import {
   Linkedin,
   Mail,
   Network,
+  Scale,
+  ShieldAlert,
 } from "lucide-react";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -123,6 +126,72 @@ const lossExceedanceCurve = {
   ],
 };
 
+const aiRiskRegister = {
+  url: "https://xnasusx.github.io/ai-risk-register/",
+  repo: "https://github.com/xnasusx/ai-risk-register",
+  steps: [
+    {
+      eyebrow: "Step 1 · Seed",
+      title: "Start from twelve scenarios",
+      body: "Prompt injection, training data poisoning, model inversion, confabulation in a customer-facing decision, silent drift, shadow AI. Each arrives with a trustworthiness characteristic and a pre-built framework mapping. Add or remove them to shape your register.",
+    },
+    {
+      eyebrow: "Step 2 · Simulate",
+      title: "Aggregate the portfolio",
+      body: "Every risk takes a three-point frequency and loss range. 10,000 iterations — triangular for magnitude, Poisson for event counts — produce a distribution per risk and a summed portfolio exposure at the mean, P50, P90, and P99.",
+    },
+    {
+      eyebrow: "Step 3 · Map",
+      title: "Show coverage, not compliance",
+      body: "The panel reports which of the nineteen NIST AI RMF categories and nine ISO 42001 Annex A groups the register touches, and which it does not. Coverage means a risk maps there — not that the category is satisfied.",
+    },
+  ],
+};
+
+const incidentSeverity = {
+  url: "https://xnasusx.github.io/incident-severity-calculator/",
+  repo: "https://github.com/xnasusx/incident-severity-calculator",
+  steps: [
+    {
+      eyebrow: "Step 1 · Rate",
+      title: "Answer sixteen narrower questions",
+      body: "Threat agent and vulnerability factors on the likelihood leg; technical and business impact on the other. Each option carries the score OWASP assigns it, so nobody is rating against a private sense of what “high” means.",
+    },
+    {
+      eyebrow: "Step 2 · Choose the leg",
+      title: "Let business impact win",
+      body: "Impact is the mean of either impact group, and you pick which one drives the outcome. OWASP is explicit that business impact should carry it whenever you can estimate it credibly — a technically severe finding on a system nobody depends on is not a severe business problem.",
+    },
+    {
+      eyebrow: "Step 3 · Read the matrix",
+      title: "Keep the derivation visible",
+      body: "Each leg lands in a band and the active cell of the OWASP matrix highlights live as you rate. The copyable rating record captures every factor selection alongside the result, so the argument becomes “you scored intrusion detection at 9 and I scored it at 3.”",
+    },
+  ],
+};
+
+const materialityWorkbench = {
+  url: "https://xnasusx.github.io/cyber-materiality-workbench/",
+  repo: "https://github.com/xnasusx/cyber-materiality-workbench",
+  steps: [
+    {
+      eyebrow: "Step 1 · Date it",
+      title: "Separate discovery from determination",
+      body: "The four business days run from determination, not discovery — and the determination itself must be made without unreasonable delay. The workbench computes the gap and flags a long one, because that gap is independently reviewable.",
+    },
+    {
+      eyebrow: "Step 2 · Screen it",
+      title: "Run both legs of the analysis",
+      body: "Four loss components sum to an expected exposure, and a multiplier produces the reasonably likely downside. Both are shown against 5% of pre-tax income and 0.5% of revenue, then weighed against nine qualitative factors for the SAB No. 99 total mix.",
+    },
+    {
+      eyebrow: "Step 3 · Write it down",
+      title: "Produce the contemporaneous memo",
+      body: "A plain-text determination memorandum recording the inputs, both legs, the conclusion and its basis, and a filing deadline that excludes weekends and observed US federal holidays. Any verdict can be overridden, and the override is recorded as a filer judgment.",
+    },
+  ],
+};
+
 type RiskLabTool = {
   id: string;
   label: string;
@@ -222,6 +291,69 @@ const riskLabTools: RiskLabTool[] = [
       </>
     ),
     tool: lossExceedanceCurve,
+  },
+  {
+    id: "ai-risk-register",
+    label: "AI Risk Register",
+    icon: Bot,
+    eyebrow: "The Lesson",
+    title: (
+      <>
+        AI frameworks give you coverage. They do not give you a <em>number</em>.
+      </>
+    ),
+    blurb: [
+      "NIST AI RMF 1.0 and ISO/IEC 42001 tell you which questions an AI programme should be able to answer. Neither tells you how much AI risk you are actually carrying, which is why most AI risk registers end up as a list of scenarios with a colour beside each one.",
+      "This register keeps the framework mapping — you do need to show coverage — and scores every risk the way any other risk should be scored. Twelve seeded scenarios, three-point estimates, and a 10,000-iteration Monte Carlo aggregated across the whole register. The seeded ranges are illustrative: the AI incident base is thin, so replace them with your own calibrated estimates before the output means anything about your organisation.",
+    ],
+    stepsHeading: (
+      <>
+        From framework coverage to a <em>loss exposure range</em>.
+      </>
+    ),
+    tool: aiRiskRegister,
+  },
+  {
+    id: "incident-severity",
+    label: "Incident Severity",
+    icon: ShieldAlert,
+    eyebrow: "The Lesson",
+    title: (
+      <>
+        The rubric matters more than the <em>rating</em>.
+      </>
+    ),
+    blurb: [
+      "Ask three engineers to rate the same finding and you get three answers. The disagreement is rarely about the finding — it is about the absence of a shared scale.",
+      "OWASP's methodology sidesteps that by never asking “how bad is this” directly. It asks sixteen narrower questions with pre-scored answers and derives severity from the arithmetic. The payoff is not accuracy — averaging ordinal scores is not sound measurement, and these decimals are a sorting aid, never an input to a financial model. The payoff is that the argument becomes specific enough for someone to go check.",
+    ],
+    stepsHeading: (
+      <>
+        Sixteen factors, one rubric <em>every team</em> derives from.
+      </>
+    ),
+    tool: incidentSeverity,
+  },
+  {
+    id: "materiality",
+    label: "SEC Materiality",
+    icon: Scale,
+    eyebrow: "The Lesson",
+    title: (
+      <>
+        Materiality is a <em>judgment</em>, and the memo is the deliverable.
+      </>
+    ),
+    blurb: [
+      "Item 1.05 of Form 8-K gives a registrant four business days to disclose a material cybersecurity incident. Two things about that sentence get misread constantly: the clock starts at determination rather than discovery, and there is no dollar threshold — materiality still runs on the total mix of information a reasonable investor would consider important.",
+      "Most calculators in this space return a score. A score is exactly the wrong output, because the artefact examined afterwards is the reasoning, not the number. This one works the incident through both legs of the analysis and ends at a memo. It is an analysis aid, not legal advice, and it does not substitute for securities counsel.",
+    ],
+    stepsHeading: (
+      <>
+        From two dates to a <em>defensible memo</em>, in three steps.
+      </>
+    ),
+    tool: materialityWorkbench,
   },
 ];
 
