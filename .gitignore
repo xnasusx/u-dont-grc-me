@@ -23,6 +23,13 @@ vite.config.d.ts
 *.pfx
 aws-credentials*
 credentials.json
+# CLI credential exports — the console and most CLIs hand you these as a CSV
+# download that lands wherever you were working.
+*accessKeys*.csv
+*accesskeys*.csv
+*AccessKeys*.csv
+*credentials*.csv
+*_secret*.csv
 
 dist-portfolio/
 
