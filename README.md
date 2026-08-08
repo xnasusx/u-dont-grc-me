@@ -229,5 +229,11 @@ The next production step is replacing remaining `src/store.ts` operations with a
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Vendored upstream content keeps its own licensing; see
+[GNU AGPL v3 or later](LICENSE) — copyright (c) 2026 Susan Shepard. If you modify this and
+run it as a network service, the AGPL requires you to offer your users the modified source
+under the same terms.
+
+The AGPL covers this project's own code only. Vendored upstream content is not relicensed
+and keeps its own terms — in particular the Secure Controls Framework text under
+`data/scf/` is CC BY-ND 4.0, which does not permit modified redistribution. See
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
